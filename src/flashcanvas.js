@@ -801,5 +801,6 @@ req.send(null);
  */
 
 window["FlashCanvas"] = FlashCanvas;
+FlashCanvas["initElement"] = FlashCanvas.initElement;
 
 })();
