@@ -18,8 +18,11 @@
         ctx.lineTo(103,76);
         ctx.lineTo(170,15);
         ctx.stroke();
+
+        // prevent IE6 memory leak
+        img = null;
       }
-      img.src = 'images/backdrop.png?' + new Date().getTime();
+      img.src = 'images/backdrop.png';
     }
     </script>
     <style type="text/css">
@@ -46,8 +49,11 @@ function draw() {
     ctx.lineTo(103,76);
     ctx.lineTo(170,15);
     ctx.stroke();
+
+    // prevent IE6 memory leak
+    img = null;
   }
-  img.src = 'images/backdrop.png?' + new Date().getTime();
+  img.src = 'images/backdrop.png';
 }
       </pre>
       <div style="float:left;">

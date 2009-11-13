@@ -19,8 +19,10 @@
           ctx.fillStyle = ptrn;
           ctx.fillRect(0,0,150,150);
 
+          // prevent IE6 memory leak
+          img = null;
         }
-        img.src = 'images/wallpaper.png?' + new Date().getTime();
+        img.src = 'images/wallpaper.png';
       }
     </script>
     <style type="text/css">
@@ -47,8 +49,10 @@ function draw() {
     ctx.fillStyle = ptrn;
     ctx.fillRect(0,0,150,150);
 
+    // prevent IE6 memory leak
+    img = null;
   }
-  img.src = 'images/wallpaper.png?' + new Date().getTime();
+  img.src = 'images/wallpaper.png';
 }
       </pre>
     </div>

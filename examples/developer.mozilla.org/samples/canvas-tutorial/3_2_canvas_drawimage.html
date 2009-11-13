@@ -16,8 +16,11 @@
             ctx.drawImage(img,j*50,i*38,50,38);
           }
         }
+
+        // prevent IE6 memory leak
+        img = null;
       }
-      img.src = 'images/rhino.jpg?' + new Date().getTime();
+      img.src = 'images/rhino.jpg';
     }
     </script>
     <style type="text/css">
@@ -42,8 +45,11 @@ function draw() {
         ctx.drawImage(img,j*50,i*38,50,38);
       }
     }
+
+    // prevent IE6 memory leak
+    img = null;
   }
-  img.src = 'images/rhino.jpg?' + new Date().getTime();
+  img.src = 'images/rhino.jpg';
 }
       </pre>
       <div style="float:left;">
