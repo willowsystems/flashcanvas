@@ -149,7 +149,7 @@ var CanvasRenderingContext2D = function(canvas, swf) {
 	(function(ctx) {
 		window.setInterval(function() {
 			if (ctx._lock === 0) ctx._postCommands();
-		}, 10);
+		}, 30);
 	})(this);
 };
 
