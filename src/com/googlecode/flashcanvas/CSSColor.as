@@ -217,6 +217,21 @@ package com.googlecode.flashcanvas
                 _alpha = parseFloat(rgba[3]);
             }
 
+            // hsl(0,100%,50%)
+            else if (str.indexOf("hsl(") == 0)
+            {
+                var hsl:Array = str.substring(4, str.length - 1).split(",");
+                _color = hsl2hex(hsl);
+            }
+
+            // hsla(0,100%,50%,1)
+            else if (str.indexOf("hsla(") == 0)
+            {
+                var hsla:Array = str.substring(5, str.length - 1).split(",");
+                _color = hsl2hex(hsla);
+                _alpha = parseFloat(hsla[3]);
+            }
+
             // red
             else
             {
@@ -238,6 +253,44 @@ package com.googlecode.flashcanvas
             var g:int = parseInt(rgb[1]) << 8;
             var b:int = parseInt(rgb[2]);
             return r + g + b;
+        }
+
+        private function hsl2hex(hsl:Array):uint
+        {
+            var h:Number = parseFloat(hsl[0]) / 360;
+            var s:Number = parseFloat(hsl[1]) / 100;
+            var l:Number = parseFloat(hsl[2]) / 100;
+
+            // these values should be in the range [0, 1].
+            h -= Math.floor(h);
+            s = (s < 0) ? 0 : (s > 1) ? 1 : s;
+            l = (l < 0) ? 0 : (l > 1) ? 1 : l;
+
+            var m2:Number = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
+            var m1:Number = l * 2 - m2;
+
+            var r:Number = hue2rgb(m1, m2, h + 1 / 3) * 255;
+            var g:Number = hue2rgb(m1, m2, h)         * 255;
+            var b:Number = hue2rgb(m1, m2, h - 1 / 3) * 255;
+
+            return (r << 16) | (g << 8) | b;
+        }
+
+        private function hue2rgb(m1:Number, m2:Number, h:Number):Number
+        {
+            if (h < 0)
+                h++;
+            else if (h > 1)
+                h--;
+
+            if (h < 1 / 6)
+                return m1 + (m2 - m1) * h * 6;
+            else if (h < 1 / 2)
+                return m2;
+            else if (h < 2 / 3)
+                return m1 + (m2 - m1) * (2 / 3 - h) * 6;
+            else
+                return m1;
         }
 
         public function get color():uint
