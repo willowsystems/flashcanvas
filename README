@@ -1,0 +1,61 @@
+FlashCanvas
+===========
+
+An implementation of the HTML5 Canvas API for Internet Explorer.
+The project page is at:
+
+    http://code.google.com/p/flashcanvas/
+
+
+Description
+-----------
+
+FlashCanvas is a JavaScript library which adds the HTML5 Canvas support
+to Internet Explorer. It renders shapes and images via Flash drawing
+API, and runs much faster than other similar libraries which use VML or
+Silverlight.
+
+
+Requirements
+------------
+
+ * Microsoft Internet Explorer
+ * Adobe Flash Player 9 or later
+
+
+Usage
+-----
+
+Copy the files flashcanvas.js and flashcanvas.swf into some directory on
+a Web server, and then add the following line to your HTML file.
+
+    <!--[if IE]><script type="text/javascript" src="path/to/flashcanvas.js"></script><![endif]-->
+
+That's all you have to do in most cases. For more details, please see
+the project page.
+
+
+License
+-------
+
+FlashCanvas is distributed under the MIT License.
+
+
+Credit
+------
+
+The current version of FlashCanvas is developed by:
+
+ * Shinya Muramatsu <revulon@gmail.com>
+
+And it is based on the following pioneering works:
+
+ * The first implementation of FlashCanvas by Grant Jones
+   http://gxjones.blogspot.com/2008/07/flashcanvas.html
+
+ * ASCanvas by Colin Leung
+   http://code.google.com/p/ascanvas/
+
+ * haXe version of FlashCanvas by Tim Cameron Ryan
+   http://timcameronryan.github.com/FlashCanvas/
+
