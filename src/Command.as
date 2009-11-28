@@ -112,9 +112,9 @@ package
             return ret;
         }
 
-        private function toDataURL():*
+        private function toDataURL():String
         {
-            // TODO: Implement
+            return ctx.canvas.toDataURL();
         }
 
         private function save():void

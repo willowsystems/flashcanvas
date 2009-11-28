@@ -752,7 +752,8 @@ var FlashCanvas = {
 			return contextId == "2d" ? ctx : null;
 		};
 		canvas.toDataURL = function() {
-			// TODO: Implement
+			ctx._queue.push(properties.toDataURL);
+			return ctx._postCommands();
 		};
 
 		// add event listener
