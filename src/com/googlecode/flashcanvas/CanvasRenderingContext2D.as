@@ -706,8 +706,8 @@ package com.googlecode.flashcanvas
 
         public function drawImage(image:*, ...args:Array):void
         {
-            var sx:Number = 0;
-            var sy:Number = 0;
+            var sx:Number;
+            var sy:Number;
             var sw:Number;
             var sh:Number;
             var dx:Number;
@@ -745,24 +745,27 @@ package com.googlecode.flashcanvas
             var loader:Loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(event:Event):void
             {
-                var source:BitmapData = Bitmap(loader.content).bitmapData;
-                var width:int  = sw || source.width;
-                var height:int = sh || source.height;
+                var source:BitmapData;
+
+                if (args.length == 8)
+                {
+                    var sourceRect:Rectangle = new Rectangle(sx, sy, sw, sh);
+                    var destPoint:Point      = new Point();
+                    source = new BitmapData(sw, sh, true, 0);
+                    source.copyPixels(Bitmap(loader.content).bitmapData, sourceRect, destPoint);
+                }
+                else
+                {
+                    source = Bitmap(loader.content).bitmapData;
+                }
 
                 var matrix:Matrix = new Matrix();
                 if (dw && dh)
-                    matrix.scale(dw / width, dh / height);
+                    matrix.scale(dw / source.width, dh / source.height);
                 matrix.translate(dx, dy);
                 matrix.concat(state.transformMatrix);
 
-                var clipRect:Rectangle = null;
-                if (sx != 0 || sy != 0)
-                {
-                    source.scroll(-sx, -sy);
-                    clipRect = new Rectangle(0, 0, width, height); 
-                }
-
-                _canvas.bitmapData.draw(source, matrix, null, null, clipRect);
+                _canvas.bitmapData.draw(source, matrix, null, null, null, true);
                 source.dispose();
                 loader.unload();
             });
