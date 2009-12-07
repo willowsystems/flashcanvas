@@ -473,6 +473,9 @@ CanvasRenderingContext2D.prototype = {
 		// HTMLVideoElement. For now, only HTMLImageElement is supported.
 		if (a[0].tagName.toUpperCase() != "IMG") return;
 
+		this._setCompositing();
+		this._setShadows();
+
 		if (argc == 3) {
 			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2]);
 		} else if (argc == 5) {

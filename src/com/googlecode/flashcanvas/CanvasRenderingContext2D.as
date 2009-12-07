@@ -41,6 +41,7 @@ package com.googlecode.flashcanvas
     import flash.display.Shape;
     import flash.display.SpreadMethod;
     import flash.events.Event;
+    import flash.geom.ColorTransform;
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
@@ -765,7 +766,11 @@ package com.googlecode.flashcanvas
                 matrix.translate(dx, dy);
                 matrix.concat(state.transformMatrix);
 
-                _canvas.bitmapData.draw(source, matrix, null, null, null, true);
+                var colorTransform:ColorTransform = null;
+                if (state.globalAlpha < 1)
+                    colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+
+                _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
                 source.dispose();
                 loader.unload();
             });
