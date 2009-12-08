@@ -637,7 +637,6 @@ package com.googlecode.flashcanvas
         {
             // extract path
             state.clipPath = path;
-            path = [];
 
             // draw paths
             var graphics:Graphics = clippingMask.graphics;
