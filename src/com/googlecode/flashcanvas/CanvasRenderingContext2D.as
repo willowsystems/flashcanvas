@@ -79,7 +79,7 @@ package com.googlecode.flashcanvas
 
             shape        = new Shape();
             clippingMask = new Shape();
-            shape.mask   = clippingMask
+            shape.mask   = clippingMask;
 
             startingPoint = new Point();
             currentPoint  = new Point();
