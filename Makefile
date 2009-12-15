@@ -17,7 +17,7 @@ $(swf): $(as3src)
 	mxmlc -incremental $(as3src) -output $(swf)
 
 $(js): $(jssrc)
-	java -jar $(minifier) --compilation_level ADVANCED_OPTIMIZATIONS --js $(jssrc) --js_output_file $(js)
+	java -jar $(minifier) --compilation_level ADVANCED_OPTIMIZATIONS --externs $(srcdir)/externs.js --js $(jssrc) --js_output_file $(js)
 
 clean:
 	rm -f $(objects) $(swf).cache

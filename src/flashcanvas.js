@@ -528,7 +528,7 @@ CanvasRenderingContext2D.prototype = {
 		// post commands
 		var commands = this._flush();
 		if (commands.length > 0) {
-			return eval(this._swf["CallFunction"](
+			return eval(this._swf.CallFunction(
 				'<invoke name="postCommands" returntype="javascript"><arguments><string>'
 				+ commands.join("&#0;") + "</string></arguments></invoke>"
 			));
@@ -537,7 +537,7 @@ CanvasRenderingContext2D.prototype = {
 
 	_resize: function(width, height) {
 		// resize frame
-		this._swf["resize"](width, height);
+		this._swf.resize(width, height);
 
 		// clear back to the initial state
 		this._initialize();
@@ -679,7 +679,7 @@ var SWFUtils = {
 
 	// addCallbacks may not be added when first loaded, but CallMethod always works
 	callMethod: function (swf, methodName, args) {
-		return eval(swf["CallFunction"]('<invoke name="' + methodName + '" returntype="javascript">'
+		return eval(swf.CallFunction('<invoke name="' + methodName + '" returntype="javascript">'
 		    + SWFUtils._argumentsToXML(args, 0) + '</invoke>'));
 	},
 
