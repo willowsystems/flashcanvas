@@ -92,11 +92,17 @@ package com.googlecode.flashcanvas
             // initialize bitmapdata
             _canvas.resize(width, height);
 
+            // initialize drawing states
+            stateStack = [];
+            state = new State();
+
             // draw initial clipping region
             beginPath();
             rect(0, 0, width, height);
             clip();
-            closePath();
+
+            // clear the current path
+            beginPath();
         }
 
         /*

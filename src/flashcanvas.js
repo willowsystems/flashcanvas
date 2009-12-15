@@ -108,42 +108,11 @@ var CanvasRenderingContext2D = function(canvas, swf) {
 	// back-reference to the canvas
 	this.canvas = canvas;
 
-	// compositing
-	this.globalAlpha = this._globalAlpha = 1.0;
-	this.globalCompositeOperation = this._globalCompositeOperation = "source-over";
-
-	// colors and styles
-	this.strokeStyle = this._strokeStyle = "#000000";
-	this.fillStyle   = this._fillStyle   = "#000000";
-
-	// line caps/joins
-	this.lineWidth  = this._lineWidth  = 1.0;
-	this.lineCap    = this._lineCap    = "butt";
-	this.lineJoin   = this._lineJoin   = "miter";
-	this.miterLimit = this._miterLimit = 10.0;
-
-	// shadows
-	this.shadowOffsetX = this._shadowOffsetX = 0;
-	this.shadowOffsetY = this._shadowOffsetY = 0;
-	this.shadowBlur    = this._shadowBlur    = 0;
-	this.shadowColor   = this._shadowColor   = "rgba(0,0,0,0)";
-
-	// text
-	this.font         = this._font         = "10px sans-serif";
-	this.textAlign    = this._textAlign    = "start";
-	this.textBaseline = this._textBaseline = "alphabetic";
-
 	// back-reference to the swf
 	this._swf = swf;
 
-	// command queue
-	this._queue = [];
-
-	// stack of drawing states
-	this._stateStack = [];
-
-	// number of loading files
-	this._lock = 0;
+	// initialize drawing states
+	this._initialize();
 
 	// frame update interval
 	(function(ctx) {
@@ -513,6 +482,42 @@ CanvasRenderingContext2D.prototype = {
 	 * private methods
 	 */
 
+	_initialize: function() {
+		// compositing
+		this.globalAlpha = this._globalAlpha = 1.0;
+		this.globalCompositeOperation = this._globalCompositeOperation = "source-over";
+
+		// colors and styles
+		this.strokeStyle = this._strokeStyle = "#000000";
+		this.fillStyle   = this._fillStyle   = "#000000";
+
+		// line caps/joins
+		this.lineWidth  = this._lineWidth  = 1.0;
+		this.lineCap    = this._lineCap    = "butt";
+		this.lineJoin   = this._lineJoin   = "miter";
+		this.miterLimit = this._miterLimit = 10.0;
+
+		// shadows
+		this.shadowOffsetX = this._shadowOffsetX = 0;
+		this.shadowOffsetY = this._shadowOffsetY = 0;
+		this.shadowBlur    = this._shadowBlur    = 0;
+		this.shadowColor   = this._shadowColor   = "rgba(0,0,0,0)";
+
+		// text
+		this.font         = this._font         = "10px sans-serif";
+		this.textAlign    = this._textAlign    = "start";
+		this.textBaseline = this._textBaseline = "alphabetic";
+
+		// command queue
+		this._queue = [];
+
+		// stack of drawing states
+		this._stateStack = [];
+
+		// number of loading files
+		this._lock = 0;
+	},
+
 	_flush: function() {
 		var queue = this._queue;
 		this._queue = [];
@@ -532,9 +537,10 @@ CanvasRenderingContext2D.prototype = {
 
 	_resize: function(width, height) {
 		// resize frame
-		SWFUtils.callMethod(this._swf, "resize", [width, height]);
-		// frame is cleared; clear command queue
-		this._flush();
+		this._swf["resize"](width, height);
+
+		// clear back to the initial state
+		this._initialize();
 	},
 
 	_wait: function() {
@@ -578,13 +584,13 @@ var CanvasPattern = function(ctx) {
 function onPropertyChange(event) {
 	var prop = event.propertyName;
 	if (prop == "width" || prop == "height") {
-		var canvas = event.srcElement, swf = canvas.firstChild;
+		var canvas = event.srcElement, ctx = canvas.getContext("2d");
 		var value = parseInt(canvas[prop]);
 		if (isNaN(value) || value < 0) {
 			value = (prop == "width") ? 300 : 150;
 		}
 		canvas.style[prop] = value + "px";
-		swf["resize"](canvas.clientWidth, canvas.clientHeight);
+		ctx._resize(canvas.clientWidth, canvas.clientHeight);
 	}
 }
 
