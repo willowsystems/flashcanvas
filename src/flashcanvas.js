@@ -657,82 +657,6 @@ var DOMUtils = {
 document.attachEvent("onreadystatechange", DOMUtils._loadHandler);
 
 /*
- * SWF utilities
- */
-
-var SWFUtils = {
-	generateHTML: function (id, url, width, height, swfVersion, params, css) {
-		if (params) {
-			for (var key in params)
-				url += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&amp;";
-		}
-		return '\
-<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"\
- codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + swfVersion + '"\
- width="' + width + '" height="' + height + '"' + (id ? ' id="' + id + '"' : '') + (css ? ' style="' + css + '"' : '') + '>\
-  <param name="allowScriptAccess" value="always">\
-  <param name="movie" value="' + url + '">\
-  <param name="quality" value="high">\
-  <param name="wmode" value="transparent">\
-</object>';
-	},
-
-	// addCallbacks may not be added when first loaded, but CallMethod always works
-	callMethod: function (swf, methodName, args) {
-		return eval(swf.CallFunction('<invoke name="' + methodName + '" returntype="javascript">'
-		    + SWFUtils._argumentsToXML(args, 0) + '</invoke>'));
-	},
-
-	// these might not be available before flash loads
-	_arrayToXML: function (obj) {
-		var s = "<array>";
-		for (var i=0; i<obj.length; i++) {
-			s += "<property id=\"" + i + "\">" + SWFUtils._toXML(obj[i]) + "</property>";
-		}
-		return s+"</array>";
-	},
-	_argumentsToXML: function (obj,index) {
-		var s = "<arguments>";
-		for (var i=index; i<obj.length; i++) {
-			s += SWFUtils._toXML(obj[i]);
-		}
-		return s+"</arguments>";
-	},
-	_objectToXML: function (obj) {
-		var s = "<object>";
-		for (var prop in obj) {
-			s += "<property id=\"" + prop + "\">" + SWFUtils._toXML(obj[prop]) + "</property>";
-		}
-		return s+"</object>";
-	},
-	_escapeXML: function (s) {
-		return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
-	},
-	_toXML: function (value) {
-		var type = typeof(value);
-		if (type == "string") {
-			return "<string>" + SWFUtils._escapeXML(value) + "</string>";
-		} else if (type == "undefined") {
-			return "<undefined/>";
-		} else if (type == "number") {
-			return "<number>" + value + "</number>";
-		} else if (value == null) {
-			return "<null/>";
-		} else if (type == "boolean") {
-			return value ? "<true/>" : "<false/>";
-		} else if (value instanceof Date) {
-			return "<date>" + value.getTime() + "</date>";
-		} else if (value instanceof Array) {
-			return SWFUtils._arrayToXML(value);
-		} else if (type == "object") {
-			return SWFUtils._objectToXML(value);
-		} else {
-			return "<null/>"; //???
-		}
-	}
-};
-
-/*
  * FlashCanvas API
  */
 
@@ -747,10 +671,16 @@ var FlashCanvas = {
 		canvas.style.width  = width  + "px";
 		canvas.style.height = height + "px";
 
-		// settings
-		var id = "flashcanvas-" + canvas.uniqueID;
 		// embed swf
-		canvas.innerHTML = SWFUtils.generateHTML(id, SWF_URL, "100%", "100%", SWF_VERSION);
+		canvas.innerHTML =
+			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
+			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + SWF_VERSION + '"' +
+			' width="100%" height="100%" id="flashcanvas' + canvas.uniqueID + '">' +
+			'<param name="allowScriptAccess" value="always">' +
+			'<param name="movie" value="' + SWF_URL + '">' +
+			'<param name="quality" value="high">' +
+			'<param name="wmode" value="transparent">' +
+			'</object>';
 		var swf = canvas.firstChild;
 
 		// initialize context (self-reference)
