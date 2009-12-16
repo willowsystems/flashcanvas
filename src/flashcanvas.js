@@ -740,6 +740,9 @@ req.send(null);
  * public API
  */
 
+window["CanvasRenderingContext2D"] = CanvasRenderingContext2D;
+window["CanvasGradient"] = CanvasGradient;
+window["CanvasPattern"] = CanvasPattern;
 window["FlashCanvas"] = FlashCanvas;
 FlashCanvas["initElement"] = FlashCanvas.initElement;
 
