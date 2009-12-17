@@ -42,6 +42,7 @@ package com.googlecode.flashcanvas
     import flash.display.Shape;
     import flash.display.SpreadMethod;
     import flash.events.Event;
+    import flash.external.ExternalInterface;
     import flash.geom.ColorTransform;
     import flash.geom.Matrix;
     import flash.geom.Point;
@@ -1023,6 +1024,12 @@ package com.googlecode.flashcanvas
 
                 // Draw the image to the Canvas
                 _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
+
+                // Remove the prefix "flashcanvas" from objectID
+                var canvasId:String = ExternalInterface.objectID.slice(11);
+
+                // Send JavaScript a message that the image has been drawn
+                ExternalInterface.call("FlashCanvas.unlock", canvasId);
 
                 // Release the memory
                 source.dispose();

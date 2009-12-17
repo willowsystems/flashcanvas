@@ -32,6 +32,7 @@ package com.googlecode.flashcanvas
     import flash.display.Loader;
     import flash.display.LoaderInfo;
     import flash.events.Event;
+    import flash.external.ExternalInterface;
     import flash.net.URLRequest;
 
     public class CanvasPattern
@@ -60,6 +61,12 @@ package com.googlecode.flashcanvas
             // Get BitmapData of the image
             var loader:Loader = loaderInfo.loader;
             bitmapData = Bitmap(loader.content).bitmapData;
+
+            // Remove the prefix "flashcanvas" from objectID
+            var canvasId:String = ExternalInterface.objectID.slice(11);
+
+            // Send JavaScript a message that the image has been loaded
+            ExternalInterface.call("FlashCanvas.unlock", canvasId);
 
             // Release the memory
             loader.unload();

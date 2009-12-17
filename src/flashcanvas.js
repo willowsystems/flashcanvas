@@ -100,8 +100,11 @@ var properties = new Lookup([
 	"addColorStop"
 ]);
 
+// Monitor the number of loading files
+var lock = {};
+
 function getStyleId(ctx) {
-	var canvasId = ctx.canvas.uniqueID;
+	var canvasId = ctx._canvasId;
 	if (!arguments.callee[canvasId]) arguments.callee[canvasId] = 0;
 	return arguments.callee[canvasId]++;
 }
@@ -114,15 +117,19 @@ var CanvasRenderingContext2D = function(canvas, swf) {
 	// back-reference to the swf
 	this._swf = swf;
 
+	// unique ID of canvas
+	this._canvasId = canvas.uniqueID;
+
 	// initialize drawing states
 	this._initialize();
 
 	// frame update interval
-	(function(ctx) {
-		window.setInterval(function() {
-			if (ctx._lock === 0) ctx._postCommands();
-		}, 30);
-	})(this);
+	var self = this;
+	window.setInterval(function() {
+		if (lock[self._canvasId] === 0) {
+			self._postCommands();
+		}
+	}, 30);
 };
 
 CanvasRenderingContext2D.prototype = {
@@ -260,7 +267,7 @@ CanvasRenderingContext2D.prototype = {
 
 		this._queue.push(properties.createPattern, image.src, repetition);
 		this._postCommands();
-		this._wait();
+		++lock[this._canvasId];
 		return new CanvasPattern(this);
 	},
 
@@ -458,7 +465,7 @@ CanvasRenderingContext2D.prototype = {
 			return;
 		}
 		this._postCommands();
-		this._wait();
+		++lock[this._canvasId];
 	},
 
 	/*
@@ -516,9 +523,6 @@ CanvasRenderingContext2D.prototype = {
 
 		// stack of drawing states
 		this._stateStack = [];
-
-		// number of loading files
-		this._lock = 0;
 	},
 
 	_flush: function() {
@@ -544,16 +548,6 @@ CanvasRenderingContext2D.prototype = {
 
 		// clear back to the initial state
 		this._initialize();
-	},
-
-	_wait: function() {
-		++this._lock;
-
-		// TODO: Wait flash.display.LoaderInfo.complete event.
-		var self = this;
-		setTimeout(function() {
-			--self._lock;
-		}, 100);
 	}
 };
 
@@ -675,16 +669,20 @@ var FlashCanvas = {
 		canvas.style.height = height + "px";
 
 		// embed swf
+		var canvasId = canvas.uniqueID;
 		canvas.innerHTML =
 			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
 			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + SWF_VERSION + '"' +
-			' width="100%" height="100%" id="flashcanvas' + canvas.uniqueID + '">' +
+			' width="100%" height="100%" id="flashcanvas' + canvasId + '">' +
 			'<param name="allowScriptAccess" value="always">' +
 			'<param name="movie" value="' + SWF_URL + '">' +
 			'<param name="quality" value="high">' +
 			'<param name="wmode" value="transparent">' +
 			'</object>';
 		var swf = canvas.firstChild;
+
+		// initialize lock
+		lock[canvasId] = 0;
 
 		// initialize context (self-reference)
 		var ctx = new CanvasRenderingContext2D(canvas, swf);
@@ -709,6 +707,12 @@ var FlashCanvas = {
 */
 		// TODO: wait until swf is ready for use
 		ctx._resize(width, height);
+	},
+
+	unlock: function(canvasId) {
+		if (lock[canvasId]) {
+			--lock[canvasId];
+		}
 	}
 };
 
@@ -744,10 +748,11 @@ req.send(null);
  */
 
 window["CanvasRenderingContext2D"] = CanvasRenderingContext2D;
-window["CanvasGradient"] = CanvasGradient;
-window["CanvasPattern"] = CanvasPattern;
-window["FlashCanvas"] = FlashCanvas;
+window["CanvasGradient"]   = CanvasGradient;
+window["CanvasPattern"]    = CanvasPattern;
+window["FlashCanvas"]      = FlashCanvas;
 FlashCanvas["initElement"] = FlashCanvas.initElement;
+FlashCanvas["unlock"]      = FlashCanvas.unlock;
 
 })();
 
