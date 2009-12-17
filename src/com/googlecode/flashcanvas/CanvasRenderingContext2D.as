@@ -38,6 +38,7 @@ package com.googlecode.flashcanvas
     import flash.display.JointStyle;
     import flash.display.LineScaleMode;
     import flash.display.Loader;
+    import flash.display.LoaderInfo;
     import flash.display.Shape;
     import flash.display.SpreadMethod;
     import flash.events.Event;
@@ -712,73 +713,11 @@ package com.googlecode.flashcanvas
 
         public function drawImage(image:*, ...args:Array):void
         {
-            var sx:Number;
-            var sy:Number;
-            var sw:Number;
-            var sh:Number;
-            var dx:Number;
-            var dy:Number;
-            var dw:Number;
-            var dh:Number;
-
-            if (args.length == 2)
-            {
-                dx = args[0];
-                dy = args[1];
-            }
-            else if (args.length == 4)
-            {
-                dx = args[0];
-                dy = args[1];
-                dw = args[2];
-                dh = args[3];
-            }
-            else if (args.length == 8)
-            {
-                sx = args[0];
-                sy = args[1];
-                sw = args[2];
-                sh = args[3];
-                dx = args[4];
-                dy = args[5];
-                dw = args[6];
-                dh = args[7];
-            }
-
-            var url:String = image.src;
+            var url:String         = image.src;
+            var loader:Loader      = new Loader();
             var request:URLRequest = new URLRequest(url);
 
-            var loader:Loader = new Loader();
-            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(event:Event):void
-            {
-                var source:BitmapData;
-
-                if (args.length == 8)
-                {
-                    var sourceRect:Rectangle = new Rectangle(sx, sy, sw, sh);
-                    var destPoint:Point      = new Point();
-                    source = new BitmapData(sw, sh, true, 0);
-                    source.copyPixels(Bitmap(loader.content).bitmapData, sourceRect, destPoint);
-                }
-                else
-                {
-                    source = Bitmap(loader.content).bitmapData;
-                }
-
-                var matrix:Matrix = new Matrix();
-                if (dw && dh)
-                    matrix.scale(dw / source.width, dh / source.height);
-                matrix.translate(dx, dy);
-                matrix.concat(state.transformMatrix);
-
-                var colorTransform:ColorTransform = null;
-                if (state.globalAlpha < 1)
-                    colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
-
-                _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
-                source.dispose();
-                loader.unload();
-            });
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler(args));
             loader.load(request);
         }
 
@@ -1017,6 +956,78 @@ package com.googlecode.flashcanvas
         {
             _canvas.bitmapData.draw(shape);
             shape.graphics.clear();
+        }
+
+        private function _completeHandler(args:Array):Function
+        {
+            return function(event:Event):void
+            {
+                // Remove the event listener
+                var loaderInfo:LoaderInfo = event.target as LoaderInfo;
+                loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
+
+                var loader:Loader = loaderInfo.loader;
+                var source:BitmapData;
+
+                var sx:Number;
+                var sy:Number;
+                var sw:Number;
+                var sh:Number;
+                var dx:Number;
+                var dy:Number;
+                var dw:Number;
+                var dh:Number;
+
+                if (args.length == 8)
+                {
+                    // Define the source and destination rectangles
+                    sx = args[0];
+                    sy = args[1];
+                    sw = args[2];
+                    sh = args[3];
+                    dx = args[4];
+                    dy = args[5];
+                    dw = args[6];
+                    dh = args[7];
+
+                    // Clip the region within the source rectangle
+                    var sourceRect:Rectangle = new Rectangle(sx, sy, sw, sh);
+                    var destPoint:Point      = new Point();
+                    source = new BitmapData(sw, sh, true, 0);
+                    source.copyPixels(Bitmap(loader.content).bitmapData, sourceRect, destPoint);
+                }
+                else
+                {
+                    // Get BitmapData of the image
+                    source = Bitmap(loader.content).bitmapData;
+
+                    // Define the destination rectangle
+                    dx = args[0];
+                    dy = args[1];
+                    dw = args[2] || source.width;
+                    dh = args[3] || source.height;
+                }
+
+                // Create transformation matrix
+                var matrix:Matrix = new Matrix();
+                matrix.scale(dw / source.width, dh / source.height);
+                matrix.translate(dx, dy);
+                matrix.concat(state.transformMatrix);
+
+                var colorTransform:ColorTransform = null;
+                if (state.globalAlpha < 1)
+                {
+                    // Make the image translucent
+                    colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+                }
+
+                // Draw the image to the Canvas
+                _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
+
+                // Release the memory
+                source.dispose();
+                loader.unload();
+            }
         }
     }
 }

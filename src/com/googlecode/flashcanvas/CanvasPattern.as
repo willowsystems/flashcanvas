@@ -30,21 +30,21 @@ package com.googlecode.flashcanvas
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.Loader;
+    import flash.display.LoaderInfo;
     import flash.events.Event;
     import flash.net.URLRequest;
 
     public class CanvasPattern
     {
-        public  var bitmapData:BitmapData;
-        public  var repetition:String;
-        private var loader:Loader;
+        public var bitmapData:BitmapData;
+        public var repetition:String;
 
         public function CanvasPattern(image:*, repetition:String)
         {
-            var url:String = image.src;
+            var url:String         = image.src;
+            var loader:Loader      = new Loader();
             var request:URLRequest = new URLRequest(url);
 
-            loader = new Loader();
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, completeHandler);
             loader.load(request);
 
@@ -53,7 +53,15 @@ package com.googlecode.flashcanvas
 
         private function completeHandler(event:Event):void
         {
+            // Remove the event listener
+            var loaderInfo:LoaderInfo = event.target as LoaderInfo;
+            loaderInfo.removeEventListener(Event.COMPLETE, arguments.callee);
+
+            // Get BitmapData of the image
+            var loader:Loader = loaderInfo.loader;
             bitmapData = Bitmap(loader.content).bitmapData;
+
+            // Release the memory
             loader.unload();
         }
     }
