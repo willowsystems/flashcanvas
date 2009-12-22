@@ -629,25 +629,6 @@ function onBeforeUnload() {
 }
 
 /*
- * DOM utilities
- */
-
-var DOMUtils = {
-	/*
-	 * stylesheet
-	 */
-
-	_styleSheet: null,
-	addCSSRules: function (a, b) {
-		if (!DOMUtils._styleSheet) {
-			DOMUtils._styleSheet = document.createStyleSheet();
-			DOMUtils._styleSheet.cssText = "";
-		}
-		DOMUtils._styleSheet.cssText += a + " { " + b + "}";
-	}
-};
-
-/*
  * FlashCanvas API
  */
 
@@ -718,7 +699,8 @@ var FlashCanvas = {
 document.createElement("canvas");
 
 // setup default CSS
-DOMUtils.addCSSRules("canvas", "display: inline-block; overflow: hidden; width: 300px; height: 150px;");
+document.createStyleSheet().cssText =
+	"canvas{display:inline-block;overflow:hidden;width:300px;height:150px}";
 
 // initialize canvas elements
 document.attachEvent("onreadystatechange", onReadyStateChange);
