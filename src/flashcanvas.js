@@ -580,7 +580,7 @@ var CanvasPattern = function(ctx) {
 
 function onReadyStateChange() {
 	if (document.readyState === "complete") {
-		document.detachEvent("onreadystatechange", arguments.callee);
+		document.detachEvent("onreadystatechange", onReadyStateChange);
 
 		var elements = document.getElementsByTagName("canvas");
 		for (var i = 0, len = elements.length; i < len; ++i) {
@@ -606,7 +606,7 @@ function onPropertyChange(event) {
 }
 
 function onBeforeUnload() {
-	window.detachEvent("onbeforeunload", arguments.callee);
+	window.detachEvent("onbeforeunload", onBeforeUnload);
 
 	var elements = document.getElementsByTagName("canvas");
 	for (var i = 0, len = elements.length; i < len; ++i) {
