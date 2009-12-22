@@ -578,6 +578,20 @@ var CanvasPattern = function(ctx) {
  * Event handlers
  */
 
+function onReadyStateChange() {
+	if (document.readyState === "complete") {
+		document.detachEvent("onreadystatechange", arguments.callee);
+
+		var elements = document.getElementsByTagName("canvas");
+		for (var i = 0, len = elements.length; i < len; ++i) {
+			var canvas = elements[i];
+			if (!canvas.getContext) {
+				FlashCanvas.initElement(canvas);
+			}
+		}
+	}
+}
+
 function onPropertyChange(event) {
 	var prop = event.propertyName;
 	if (prop == "width" || prop == "height") {
@@ -620,24 +634,6 @@ function onBeforeUnload() {
 
 var DOMUtils = {
 	/*
-	 * load events
-	 */
-
-	_loadEvents: [],
-	_loadHandler: function () {
-		if (document.readyState != "complete")
-			return;
-		document.detachEvent("onreadystatechange", arguments.callee);
-
-		for (var e = null; e = DOMUtils._loadEvents.shift(); )
-			e();
-		DOMUtils.addLoadEvent = function (e) { e(); };
-	},
-	addLoadEvent: function (e) {
-		DOMUtils._loadEvents.push(e);
-	},
-
-	/*
 	 * stylesheet
 	 */
 
@@ -650,8 +646,6 @@ var DOMUtils = {
 		DOMUtils._styleSheet.cssText += a + " { " + b + "}";
 	}
 };
-
-document.attachEvent("onreadystatechange", DOMUtils._loadHandler);
 
 /*
  * FlashCanvas API
@@ -726,14 +720,8 @@ document.createElement("canvas");
 // setup default CSS
 DOMUtils.addCSSRules("canvas", "display: inline-block; overflow: hidden; width: 300px; height: 150px;");
 
-// initialize canvas elements in markup
-DOMUtils.addLoadEvent(function() {
-	var els = document.getElementsByTagName("canvas");
-	for (var i = 0, len = els.length; i < len; ++i) {
-		if (!els[i].getContext)
-			FlashCanvas.initElement(els[i]);
-	}
-});
+// initialize canvas elements
+document.attachEvent("onreadystatechange", onReadyStateChange);
 
 // prevent IE6 memory leaks
 window.attachEvent("onbeforeunload", onBeforeUnload);
