@@ -151,7 +151,7 @@ package com.googlecode.flashcanvas
             state.transformMatrix.scale(sx, sy);
             state.transformMatrix.concat(matrix);
 
-            state.lineScale *= Math.sqrt(sx * sy);
+            state.lineScale *= Math.sqrt(Math.abs(sx * sy));
         }
 
         public function rotate(angle:Number):void
