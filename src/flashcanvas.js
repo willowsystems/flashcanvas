@@ -632,7 +632,17 @@ function onBeforeUnload() {
 				canvas[prop] = null;
 			}
 		}
+
+		// remove event listeners
+		canvas.detachEvent("onpropertychange", onPropertyChange);
+		swf.detachEvent("onfocus", onFocus);
 	}
+
+	// delete exported symbols
+	window["CanvasRenderingContext2D"] = null;
+	window["CanvasGradient"]           = null;
+	window["CanvasPattern"]            = null;
+	window["FlashCanvas"]              = null;
 }
 
 /*
