@@ -605,6 +605,13 @@ function onPropertyChange(event) {
 	}
 }
 
+function onFocus(event) {
+	// forward the event to the parent
+	var swf = event.srcElement, canvas = swf.parentNode;
+	swf.blur();
+	canvas.focus();
+}
+
 function onBeforeUnload() {
 	window.detachEvent("onbeforeunload", onBeforeUnload);
 
@@ -671,15 +678,10 @@ var FlashCanvas = {
 			return ctx._postCommands();
 		};
 
-		// add event listener
+		// add event listeners
 		canvas.attachEvent("onpropertychange", onPropertyChange);
-/*
-		// forward flash events to parent
-		swf.attachEvent("onfocus", function() {
-			swf.blur();
-			canvas.focus();
-		});
-*/
+		swf.attachEvent("onfocus", onFocus);
+
 		// TODO: wait until swf is ready for use
 		ctx._resize(width, height);
 	},
