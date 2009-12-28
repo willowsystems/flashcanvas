@@ -58,6 +58,12 @@ package
             context = canvas.getContext("2d");
             command = new Command(context);
             addChild(canvas);
+
+            // Remove the prefix "external" from objectID
+            var canvasId:String = ExternalInterface.objectID.slice(8);
+
+            // Send JavaScript a message that the swf is ready
+            ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
         }
 
         public function postCommands(data:String):*

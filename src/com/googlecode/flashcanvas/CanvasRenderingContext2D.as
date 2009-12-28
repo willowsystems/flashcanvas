@@ -1025,8 +1025,8 @@ package com.googlecode.flashcanvas
                 // Draw the image to the Canvas
                 _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
 
-                // Remove the prefix "flashcanvas" from objectID
-                var canvasId:String = ExternalInterface.objectID.slice(11);
+                // Remove the prefix "external" from objectID
+                var canvasId:String = ExternalInterface.objectID.slice(8);
 
                 // Send JavaScript a message that the image has been drawn
                 ExternalInterface.call("FlashCanvas.unlock", canvasId);

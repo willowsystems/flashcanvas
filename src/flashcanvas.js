@@ -100,6 +100,9 @@ var properties = new Lookup([
 	"addColorStop"
 ]);
 
+// Whether swf is ready for use
+var isReady = {};
+
 // Monitor the number of loading files
 var lock = {};
 
@@ -266,8 +269,12 @@ CanvasRenderingContext2D.prototype = {
 		if (image.tagName.toUpperCase() != "IMG") return;
 
 		this._queue.push(properties.createPattern, image.src, repetition);
-		this._postCommands();
-		++lock[this._canvasId];
+
+		if (isReady[this._canvasId]) {
+			this._postCommands();
+			++lock[this._canvasId];
+		}
+
 		return new CanvasPattern(this);
 	},
 
@@ -464,8 +471,11 @@ CanvasRenderingContext2D.prototype = {
 		} else {
 			return;
 		}
-		this._postCommands();
-		++lock[this._canvasId];
+
+		if (isReady[this._canvasId]) {
+			this._postCommands();
+			++lock[this._canvasId];
+		}
 	},
 
 	/*
@@ -660,12 +670,16 @@ var FlashCanvas = {
 		canvas.style.width  = width  + "px";
 		canvas.style.height = height + "px";
 
+		// initialize lock
+		var canvasId      = canvas.uniqueID;
+		isReady[canvasId] = false;
+		lock[canvasId]    = 1;
+
 		// embed swf
-		var canvasId = canvas.uniqueID;
 		canvas.innerHTML =
 			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
 			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + SWF_VERSION + '"' +
-			' width="100%" height="100%" id="flashcanvas' + canvasId + '">' +
+			' width="100%" height="100%" id="external' + canvasId + '">' +
 			'<param name="allowScriptAccess" value="always">' +
 			'<param name="movie" value="' + SWF_URL + '">' +
 			'<param name="quality" value="high">' +
@@ -673,10 +687,7 @@ var FlashCanvas = {
 			'</object>';
 		var swf = canvas.firstChild;
 
-		// initialize lock
-		lock[canvasId] = 0;
-
-		// initialize context (self-reference)
+		// initialize context
 		var ctx = new CanvasRenderingContext2D(canvas, swf);
 
 		// canvas API
@@ -691,14 +702,16 @@ var FlashCanvas = {
 		// add event listeners
 		canvas.attachEvent("onpropertychange", onPropertyChange);
 		swf.attachEvent("onfocus", onFocus);
-
-		// TODO: wait until swf is ready for use
-		ctx._resize(width, height);
 	},
 
-	unlock: function(canvasId) {
+	unlock: function(canvasId, ready) {
 		if (lock[canvasId]) {
 			--lock[canvasId];
+		}
+		if (ready) {
+			var swf = document.getElementById("external" + canvasId);
+			swf.resize(swf.clientWidth, swf.clientHeight);
+			isReady[canvasId] = true;
 		}
 	}
 };

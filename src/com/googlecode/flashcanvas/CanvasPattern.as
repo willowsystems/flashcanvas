@@ -62,8 +62,8 @@ package com.googlecode.flashcanvas
             var loader:Loader = loaderInfo.loader;
             bitmapData = Bitmap(loader.content).bitmapData;
 
-            // Remove the prefix "flashcanvas" from objectID
-            var canvasId:String = ExternalInterface.objectID.slice(11);
+            // Remove the prefix "external" from objectID
+            var canvasId:String = ExternalInterface.objectID.slice(8);
 
             // Send JavaScript a message that the image has been loaded
             ExternalInterface.call("FlashCanvas.unlock", canvasId);
