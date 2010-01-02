@@ -22,9 +22,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * @author Colin (developed original ASCanvas)
- * @author Tim Cameron Ryan (developed haXe version)
+ * @author Colin Leung (developed ASCanvas)
+ * @author Tim Cameron Ryan
  * @author Shinya Muramatsu
+ * @see    http://code.google.com/p/ascanvas/
  */
 
 package com.googlecode.flashcanvas

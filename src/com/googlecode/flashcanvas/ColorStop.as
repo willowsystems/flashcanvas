@@ -22,8 +22,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * @author Colin (developed original ASCanvas)
+ * @author Colin Leung (developed ASCanvas)
  * @author Shinya Muramatsu
+ * @see    http://code.google.com/p/ascanvas/
  */
 
 package com.googlecode.flashcanvas
