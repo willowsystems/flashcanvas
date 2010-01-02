@@ -9,7 +9,7 @@
  */
 
 // Reference:
-//   http://www.whatwg.org/specs/web-apps/current-work/#the-canvas-element
+//   http://www.whatwg.org/specs/web-apps/current-work/multipage/the-canvas-element.html
 //   http://dev.w3.org/html5/spec/the-canvas-element.html
 
 // If the browser does not support HTML5 Canvas
