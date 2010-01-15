@@ -18,22 +18,6 @@ if (!window["CanvasRenderingContext2D"]) {
 (function() {
 
 /*
- * settings
- */
-
-// determine script url
-var SCRIPT_URL = (function() {
-	var scripts = document.getElementsByTagName("script");
-	var script = scripts[scripts.length - 1];
-	return script.getAttribute("src", 2);
-}());
-var SCRIPT_PATH = SCRIPT_URL.replace(/[^\/]+$/, "");
-
-// swf settings
-var SWF_URL = SCRIPT_PATH + "flashcanvas.swf";  // + "?r=" + Math.random();
-var SWF_VERSION = "9,0,0,0";
-
-/*
  * Context API
  */
 
@@ -678,7 +662,7 @@ var FlashCanvas = {
 		// embed swf
 		canvas.innerHTML =
 			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
-			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + SWF_VERSION + '"' +
+			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
 			' width="100%" height="100%" id="external' + canvasId + '">' +
 			'<param name="allowScriptAccess" value="always">' +
 			'<param name="movie" value="' + SWF_URL + '">' +
@@ -717,6 +701,16 @@ var FlashCanvas = {
 };
 
 /*
+ * Utility methods
+ */
+
+function getScriptUrl() {
+	var scripts = document.getElementsByTagName("script");
+	var script  = scripts[scripts.length - 1];
+	return script.getAttribute("src", 2);
+}
+
+/*
  * initialization
  */
 
@@ -732,6 +726,10 @@ document.attachEvent("onreadystatechange", onReadyStateChange);
 
 // prevent IE6 memory leaks
 window.attachEvent("onbeforeunload", onBeforeUnload);
+
+// determine SWF url
+var path    = getScriptUrl().replace(/[^\/]+$/, "");
+var SWF_URL = path + "flashcanvas.swf";  // + "?r=" + Math.random();
 
 // cache SWF data so that object is interactive upon writing
 var req = new ActiveXObject("Microsoft.XMLHTTP");
