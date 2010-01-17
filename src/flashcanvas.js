@@ -1,11 +1,9 @@
 /*
  * FlashCanvas
  *
- * Copyright (c) 2009 Tim Cameron Ryan
+ * Copyright (c) 2009      Tim Cameron Ryan
+ * Copyright (c) 2009-2010 FlashCanvas Project
  * Released under the MIT/X License
- *
- * @author Tim Cameron Ryan
- * @author Shinya Muramatsu
  */
 
 // Reference:

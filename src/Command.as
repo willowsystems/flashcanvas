@@ -1,7 +1,8 @@
 /*
  * FlashCanvas
  *
- * Copyright (c) 2009 Tim Cameron Ryan
+ * Copyright (c) 2009      Tim Cameron Ryan
+ * Copyright (c) 2009-2010 FlashCanvas Project
  * Licensed under the MIT License.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a

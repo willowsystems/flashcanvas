@@ -1,7 +1,8 @@
 /*
  * FlashCanvas
  *
- * Copyright (c) 2009 Shinya Muramatsu
+ * Copyright (c) 2009      Shinya Muramatsu
+ * Copyright (c) 2009-2010 FlashCanvas Project
  * Licensed under the MIT License.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -21,6 +22,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
+ *
+ * @author Shinya Muramatsu
  */
 
 package com.googlecode.flashcanvas
