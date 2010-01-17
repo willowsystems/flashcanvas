@@ -1,11 +1,9 @@
 /*
  * FlashCanvas
  *
- * Copyright (c) 2009 Tim Cameron Ryan
+ * Copyright (c) 2009      Tim Cameron Ryan
+ * Copyright (c) 2009-2010 FlashCanvas Project
  * Released under the MIT/X License
- *
- * @author Tim Cameron Ryan
- * @author Shinya Muramatsu
  */
 window.CanvasRenderingContext2D||function(){function u(a){for(var b=0,e=a.length;b<e;b++)this[a[b]]=b}function m(a){var b=a.c;arguments.callee[b]||(arguments.callee[b]=0);return arguments.callee[b]++}function n(){if(document.readyState==="complete"){document.detachEvent("onreadystatechange",n);for(var a=document.getElementsByTagName("canvas"),b=0,e=a.length;b<e;++b){var d=a[b];d.getContext||h.D(d)}}}function o(a){var b=a.propertyName;if(b=="width"||b=="height"){a=a.srcElement;var e=a.getContext("2d"),
 d=parseInt(a[b]);if(isNaN(d)||d<0)d=b=="width"?300:150;a.style[b]=d+"px";e.H(a.clientWidth,a.clientHeight)}}function p(a){a=a.srcElement;var b=a.parentNode;a.blur();b.focus()}function q(){window.detachEvent("onbeforeunload",q);for(var a=document.getElementsByTagName("canvas"),b=0,e=a.length;b<e;++b){var d=a[b],f=d.firstChild,g;for(g in f)if(typeof f[g]=="function")f[g]=null;for(g in d)if(typeof d[g]=="function")d[g]=null;d.detachEvent("onpropertychange",o);f.detachEvent("onfocus",p)}window.CanvasRenderingContext2D=
