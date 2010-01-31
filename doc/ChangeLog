@@ -1,0 +1,25 @@
+FlashCanvas
+===========
+
+You can view a complete ChangeLog at the project page:
+http://code.google.com/p/flashcanvas/source/list
+
+
+FlashCanvas-20100131
+--------------------
+
+ - Implement a delayed execution mechanism so as not to process canvas
+   commands while loading SWF or image files.
+ - Implement toDataURL(). Only "image/png" MIME type is supported now.
+ - Improve drawImage()
+   - globalAlpha attribute is supported
+   - Bug fixes regarding the source rectangle
+ - Refine the source code
+ - Add document files
+ - Many small bug fixes
+
+
+FlashCanvas-20091123
+--------------------
+
+ - Initial release
