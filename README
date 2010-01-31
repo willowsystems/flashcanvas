@@ -23,13 +23,22 @@ Requirements
 Usage
 -----
 
-Copy the files flashcanvas.js and flashcanvas.swf into some directory on
-a Web server, and then add the following line to your HTML file.
+FlashCanvas consists of JavaScript and Flash files:
 
-    <!--[if IE]><script type="text/javascript" src="path/to/flashcanvas.js"></script><![endif]-->
+ * flashcanvas.js
+ * flashcanvas.swf
 
-That's all you have to do in most cases. For more details, please see
-the project page.
+These files can be found in the bin directory in this distribution
+package. To install FlashCanvas, copy these files into some directory on
+a Web server, and then add the following HTML code between <head> and
+</head> tags on your web page.
+
+    <!--[if IE]>
+    <script type="text/javascript" src="path/to/flashcanvas.js"></script>
+    <![endif]-->
+
+That's all you have to do in most cases. For more details, please read
+the online manual at the project page.
 
 
 License
