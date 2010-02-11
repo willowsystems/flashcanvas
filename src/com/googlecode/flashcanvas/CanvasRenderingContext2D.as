@@ -728,17 +728,19 @@ package com.googlecode.flashcanvas
          * pixel manipulation
          */
 
-        public function createImageData():*
+        public function createImageData():ImageData
         {
             // TODO: Implement
+            return new ImageData;
         }
 
-        public function getImageData(sx:Number, sy:Number, sw:Number, sh:Number):*
+        public function getImageData(sx:Number, sy:Number, sw:Number, sh:Number):ImageData
         {
             // TODO: Implement
+            return new ImageData;
         }
 
-        public function putImageData():void
+        public function putImageData(data:ImageData, dx:Number, dy:Number, dirtyX:Number, dirtyY:Number, dirtyWidth:Number, dirtyHeight:Number):void
         {
             // TODO: Implement
         }
