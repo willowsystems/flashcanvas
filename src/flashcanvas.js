@@ -676,8 +676,15 @@ var FlashCanvas = {
 		canvas.getContext = function(contextId) {
 			return contextId == "2d" ? ctx : null;
 		};
+
 		canvas.toDataURL = function() {
-			ctx._queue.push(properties.toDataURL);
+			var a = arguments, type = a[0] ? a[0].toLowerCase() : "image/png";
+
+			if (type === "image/jpeg") {
+				ctx._queue.push(properties.toDataURL, type, a[1] || 0.5);
+			} else {
+				ctx._queue.push(properties.toDataURL, type);
+			}
 			return ctx._postCommands();
 		};
 

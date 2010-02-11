@@ -31,7 +31,7 @@ Third-party libraries used in FlashCanvas
  * bezier_lib.as by Timothee Groleau
    http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
 
- * PNGEncoder.as by Adobe Systems Incorporated
+ * BitString.as, JPGEncoder.as and PNGEncoder.as by Adobe Systems Incorporated
    http://code.google.com/p/as3corelib/
    New BSD License
 

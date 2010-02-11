@@ -115,7 +115,17 @@ package
 
         private function toDataURL():String
         {
-            return ctx.canvas.toDataURL();
+            var type:String = input.readUTF();
+
+            if (type == "image/jpeg")
+            {
+                var quality:Number = input.readFloat();
+                return ctx.canvas.toDataURL(type, quality);
+            }
+            else
+            {
+                return ctx.canvas.toDataURL(type);
+            }
         }
 
         private function save():void

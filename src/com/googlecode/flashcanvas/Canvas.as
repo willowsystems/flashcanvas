@@ -34,6 +34,7 @@ package com.googlecode.flashcanvas
     import flash.display.PixelSnapping;
     import flash.events.Event;
     import flash.utils.ByteArray;
+    import com.adobe.images.JPGEncoder;
     import com.adobe.images.PNGEncoder;
 
     public class Canvas extends Bitmap
@@ -74,15 +75,32 @@ package com.googlecode.flashcanvas
             }
         }
 
-        public function toDataURL(...args:Array):String
+        public function toDataURL(type:String = "image/png", ...args:Array):String
         {
             if (width == 0 || height == 0)
             {
                 return "data:,";
             }
 
-            var byteArray:ByteArray = PNGEncoder.encode(bitmapData);
-            return "data:image/png;base64," + Base64.encode(byteArray);
+            type = type.toLowerCase();
+            var byteArray:ByteArray;
+
+            if (type == "image/jpeg")
+            {
+                var quality:* = args[0];
+                if (typeof quality != "number" || quality < 0 || quality > 1)
+                    quality = 0.5;
+
+                var jpgEncoder:JPGEncoder = new JPGEncoder(quality * 100);
+                byteArray = jpgEncoder.encode(bitmapData);
+            }
+            else
+            {
+                type      = "image/png";
+                byteArray = PNGEncoder.encode(bitmapData);
+            }
+
+            return "data:" + type + ";base64," + Base64.encode(byteArray);
         }
 
         public function resize(width:int, height:int):void
