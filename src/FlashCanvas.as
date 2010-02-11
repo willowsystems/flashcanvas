@@ -32,7 +32,15 @@ package
     import flash.display.Sprite;
     import flash.display.StageAlign;
     import flash.display.StageScaleMode;
+    import flash.events.ContextMenuEvent;
+    import flash.events.Event;
     import flash.external.ExternalInterface;
+    import flash.net.navigateToURL;
+    import flash.net.URLRequest;
+    import flash.net.URLRequestMethod;
+    import flash.net.URLVariables;
+    import flash.ui.ContextMenu;
+    import flash.ui.ContextMenuItem;
 
     import com.googlecode.flashcanvas.Canvas;
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
@@ -65,6 +73,18 @@ package
 
             // Send JavaScript a message that the swf is ready
             ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
+
+            // custom context menu
+            var contextMenu:ContextMenu   = new ContextMenu();
+            var saveItem:ContextMenuItem  = new ContextMenuItem("Save Image As...");
+            var aboutItem:ContextMenuItem = new ContextMenuItem("About FlashCanvas");
+
+            saveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveItemSelectHandler);
+            aboutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, aboutItemSelectHandler);
+
+            contextMenu.hideBuiltInItems();
+            contextMenu.customItems.push(saveItem, aboutItem);
+            this.contextMenu = contextMenu;
         }
 
         public function postCommands(data:String):*
@@ -77,6 +97,26 @@ package
         public function resize(width:int, height:int):void
         {
             context.resize(width, height);
+        }
+
+        private function saveItemSelectHandler(event:Event):void
+        {
+            var url:String = loaderInfo.url.replace(/[^\/]+$/, "d.php");
+            var request:URLRequest     = new URLRequest(url);
+            var variables:URLVariables = new URLVariables();
+
+            variables.d    = canvas.toDataURL();
+            request.data   = variables;
+            request.method = URLRequestMethod.POST;
+
+            navigateToURL(request, "_self");
+        }
+
+        private function aboutItemSelectHandler(event:Event):void
+        {
+            var url:String         = "http://code.google.com/p/flashcanvas/";
+            var request:URLRequest = new URLRequest(url);
+            navigateToURL(request, "_blank");
         }
     }
 }
