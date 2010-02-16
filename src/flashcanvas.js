@@ -224,14 +224,14 @@ CanvasRenderingContext2D.prototype = {
 	_setStrokeStyle: function() {
 		if (this._strokeStyle != this.strokeStyle) {
 			var style = this._strokeStyle = this.strokeStyle;
-			this._queue.push(properties.strokeStyle, (typeof style == "object") ? style.id : style);
+			this._queue.push(properties.strokeStyle, (typeof style === "object") ? style.id : style);
 		}
 	},
 
 	_setFillStyle: function() {
 		if (this._fillStyle != this.fillStyle) {
 			var style = this._fillStyle = this.fillStyle;
-			this._queue.push(properties.fillStyle, (typeof style == "object") ? style.id : style);
+			this._queue.push(properties.fillStyle, (typeof style === "object") ? style.id : style);
 		}
 	},
 
@@ -248,7 +248,7 @@ CanvasRenderingContext2D.prototype = {
 	createPattern: function(image, repetition) {
 		// The first argument is HTMLImageElement, HTMLCanvasElement or
 		// HTMLVideoElement. For now, only HTMLImageElement is supported.
-		if (image.tagName.toUpperCase() != "IMG") return;
+		if (image.tagName.toUpperCase() !== "IMG") return;
 
 		this._queue.push(properties.createPattern, image.src, repetition);
 
@@ -455,16 +455,16 @@ CanvasRenderingContext2D.prototype = {
 
 		// The first argument is HTMLImageElement, HTMLCanvasElement or
 		// HTMLVideoElement. For now, only HTMLImageElement is supported.
-		if (a[0].tagName.toUpperCase() != "IMG") return;
+		if (a[0].tagName.toUpperCase() !== "IMG") return;
 
 		this._setCompositing();
 		this._setShadows();
 
-		if (argc == 3) {
+		if (argc === 3) {
 			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2]);
-		} else if (argc == 5) {
+		} else if (argc === 5) {
 			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2], a[3], a[4]);
-		} else if (argc == 9) {
+		} else if (argc === 9) {
 			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]);
 		} else {
 			return;
@@ -602,11 +602,11 @@ function onReadyStateChange() {
 
 function onPropertyChange(event) {
 	var prop = event.propertyName;
-	if (prop == "width" || prop == "height") {
+	if (prop === "width" || prop === "height") {
 		var canvas = event.srcElement, ctx = canvas.getContext("2d");
 		var value = parseInt(canvas[prop]);
 		if (isNaN(value) || value < 0) {
-			value = (prop == "width") ? 300 : 150;
+			value = (prop === "width") ? 300 : 150;
 		}
 		canvas.style[prop] = value + "px";
 		ctx._resize(canvas.clientWidth, canvas.clientHeight);
@@ -629,14 +629,14 @@ function onBeforeUnload() {
 
 		// clean up the references of swf.postCommands and swf.resize
 		for (prop in swf) {
-			if (typeof swf[prop] == "function") {
+			if (typeof swf[prop] === "function") {
 				swf[prop] = null;
 			}
 		}
 
 		// clean up the references of canvas.getContext and canvas.toDataURL
 		for (prop in canvas) {
-			if (typeof canvas[prop] == "function") {
+			if (typeof canvas[prop] === "function") {
 				canvas[prop] = null;
 			}
 		}
@@ -690,7 +690,7 @@ var FlashCanvas = {
 
 		// canvas API
 		canvas.getContext = function(contextId) {
-			return contextId == "2d" ? ctx : null;
+			return contextId === "2d" ? ctx : null;
 		};
 
 		canvas.toDataURL = function() {
