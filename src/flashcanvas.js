@@ -403,7 +403,15 @@ CanvasRenderingContext2D.prototype = {
 		var queue = this._queue;
 		if (this._font != this.font) {
 			this._font = this.font;
-			queue.push(properties.font, this.font);
+			
+			try {
+			  this._swf.style.font = this.font;
+			} catch (e) {}
+			var style = this._swf.currentStyle;
+			
+			// @fixme: The font size is not always in "px"
+			var font = [style.fontStyle, style.fontWeight, style.fontSize, style.fontFamily].join(" ");
+			queue.push(properties.font, font);
 		}
 		if (this._textAlign != this.textAlign) {
 			this._textAlign = this.textAlign;
@@ -417,12 +425,20 @@ CanvasRenderingContext2D.prototype = {
 
 	// void fillText(in DOMString text, in float x, in float y, [Optional] in float maxWidth);
 	fillText: function(text, x, y, maxWidth) {
-		// TODO: Implement
+		this._setCompositing();
+		this._setFillStyle();
+		this._setShadows();
+		this._setFontStyles();
+		this._queue.push(properties.fillText, text, x, y, maxWidth);
 	},
 
 	// void strokeText(in DOMString text, in float x, in float y, [Optional] in float maxWidth);
 	strokeText: function(text, x, y, maxWidth) {
-		// TODO: Implement
+		this._setCompositing();
+		this._setStrokeStyle();
+		this._setShadows();
+		this._setFontStyles();
+		this._queue.push(properties.strokeText, text, x, y, maxWidth);
 	},
 
 	// TextMetrics measureText(in DOMString text);

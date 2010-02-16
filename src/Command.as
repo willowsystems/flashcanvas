@@ -30,6 +30,7 @@
 package
 {
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+    import com.googlecode.flashcanvas.TextMetrics;
 
     public class Command
     {
@@ -400,32 +401,41 @@ package
 
         private function font():void
         {
-            // TODO: Implement
+            ctx.font = input.readUTF();
         }
 
         private function textAlign():void
         {
-            // TODO: Implement
+            ctx.textAlign = input.readUTF();
         }
 
         private function textBaseline():void
         {
-            // TODO: Implement
+            ctx.textBaseline = input.readUTF();
         }
 
         private function fillText():void
         {
-            // TODO: Implement
+            var     text:String = input.readUTF();
+            var        x:Number = input.readFloat();
+            var        y:Number = input.readFloat();
+            var maxWidth:Number = input.readFloat();
+            ctx.fillText(text, x, y, maxWidth);
         }
 
         private function strokeText():void
         {
-            // TODO: Implement
+            var     text:String = input.readUTF();
+            var        x:Number = input.readFloat();
+            var        y:Number = input.readFloat();
+            var maxWidth:Number = input.readFloat();
+            ctx.strokeText(text, x, y, maxWidth);
         }
 
-        private function measureText():*
+        private function measureText():TextMetrics
         {
             // TODO: Implement
+            return new TextMetrics(0);
         }
 
         private function drawImage():void

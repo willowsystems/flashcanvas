@@ -49,6 +49,10 @@ package com.googlecode.flashcanvas
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
+    import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
+    import flash.text.TextFormat;
+    import flash.text.TextLineMetrics;
     import flash.net.URLRequest;
 
     public class CanvasRenderingContext2D
@@ -667,37 +671,118 @@ package com.googlecode.flashcanvas
 
         public function get font():*
         {
-            // TODO: Implement
+            return state.font;
         }
 
         public function set font(value:String):void
         {
-            // TODO: Implement
+            state.font = value;
+        }
+
+        private function _parseFont():TextFormat
+        {
+            var format:TextFormat = new TextFormat;
+            var fontData:Array = state.font.split(" ", 4);
+
+            format.italic = fontData[0] == "italic";
+            format.size = parseFloat(fontData[2]);
+            format.font = fontData[3];
+
+            var weight:Number = parseInt(fontData[1]);
+            format.bold = (!isNaN(weight) && weight > 400 || fontData[1] == "bold");
+
+            return format;
         }
 
         public function get textAlign():*
         {
-            // TODO: Implement
+            return state.textAlign;
         }
 
         public function set textAlign(value:String):void
         {
-            // TODO: Implement
+            value = value.toLowerCase();
+
+            switch(value) {
+                case "start":
+                case "end":
+                case "left":
+                case "right":
+                case "center":
+                    state.textAlign = value;
+            }
         }
 
         public function get textBaseline():*
         {
-            // TODO: Implement
+            return state.textBaseline;
         }
 
         public function set textBaseline(value:String):void
         {
-            // TODO: Implement
+            value = value.toLowerCase();
+
+            switch(value) {
+                case "top":
+                case "hanging":
+                case "middle":
+                case "alphabetic":
+                case "ideographic":
+                case "bottom":
+                    state.textBaseline = value;
+            }
         }
 
         public function fillText(text:String, x:Number, y:Number, maxWidth:* = null):void
         {
-            // TODO: Implement
+            if (!isFinite(x) || !isFinite(y))
+                return;
+
+            var format:TextFormat = _parseFont();
+
+            if (state.fillStyle is CSSColor)
+                format.color = state.fillStyle.color;
+
+            var tf:TextField = new TextField();
+            tf.defaultTextFormat = format;
+            tf.autoSize = TextFieldAutoSize.LEFT;
+            tf.text = text;
+
+            var metrics:TextLineMetrics = tf.getLineMetrics(0);
+
+            // 2px gutter
+            x -= 2;
+            y -= 2;
+
+            switch(state.textAlign) {
+                default:
+                case "left": break;
+                case "center": x -= metrics.width / 2; break;
+                case "right": x -= metrics.width; break;
+            }
+
+            switch(state.textBaseline) {
+                default:
+                case "top":
+                case "hanging": break;
+                case "middle": y -= metrics.height / 2; break;
+                case "alphabetic": y -= metrics.ascent; break;
+                case "ideographic":
+                case "bottom": y -= metrics.height; break;
+            }
+
+            var transMatrix:Matrix = new Matrix();
+            transMatrix.identity();
+            transMatrix.translate(x, y);
+            transMatrix.translate(state.transformMatrix.tx, state.transformMatrix.ty);
+
+            var colorTransform:ColorTransform = null;
+            if (state.globalAlpha < 1)
+            {
+                // Make the image translucent
+                colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+            }
+            _canvas.bitmapData.draw(tf, transMatrix, colorTransform, null, null, true);
         }
 
         public function strokeText(text:String, x:Number, y:Number, maxWidth:* = null):void
