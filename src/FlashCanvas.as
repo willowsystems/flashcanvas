@@ -38,10 +38,10 @@ package
     import flash.net.navigateToURL;
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
-    import flash.net.URLVariables;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
 
+    import com.adobe.images.PNGEncoder;
     import com.googlecode.flashcanvas.Canvas;
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
 
@@ -101,13 +101,12 @@ package
 
         private function saveItemSelectHandler(event:Event):void
         {
-            var url:String = loaderInfo.url.replace(/[^\/]+$/, "d.php");
-            var request:URLRequest     = new URLRequest(url);
-            var variables:URLVariables = new URLVariables();
+            var url:String = loaderInfo.url.replace(/[^\/]+$/, "save.php");
+            var request:URLRequest = new URLRequest(url);
 
-            variables.d    = canvas.toDataURL();
-            request.data   = variables;
-            request.method = URLRequestMethod.POST;
+            request.contentType = "application/octet-stream";
+            request.method      = URLRequestMethod.POST;
+            request.data        = PNGEncoder.encode(canvas.bitmapData);
 
             navigateToURL(request, "_self");
         }

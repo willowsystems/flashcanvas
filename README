@@ -23,10 +23,11 @@ Requirements
 Usage
 -----
 
-FlashCanvas consists of JavaScript and Flash files:
+FlashCanvas consists of JavaScript, Flash and PHP files:
 
  * flashcanvas.js
  * flashcanvas.swf
+ * save.php (used for "Save Image As...")
 
 These files can be found in the bin directory in this distribution
 package. To install FlashCanvas, copy these files into some directory on
