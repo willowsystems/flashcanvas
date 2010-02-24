@@ -207,13 +207,13 @@ CanvasRenderingContext2D.prototype = {
 
 	_setCompositing: function() {
 		var queue = this._queue;
-		if (this._globalAlpha != this.globalAlpha) {
+		if (this._globalAlpha !== this.globalAlpha) {
 			this._globalAlpha = this.globalAlpha;
-			queue.push(properties.globalAlpha, this.globalAlpha);
+			queue.push(properties.globalAlpha, this._globalAlpha);
 		}
-		if (this._globalCompositeOperation != this.globalCompositeOperation) {
+		if (this._globalCompositeOperation !== this.globalCompositeOperation) {
 			this._globalCompositeOperation = this.globalCompositeOperation;
-			queue.push(properties.globalCompositeOperation, this.globalCompositeOperation);
+			queue.push(properties.globalCompositeOperation, this._globalCompositeOperation);
 		}
 	},
 
@@ -222,14 +222,14 @@ CanvasRenderingContext2D.prototype = {
 	 */
 
 	_setStrokeStyle: function() {
-		if (this._strokeStyle != this.strokeStyle) {
+		if (this._strokeStyle !== this.strokeStyle) {
 			var style = this._strokeStyle = this.strokeStyle;
 			this._queue.push(properties.strokeStyle, (typeof style === "object") ? style.id : style);
 		}
 	},
 
 	_setFillStyle: function() {
-		if (this._fillStyle != this.fillStyle) {
+		if (this._fillStyle !== this.fillStyle) {
 			var style = this._fillStyle = this.fillStyle;
 			this._queue.push(properties.fillStyle, (typeof style === "object") ? style.id : style);
 		}
@@ -266,21 +266,21 @@ CanvasRenderingContext2D.prototype = {
 
 	_setLineStyles: function() {
 		var queue = this._queue;
-		if (this._lineWidth != this.lineWidth) {
+		if (this._lineWidth !== this.lineWidth) {
 			this._lineWidth = this.lineWidth;
-			queue.push(properties.lineWidth, this.lineWidth);
+			queue.push(properties.lineWidth, this._lineWidth);
 		}
-		if (this._lineCap != this.lineCap) {
+		if (this._lineCap !== this.lineCap) {
 			this._lineCap = this.lineCap;
-			queue.push(properties.lineCap, this.lineCap);
+			queue.push(properties.lineCap, this._lineCap);
 		}
-		if (this._lineJoin != this.lineJoin) {
+		if (this._lineJoin !== this.lineJoin) {
 			this._lineJoin = this.lineJoin;
-			queue.push(properties.lineJoin, this.lineJoin);
+			queue.push(properties.lineJoin, this._lineJoin);
 		}
-		if (this._miterLimit != this.miterLimit) {
+		if (this._miterLimit !== this.miterLimit) {
 			this._miterLimit = this.miterLimit;
-			queue.push(properties.miterLimit, this.miterLimit);
+			queue.push(properties.miterLimit, this._miterLimit);
 		}
 	},
 
@@ -290,21 +290,21 @@ CanvasRenderingContext2D.prototype = {
 
 	_setShadows: function() {
 		var queue = this._queue;
-		if (this._shadowOffsetX != this.shadowOffsetX) {
+		if (this._shadowOffsetX !== this.shadowOffsetX) {
 			this._shadowOffsetX = this.shadowOffsetX;
-			queue.push(properties.shadowOffsetX, this.shadowOffsetX);
+			queue.push(properties.shadowOffsetX, this._shadowOffsetX);
 		}
-		if (this._shadowOffsetY != this.shadowOffsetY) {
+		if (this._shadowOffsetY !== this.shadowOffsetY) {
 			this._shadowOffsetY = this.shadowOffsetY;
-			queue.push(properties.shadowOffsetY, this.shadowOffsetY);
+			queue.push(properties.shadowOffsetY, this._shadowOffsetY);
 		}
-		if (this._shadowBlur != this.shadowBlur) {
+		if (this._shadowBlur !== this.shadowBlur) {
 			this._shadowBlur = this.shadowBlur;
-			queue.push(properties.shadowBlur, this.shadowBlur);
+			queue.push(properties.shadowBlur, this._shadowBlur);
 		}
-		if (this._shadowColor != this.shadowColor) {
+		if (this._shadowColor !== this.shadowColor) {
 			this._shadowColor = this.shadowColor;
-			queue.push(properties.shadowColor, this.shadowColor);
+			queue.push(properties.shadowColor, this._shadowColor);
 		}
 	},
 
@@ -401,7 +401,7 @@ CanvasRenderingContext2D.prototype = {
 
 	_setFontStyles: function() {
 		var queue = this._queue;
-		if (this._font != this.font) {
+		if (this._font !== this.font) {
 			this._font = this.font;
 			
 			try {
@@ -413,13 +413,13 @@ CanvasRenderingContext2D.prototype = {
 			var font = [style.fontStyle, style.fontWeight, style.fontSize, style.fontFamily].join(" ");
 			queue.push(properties.font, font);
 		}
-		if (this._textAlign != this.textAlign) {
+		if (this._textAlign !== this.textAlign) {
 			this._textAlign = this.textAlign;
-			queue.push(properties.textAlign, this.textAlign);
+			queue.push(properties.textAlign, this._textAlign);
 		}
-		if (this._textBaseline != this.textBaseline) {
+		if (this._textBaseline !== this.textBaseline) {
 			this._textBaseline = this.textBaseline;
-			queue.push(properties.textBaseline, this.textBaseline);
+			queue.push(properties.textBaseline, this._textBaseline);
 		}
 	},
 
