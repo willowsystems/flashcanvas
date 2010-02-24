@@ -32,7 +32,6 @@ package com.googlecode.flashcanvas
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.PixelSnapping;
-    import flash.events.Event;
     import flash.utils.ByteArray;
     import com.adobe.images.JPGEncoder;
     import com.adobe.images.PNGEncoder;
@@ -45,7 +44,6 @@ package com.googlecode.flashcanvas
         {
             super(null, PixelSnapping.ALWAYS);
             resize(width, height);
-            addEventListener(Event.ENTER_FRAME, enterFrameHandler);
         }
 
         override public function set width(value:Number):void
@@ -111,16 +109,6 @@ package com.googlecode.flashcanvas
 
             // create new bitmapdata
             bitmapData = new BitmapData(width, height, true, 0x00000000);
-
-            // frame locking
-            bitmapData.lock();
-        }
-
-        private function enterFrameHandler(event:Event):void
-        {
-            // frame locking
-            bitmapData.unlock();
-            bitmapData.lock();
         }
     }
 }
