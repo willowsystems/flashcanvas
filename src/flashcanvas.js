@@ -660,11 +660,15 @@ function onBeforeUnload() {
 var FlashCanvas = {
 	initElement: function(canvas) {
 		// get element explicit size
-		var width = 300, height = 150;
-		if (canvas.attributes["width"] != undefined)
-			width = Math.max(Number(canvas.getAttribute("width")) || 0, 0);
-		if (canvas.attributes["height"] != undefined)
-			height = Math.max(Number(canvas.getAttribute("height")) || 0, 0);
+		var width  = parseInt(canvas.getAttribute("width")),
+		    height = parseInt(canvas.getAttribute("height"));
+
+		if (isNaN(width) || width < 0) {
+			width = 300;
+		}
+		if (isNaN(height) || height < 0) {
+			height = 150;
+		}
 		canvas.style.width  = width  + "px";
 		canvas.style.height = height + "px";
 
