@@ -266,7 +266,7 @@ CanvasRenderingContext2D.prototype = {
 
 	_setLineStyles: function() {
 		var queue = this._queue;
-		if ((this._lineWidth != this.lineWidth) && isFinite(this.lineWidth)) {
+		if (this._lineWidth != this.lineWidth) {
 			this._lineWidth = this.lineWidth;
 			queue.push(properties.lineWidth, this.lineWidth);
 		}
@@ -278,7 +278,7 @@ CanvasRenderingContext2D.prototype = {
 			this._lineJoin = this.lineJoin;
 			queue.push(properties.lineJoin, this.lineJoin);
 		}
-		if ((this._miterLimit != this.miterLimit) && isFinite(this.miterLimit)) {
+		if (this._miterLimit != this.miterLimit) {
 			this._miterLimit = this.miterLimit;
 			queue.push(properties.miterLimit, this.miterLimit);
 		}

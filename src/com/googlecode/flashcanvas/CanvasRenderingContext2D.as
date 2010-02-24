@@ -278,7 +278,8 @@ package com.googlecode.flashcanvas
 
         public function set lineWidth(value:Number):void
         {
-            state.lineWidth = value;
+            if (isFinite(value) && value > 0)
+                state.lineWidth = value;
         }
 
         public function get lineCap():String
@@ -332,7 +333,8 @@ package com.googlecode.flashcanvas
 
         public function set miterLimit(value:Number):void
         {
-            state.miterLimit = value;
+            if (isFinite(value) && value > 0)
+                state.miterLimit = value;
         }
 
         /*
