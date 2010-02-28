@@ -34,6 +34,7 @@ package
     import flash.display.StageScaleMode;
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
+    import flash.events.MouseEvent;
     import flash.external.ExternalInterface;
     import flash.net.navigateToURL;
     import flash.net.URLRequest;
@@ -50,6 +51,7 @@ package
         private var canvas:Canvas;
         private var context:CanvasRenderingContext2D;
         private var command:Command;
+        private var canvasId:String;
 
         public function FlashCanvas()
         {
@@ -69,10 +71,15 @@ package
             addChild(canvas);
 
             // Remove the prefix "external" from objectID
-            var canvasId:String = ExternalInterface.objectID.slice(8);
+            canvasId = ExternalInterface.objectID.slice(8);
 
             // Send JavaScript a message that the swf is ready
             ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
+
+            // mouse event listeners
+            stage.doubleClickEnabled = true;
+            stage.addEventListener(MouseEvent.CLICK,        mouseEventHandler);
+            stage.addEventListener(MouseEvent.DOUBLE_CLICK, mouseEventHandler);
 
             // custom context menu
             var contextMenu:ContextMenu   = new ContextMenu();
@@ -97,6 +104,15 @@ package
         public function resize(width:int, height:int):void
         {
             context.resize(width, height);
+        }
+
+        private function mouseEventHandler(event:MouseEvent):void
+        {
+            var type:String = event.type;
+            if (type == MouseEvent.DOUBLE_CLICK)
+                type = "dblclick";
+
+            ExternalInterface.call("FlashCanvas.trigger", canvasId, type);
         }
 
         private function saveItemSelectHandler(event:Event):void

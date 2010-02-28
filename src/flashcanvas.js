@@ -722,6 +722,11 @@ var FlashCanvas = {
 			swf.resize(swf.clientWidth, swf.clientHeight);
 			isReady[canvasId] = true;
 		}
+	},
+
+	trigger: function(canvasId, type) {
+		var canvas = document.getElementById("external" + canvasId).parentNode;
+		canvas.fireEvent("on" + type);
 	}
 };
 
@@ -771,6 +776,7 @@ window["CanvasPattern"]    = CanvasPattern;
 window["FlashCanvas"]      = FlashCanvas;
 FlashCanvas["initElement"] = FlashCanvas.initElement;
 FlashCanvas["unlock"]      = FlashCanvas.unlock;
+FlashCanvas["trigger"]     = FlashCanvas.trigger;
 
 })();
 
