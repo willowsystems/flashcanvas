@@ -600,8 +600,8 @@ function onReadyStateChange() {
 	}
 }
 
-function onPropertyChange(event) {
-	var prop = event.propertyName;
+function onPropertyChange() {
+	var event = window.event, prop = event.propertyName;
 	if (prop === "width" || prop === "height") {
 		var canvas = event.srcElement, ctx = canvas.getContext("2d");
 		var value = parseInt(canvas[prop]);
@@ -613,9 +613,9 @@ function onPropertyChange(event) {
 	}
 }
 
-function onFocus(event) {
+function onFocus() {
 	// forward the event to the parent
-	var swf = event.srcElement, canvas = swf.parentNode;
+	var swf = window.event.srcElement, canvas = swf.parentNode;
 	swf.blur();
 	canvas.focus();
 }
