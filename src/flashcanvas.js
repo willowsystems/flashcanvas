@@ -771,12 +771,9 @@ req.send(null);
  */
 
 window["CanvasRenderingContext2D"] = CanvasRenderingContext2D;
-window["CanvasGradient"]   = CanvasGradient;
-window["CanvasPattern"]    = CanvasPattern;
-window["FlashCanvas"]      = FlashCanvas;
-FlashCanvas["initElement"] = FlashCanvas.initElement;
-FlashCanvas["unlock"]      = FlashCanvas.unlock;
-FlashCanvas["trigger"]     = FlashCanvas.trigger;
+window["CanvasGradient"]           = CanvasGradient;
+window["CanvasPattern"]            = CanvasPattern;
+window["FlashCanvas"]              = FlashCanvas;
 
 })();
 
