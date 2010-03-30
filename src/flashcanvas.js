@@ -711,6 +711,8 @@ var FlashCanvas = {
 		// add event listeners
 		canvas.attachEvent("onpropertychange", onPropertyChange);
 		swf.attachEvent("onfocus", onFocus);
+
+		return canvas;
 	},
 
 	unlock: function(canvasId, ready) {
@@ -774,6 +776,13 @@ window["CanvasRenderingContext2D"] = CanvasRenderingContext2D;
 window["CanvasGradient"]           = CanvasGradient;
 window["CanvasPattern"]            = CanvasPattern;
 window["FlashCanvas"]              = FlashCanvas;
+
+// ExplorerCanvas-compatible APIs for convenience
+window["G_vmlCanvasManager"] = {
+	init:  function(){},
+	init_: function(){},
+	initElement: FlashCanvas.initElement
+};
 
 })();
 
