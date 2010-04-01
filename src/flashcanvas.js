@@ -708,8 +708,7 @@ var FlashCanvas = {
 			return ctx._postCommands();
 		};
 
-		// add event listeners
-		canvas.attachEvent("onpropertychange", onPropertyChange);
+		// add event listener
 		swf.attachEvent("onfocus", onFocus);
 
 		return canvas;
@@ -721,7 +720,15 @@ var FlashCanvas = {
 		}
 		if (ready) {
 			var swf = document.getElementById("external" + canvasId);
+			var canvas = swf.parentNode;
+
+			// Add event listener
+			canvas.attachEvent("onpropertychange", onPropertyChange);
+
+			// Adjust the size of Flash to be the same size as the canvas
 			swf.resize(swf.clientWidth, swf.clientHeight);
+
+			// ExternalInterface is now ready for use
 			isReady[canvasId] = true;
 		}
 	},
