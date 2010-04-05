@@ -620,8 +620,8 @@ function onFocus() {
 	canvas.focus();
 }
 
-function onBeforeUnload() {
-	window.detachEvent("onbeforeunload", onBeforeUnload);
+function onUnload() {
+	window.detachEvent("onunload", onUnload);
 
 	var elements = document.getElementsByTagName("canvas");
 	for (var i = 0, len = elements.length; i < len; ++i) {
@@ -764,7 +764,7 @@ document.createStyleSheet().cssText =
 document.attachEvent("onreadystatechange", onReadyStateChange);
 
 // prevent IE6 memory leaks
-window.attachEvent("onbeforeunload", onBeforeUnload);
+window.attachEvent("onunload", onUnload);
 
 // determine SWF url
 var path    = getScriptUrl().replace(/[^\/]+$/, "");
