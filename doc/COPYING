@@ -28,7 +28,7 @@ FlashCanvas is based on the following works:
 Third-party libraries used in FlashCanvas
 -----------------------------------------
 
- * bezier_lib.as by Timothee Groleau
+ * bezier_lib.as by Timothée Groleau
    http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
 
  * BitString.as, JPGEncoder.as and PNGEncoder.as by Adobe Systems Incorporated
@@ -55,3 +55,6 @@ Explorer.
    https://developer.mozilla.org/en/Canvas_tutorial
    MIT License
 
+ * Kaleidoscope by Christophe Résigné
+   http://www.chiptune.com/kaleidoscope/
+   (Included with the permission of the author)
