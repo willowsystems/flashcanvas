@@ -651,6 +651,7 @@ function onUnload() {
 	window["CanvasGradient"]           = null;
 	window["CanvasPattern"]            = null;
 	window["FlashCanvas"]              = null;
+	window["G_vmlCanvasManager"]       = null;
 }
 
 /*
