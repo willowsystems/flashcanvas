@@ -747,7 +747,7 @@ var FlashCanvas = {
 function getScriptUrl() {
 	var scripts = document.getElementsByTagName("script");
 	var script  = scripts[scripts.length - 1];
-	return script.getAttribute("src", 2);
+	return script.getAttribute("src", 4);
 }
 
 /*
@@ -771,10 +771,12 @@ window.attachEvent("onunload", onUnload);
 var path    = getScriptUrl().replace(/[^\/]+$/, "");
 var SWF_URL = path + "flashcanvas.swf";  // + "?r=" + Math.random();
 
-// cache SWF data so that object is interactive upon writing
-var req = new ActiveXObject("Microsoft.XMLHTTP");
-req.open("GET", SWF_URL, false);
-req.send(null);
+// preload SWF file if it's in the same domain
+if (SWF_URL.indexOf(location.protocol + "//" + location.host + "/") === 0) {
+	var req = new ActiveXObject("Microsoft.XMLHTTP");
+	req.open("GET", SWF_URL, false);
+	req.send(null);
+}
 
 /*
  * public API

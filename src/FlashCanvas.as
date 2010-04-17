@@ -39,6 +39,7 @@ package
     import flash.net.navigateToURL;
     import flash.net.URLRequest;
     import flash.net.URLRequestMethod;
+    import flash.system.Security;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
 
@@ -59,6 +60,8 @@ package
             stage.scaleMode = StageScaleMode.NO_SCALE;
             stage.align     = StageAlign.TOP_LEFT;
             stage.frameRate = 60;
+
+            Security.allowDomain("*");
 
             ExternalInterface.marshallExceptions = true;
             ExternalInterface.addCallback("postCommands", postCommands);
