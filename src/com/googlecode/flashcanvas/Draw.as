@@ -45,60 +45,59 @@ package com.googlecode.flashcanvas
             this.matrix   = matrix;
         }
 
-        public function arc(cx:Number, cy:Number, radius:Number, startAngle:Number, endAngle:Number, clockwise:Boolean):void
+        public function arc(cx:Number, cy:Number, radius:Number, startAngle:Number, endAngle:Number, anticlockwise:Boolean):void
         {
-            startAngle *= 180 / Math.PI;
-            endAngle   *= 180 / Math.PI;
+            if (startAngle == endAngle)
+                return;
 
-            if (endAngle < 0)
-                endAngle += 360;
+            var theta:Number = endAngle - startAngle;
+            var PI2:Number   = Math.PI * 2;
 
-            var arc:Number = endAngle - startAngle;
-            if (clockwise)
+            if (anticlockwise)
             {
-                arc = 360 - arc;
-                if (arc == 0 && endAngle != startAngle)
-                    arc = 360;
+                if (theta <= -PI2)
+                    theta = PI2;
+                else while (theta >= 0)
+                    theta -= PI2;
             }
-            if (Math.abs(arc) > 360)
-                arc = 360;
+            else
+            {
+                if (theta >= PI2)
+                    theta = PI2;
+                else while (theta <= 0)
+                    theta += PI2;
+            }
 
-            var segs:Number = Math.ceil(Math.abs(arc) / 45);
-            var segAngle:Number = arc / segs;
+            var angle:Number     = startAngle;
+            var segments:Number  = Math.ceil(Math.abs(theta) / (Math.PI / 4));
+            var delta:Number     = theta / (segments * 2);
+            var radiusMid:Number = radius / Math.cos(delta);
 
-            var angle:Number = (startAngle / 180) * Math.PI;
-            var theta:Number = (segAngle / 180) * Math.PI;
-            if (clockwise)
-                theta = -theta;
-
-            var angleMid:Number;
-            var radiusMid:Number = radius / Math.cos(theta / 2);
             var dx:Number;
             var dy:Number;
             var diff:Point;
-            var bx:Number;
-            var by:Number;
-            var ctlx:Number;
-            var ctly:Number;
+            var cpx:Number;
+            var cpy:Number;
+            var apx:Number;
+            var apy:Number;
 
-            for (var i:int = 0; i < segs; i++)
+            for (var i:int = 0; i < segments; i++)
             {
-                angle += theta;
-                angleMid = angle - (theta / 2);
+                angle += delta;
+                dx = Math.cos(angle) * radiusMid;
+                dy = Math.sin(angle) * radiusMid;
+                diff = matrix.deltaTransformPoint(new Point(dx, dy));
+                cpx = cx + diff.x;
+                cpy = cy + diff.y;
 
+                angle += delta;
                 dx = Math.cos(angle) * radius;
                 dy = Math.sin(angle) * radius;
                 diff = matrix.deltaTransformPoint(new Point(dx, dy));
-                bx = cx + diff.x;
-                by = cy + diff.y;
+                apx = cx + diff.x;
+                apy = cy + diff.y;
 
-                dx = Math.cos(angleMid) * radiusMid;
-                dy = Math.sin(angleMid) * radiusMid;
-                diff = matrix.deltaTransformPoint(new Point(dx, dy));
-                ctlx = cx + diff.x;
-                ctly = cy + diff.y;
-
-                graphics.curveTo(ctlx, ctly, bx, by);
+                graphics.curveTo(cpx, cpy, apx, apy);
             }
         }
     }

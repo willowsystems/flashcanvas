@@ -593,7 +593,7 @@ package com.googlecode.flashcanvas
             startingPoint.y = currentPoint.y = p1.y;
         }
 
-        public function arc(x:Number, y:Number, radius:Number, startAngle:Number, endAngle:Number, clockwise:Boolean):void
+        public function arc(x:Number, y:Number, radius:Number, startAngle:Number, endAngle:Number, anticlockwise:Boolean):void
         {
             var startX:Number = x + radius * Math.cos(startAngle);
             var startY:Number = y + radius * Math.sin(startAngle);
@@ -625,7 +625,7 @@ package com.googlecode.flashcanvas
 
             path.push({
                 command: "arc",
-                data: [ p.x, p.y, radius, startAngle, endAngle, clockwise ]
+                data: [ p.x, p.y, radius, startAngle, endAngle, anticlockwise ]
             });
 
             currentPoint.x = p2.x;
@@ -1020,13 +1020,11 @@ package com.googlecode.flashcanvas
             var d:Draw = new Draw(graphics, state.transformMatrix);
             var startAngle:Number = Math.atan2(yt0 - cy, xt0 - cx);
             var endAngle:Number = Math.atan2(yt2 - cy, xt2 - cx);
-            var dir:Boolean = (startAngle < endAngle);
-            if (x1 > x2)
-                dir = !dir;
+            var anticlockwise:Boolean = (x0 - x1) * (y2 - y1) > (x2 - x1) * (y0 - y1);
 
             graphics.moveTo(x0, y0);
             graphics.lineTo(xt0, yt0);
-            d.arc(cx, cy, radius, startAngle, endAngle, dir);
+            d.arc(cx, cy, radius, startAngle, endAngle, anticlockwise);
         }
 
         private function _rect(graphics:Graphics, arg:Array):void
