@@ -1,4 +1,3 @@
-ctx.miterLimit;
 swf.CallFunction;
 swf.resize;
 FlashCanvas.initElement;
