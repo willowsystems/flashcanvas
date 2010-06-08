@@ -15,10 +15,9 @@ if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
 
 (function() {
 
-/*
- * Context API
+/**
+ * @constructor
  */
-
 function Lookup(array) {
 	for (var i = 0, len = array.length; i < len; i++)
 		this[array[i]] = i;
@@ -94,7 +93,10 @@ function getStyleId(ctx) {
 	return arguments.callee[canvasId]++;
 }
 
-// canvas context
+/**
+ * 2D context
+ * @constructor
+ */
 var CanvasRenderingContext2D = function(canvas, swf) {
 	// back-reference to the canvas
 	this.canvas = canvas;
@@ -559,10 +561,10 @@ CanvasRenderingContext2D.prototype = {
 	}
 };
 
-/*
+/**
  * CanvasGradient stub
+ * @constructor
  */
-
 var CanvasGradient = function(ctx) {
 	this._ctx = ctx;
 	this.id   = getStyleId(ctx);
@@ -574,10 +576,10 @@ CanvasGradient.prototype = {
 	}
 };
 
-/*
+/**
  * CanvasPattern stub
+ * @constructor
  */
-
 var CanvasPattern = function(ctx) {
 	this.id = getStyleId(ctx);
 };
