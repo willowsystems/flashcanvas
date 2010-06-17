@@ -15,6 +15,22 @@ if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
 
 (function() {
 
+/*
+ * Constant
+ */
+
+var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
+var CANVAS_GRADIENT             = "CanvasGradient";
+var CANVAS_PATTERN              = "CanvasPattern";
+var FLASH_CANVAS                = "FlashCanvas";
+var G_VML_CANVAS_MANAGER        = "G_vmlCanvasManager";
+var OBJECT_ID_PREFIX            = "external";
+var ON_FOCUS                    = "onfocus";
+var ON_PROPERTY_CHANGE          = "onpropertychange";
+var ON_READY_STATE_CHANGE       = "onreadystatechange";
+var ON_UNLOAD                   = "onunload";
+var SWF_URL                     = getScriptUrl().replace(/[^\/]+$/, "flashcanvas.swf");
+
 /**
  * @constructor
  */
@@ -590,7 +606,7 @@ var CanvasPattern = function(ctx) {
 
 function onReadyStateChange() {
 	if (document.readyState === "complete") {
-		document.detachEvent("onreadystatechange", onReadyStateChange);
+		document.detachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
 
 		var elements = document.getElementsByTagName("canvas");
 		for (var i = 0, len = elements.length; i < len; ++i) {
@@ -623,7 +639,7 @@ function onFocus() {
 }
 
 function onUnload() {
-	window.detachEvent("onunload", onUnload);
+	window.detachEvent(ON_UNLOAD, onUnload);
 
 	var elements = document.getElementsByTagName("canvas");
 	for (var i = 0, len = elements.length; i < len; ++i) {
@@ -644,16 +660,16 @@ function onUnload() {
 		}
 
 		// remove event listeners
-		canvas.detachEvent("onpropertychange", onPropertyChange);
-		swf.detachEvent("onfocus", onFocus);
+		canvas.detachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
+		swf.detachEvent(ON_FOCUS, onFocus);
 	}
 
 	// delete exported symbols
-	window["CanvasRenderingContext2D"] = null;
-	window["CanvasGradient"]           = null;
-	window["CanvasPattern"]            = null;
-	window["FlashCanvas"]              = null;
-	window["G_vmlCanvasManager"]       = null;
+	window[CANVAS_RENDERING_CONTEXT_2D] = null;
+	window[CANVAS_GRADIENT]             = null;
+	window[CANVAS_PATTERN]              = null;
+	window[FLASH_CANVAS]                = null;
+	window[G_VML_CANVAS_MANAGER]        = null;
 }
 
 /*
@@ -684,7 +700,7 @@ var FlashCanvas = {
 		canvas.innerHTML =
 			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
 			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
-			' width="100%" height="100%" id="external' + canvasId + '">' +
+			' width="100%" height="100%" id="' + OBJECT_ID_PREFIX + canvasId + '">' +
 			'<param name="allowScriptAccess" value="always">' +
 			'<param name="movie" value="' + SWF_URL + '">' +
 			'<param name="quality" value="high">' +
@@ -712,7 +728,7 @@ var FlashCanvas = {
 		};
 
 		// add event listener
-		swf.attachEvent("onfocus", onFocus);
+		swf.attachEvent(ON_FOCUS, onFocus);
 
 		return canvas;
 	},
@@ -722,11 +738,11 @@ var FlashCanvas = {
 			--lock[canvasId];
 		}
 		if (ready) {
-			var swf = document.getElementById("external" + canvasId);
+			var swf = document.getElementById(OBJECT_ID_PREFIX + canvasId);
 			var canvas = swf.parentNode;
 
 			// Add event listener
-			canvas.attachEvent("onpropertychange", onPropertyChange);
+			canvas.attachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
 
 			// Adjust the size of Flash to be the same size as the canvas
 			swf.resize(swf.clientWidth, swf.clientHeight);
@@ -737,7 +753,7 @@ var FlashCanvas = {
 	},
 
 	trigger: function(canvasId, type) {
-		var canvas = document.getElementById("external" + canvasId).parentNode;
+		var canvas = document.getElementById(OBJECT_ID_PREFIX + canvasId).parentNode;
 		canvas.fireEvent("on" + type);
 	}
 };
@@ -764,14 +780,10 @@ document.createStyleSheet().cssText =
 	"canvas{display:inline-block;overflow:hidden;width:300px;height:150px}";
 
 // initialize canvas elements
-document.attachEvent("onreadystatechange", onReadyStateChange);
+document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
 
 // prevent IE6 memory leaks
-window.attachEvent("onunload", onUnload);
-
-// determine SWF url
-var path    = getScriptUrl().replace(/[^\/]+$/, "");
-var SWF_URL = path + "flashcanvas.swf";  // + "?r=" + Math.random();
+window.attachEvent(ON_UNLOAD, onUnload);
 
 // preload SWF file if it's in the same domain
 if (SWF_URL.indexOf(location.protocol + "//" + location.host + "/") === 0) {
@@ -784,13 +796,13 @@ if (SWF_URL.indexOf(location.protocol + "//" + location.host + "/") === 0) {
  * public API
  */
 
-window["CanvasRenderingContext2D"] = CanvasRenderingContext2D;
-window["CanvasGradient"]           = CanvasGradient;
-window["CanvasPattern"]            = CanvasPattern;
-window["FlashCanvas"]              = FlashCanvas;
+window[CANVAS_RENDERING_CONTEXT_2D] = CanvasRenderingContext2D;
+window[CANVAS_GRADIENT]             = CanvasGradient;
+window[CANVAS_PATTERN]              = CanvasPattern;
+window[FLASH_CANVAS]                = FlashCanvas;
 
 // ExplorerCanvas-compatible APIs for convenience
-window["G_vmlCanvasManager"] = {
+window[G_VML_CANVAS_MANAGER] = {
 	init:  function(){},
 	init_: function(){},
 	initElement: FlashCanvas.initElement
