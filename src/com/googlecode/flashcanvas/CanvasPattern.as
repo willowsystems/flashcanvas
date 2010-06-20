@@ -35,6 +35,7 @@ package com.googlecode.flashcanvas
     import flash.events.Event;
     import flash.external.ExternalInterface;
     import flash.net.URLRequest;
+    import flash.utils.ByteArray;
 
     public class CanvasPattern
     {
@@ -43,12 +44,22 @@ package com.googlecode.flashcanvas
 
         public function CanvasPattern(image:*, repetition:String)
         {
-            var url:String         = image.src;
-            var loader:Loader      = new Loader();
-            var request:URLRequest = new URLRequest(url);
+            var url:String    = image.src;
+            var loader:Loader = new Loader();
 
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, completeHandler);
-            loader.load(request);
+
+            if (url.slice(0, 11) == "data:image/")
+            {
+                var data:String         = url.slice(url.indexOf(",") + 1);
+                var byteArray:ByteArray = Base64.decode(data);
+                loader.loadBytes(byteArray);
+            }
+            else
+            {
+                var request:URLRequest = new URLRequest(url);
+                loader.load(request);
+            }
 
             this.repetition = repetition;
         }

@@ -32,23 +32,35 @@ package com.googlecode.flashcanvas
 
     public class Base64
     {
-        private static var CHARS:Array =
+        private static var ENCODE_TABLE:Array =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
+
+        private static var DECODE_TABLE:Object = initDecodeTable();
+
+        private static function initDecodeTable():Object
+        {
+            var object:Object = {};
+            for (var i:uint = 0, n:uint = ENCODE_TABLE.length; i < n; i++)
+            {
+                object[ENCODE_TABLE[i]] = i;
+            }
+            return object;
+        }
 
         public static function encode(input:ByteArray):String
         {
             var output:Array = [];
-            var i:uint = 0;
-            var j:uint = 0;
-            var length:uint = input.length;
+            var i:uint       = 0;
+            var j:uint       = 0;
+            var length:uint  = input.length;
 
             while (i < length)
             {
                 var n:uint = input[i++] << 16 | input[i++] << 8 | input[i++];
-                output[j++] = CHARS[n >> 18];
-                output[j++] = CHARS[n >> 12 & 63];
-                output[j++] = CHARS[n >>  6 & 63];
-                output[j++] = CHARS[n & 63];
+                output[j++] = ENCODE_TABLE[n >> 18];
+                output[j++] = ENCODE_TABLE[n >> 12 & 63];
+                output[j++] = ENCODE_TABLE[n >>  6 & 63];
+                output[j++] = ENCODE_TABLE[n & 63];
             }
 
             switch (length % 3)
@@ -58,6 +70,31 @@ package com.googlecode.flashcanvas
             }
 
             return output.join("");
+        }
+
+        public static function decode(input:String):ByteArray
+        {
+            input = input.replace(/[^A-Za-z0-9\+\/]/g, "");
+
+            var output:ByteArray = new ByteArray();
+            var i:uint           = 0;
+            var length:uint      = input.length;
+
+            while (i < length)
+            {
+                var n:int = DECODE_TABLE[input.charAt(i++)] << 18
+                          | DECODE_TABLE[input.charAt(i++)] << 12
+                          | DECODE_TABLE[input.charAt(i++)] <<  6
+                          | DECODE_TABLE[input.charAt(i++)];
+                output.writeByte(n >> 16);
+                output.writeByte(n >> 8);
+                output.writeByte(n);
+            }
+
+            output.length   = Math.ceil(length * 3 / 4);
+            output.position = 0;
+
+            return output;
         }
     }
 }

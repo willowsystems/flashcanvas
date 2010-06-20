@@ -54,6 +54,7 @@ package com.googlecode.flashcanvas
     import flash.text.TextFormat;
     import flash.text.TextLineMetrics;
     import flash.net.URLRequest;
+    import flash.utils.ByteArray;
 
     public class CanvasRenderingContext2D
     {
@@ -803,12 +804,22 @@ package com.googlecode.flashcanvas
 
         public function drawImage(image:*, ...args:Array):void
         {
-            var url:String         = image.src;
-            var loader:Loader      = new Loader();
-            var request:URLRequest = new URLRequest(url);
+            var url:String    = image.src;
+            var loader:Loader = new Loader();
 
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler(args));
-            loader.load(request);
+
+            if (url.slice(0, 11) == "data:image/")
+            {
+                var data:String         = url.slice(url.indexOf(",") + 1);
+                var byteArray:ByteArray = Base64.decode(data);
+                loader.loadBytes(byteArray);
+            }
+            else
+            {
+                var request:URLRequest = new URLRequest(url);
+                loader.load(request);
+            }
         }
 
         /*
