@@ -638,6 +638,8 @@ function onPropertyChange() {
 		var value = parseInt(canvas[prop]);
 		if (isNaN(value) || value < 0) {
 			value = (prop === "width") ? 300 : 150;
+		} else if (value === 0) {
+			value = 1;
 		}
 		canvas.style[prop] = value + "px";
 		ctx._resize(canvas.clientWidth, canvas.clientHeight);
