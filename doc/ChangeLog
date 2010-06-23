@@ -5,6 +5,32 @@ You can view a complete ChangeLog at the project page:
 http://code.google.com/p/flashcanvas/source/list
 
 
+FlashCanvas-20100623
+--------------------
+
+ - Added a code which emulates ExplorerCanvas library.
+ - Added basic support for fillText() (thanks to code from fxCanvas).
+ - Added JPEG support to toDataURL().
+ - Supported data URI scheme in drawImage() and createPattern().
+ - Implemented "Save Image As..." in the right-click context menu.
+ - Implemented event bubbling for click and dblclick events.
+ - Made it possible to use FlashCanvas library installed in other domain.
+ - Optimized drawImage().
+ - Reduced CPU time consumption.
+ - Various bug fixes in drawImage().
+   - draw-image-flip.html, an example from ExplorerCanvas project, is
+     now rendered correctly.
+   - Images are rendered in the right order.
+ - Fixed a bug that arc() failed to calculate the central angle in some
+   cases.
+ - Fixed a bug that swf.resize() method could be called before
+   ExternalInterface was ready for use.
+ - Fixed a bug that resize event canceled createLinearGradient().
+ - Switched to using onunload event instead of onbeforeunload event.
+ - Included several additional Canvas demos.
+ - Some minor optimizations.
+
+
 FlashCanvas-20100131
 --------------------
 
