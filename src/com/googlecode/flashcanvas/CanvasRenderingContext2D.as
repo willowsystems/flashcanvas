@@ -82,6 +82,12 @@ package com.googlecode.flashcanvas
         // drawing state
         private var state:State;
 
+        // cache for BitmapData
+        private var imageCache:Object = {};
+
+        // queue used in drawImage()
+        private var taskQueue:Array = [];
+
         public function CanvasRenderingContext2D(canvas:Canvas)
         {
             _canvas = canvas;
@@ -804,21 +810,98 @@ package com.googlecode.flashcanvas
 
         public function drawImage(image:*, ...args:Array):void
         {
-            var url:String    = image.src;
-            var loader:Loader = new Loader();
+            var url:String = image.src;
 
-            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler(args));
-
-            if (url.slice(0, 11) == "data:image/")
+            // If the image is already in the cache
+            if (imageCache[url])
             {
-                var data:String         = url.slice(url.indexOf(",") + 1);
-                var byteArray:ByteArray = Base64.decode(data);
-                loader.loadBytes(byteArray);
+                // Render the image immediately
+                _renderImage(imageCache[url], args);
             }
+
+            // If the image is not in the cache
             else
             {
-                var request:URLRequest = new URLRequest(url);
-                loader.load(request);
+                // Enqueue the task
+                taskQueue.push({
+                    url:   url,
+                    args:  args,
+                    state: state.clone()
+                });
+
+                // If the image is being loaded
+                if (url in imageCache)
+                {
+                    // Do nothing
+                }
+
+                // If this is the first time to access the URL
+                else
+                {
+                    // Use the URL as a hash key
+                    imageCache[url] = null;
+
+                    var loader:Loader = new Loader();
+
+                    // Register a listener for a complete event
+                    loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler(url));
+
+                    if (url.slice(0, 11) == "data:image/")
+                    {
+                        // Decode data URI
+                        var data:String         = url.slice(url.indexOf(",") + 1);
+                        var byteArray:ByteArray = Base64.decode(data);
+                        loader.loadBytes(byteArray);
+                    }
+                    else
+                    {
+                        // Load the image
+                        var request:URLRequest = new URLRequest(url);
+                        loader.load(request);
+                    }
+                }
+            }
+        }
+
+        private function _completeHandler(url:String):Function
+        {
+            return function(event:Event):void
+            {
+                // Remove the event listener
+                var loaderInfo:LoaderInfo = event.target as LoaderInfo;
+                loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
+
+                // Cache BitmapData of the image
+                imageCache[url] = Bitmap(loaderInfo.content).bitmapData;
+
+                // Process the tasks in order
+                while (taskQueue.length > 0)
+                {
+                    // Get the URL property
+                    url = taskQueue[0].url;
+
+                    // If the BitmapData is not ready, we defer the execution
+                    // of the remaining tasks.
+                    if (!imageCache[url])
+                        break;
+
+                    // Dequeue the object
+                    var task:Object = taskQueue.shift();
+
+                    // Render the image
+                    var args:Array  = task.args;
+                    var state:State = task.state;
+                    _renderImage(imageCache[url], args, state);
+                }
+
+                // Remove the prefix "external" from objectID
+                var canvasId:String = ExternalInterface.objectID.slice(8);
+
+                // Send JavaScript a message that the image has been drawn
+                ExternalInterface.call("FlashCanvas.unlock", canvasId);
+
+                // Release the memory
+                loaderInfo.loader.unload();
             }
         }
 
@@ -1059,82 +1142,69 @@ package com.googlecode.flashcanvas
             shape.graphics.clear();
         }
 
-        private function _completeHandler(args:Array):Function
+        private function _renderImage(bitmapData:BitmapData, args:Array, state:State = null):void
         {
-            return function(event:Event):void
+            // Get the drawing state at the time drawImage() was called
+            state = state || this.state;
+
+            var sx:Number;
+            var sy:Number;
+            var sw:Number;
+            var sh:Number;
+            var dx:Number;
+            var dy:Number;
+            var dw:Number;
+            var dh:Number;
+
+            if (args.length == 8)
             {
-                // Remove the event listener
-                var loaderInfo:LoaderInfo = event.target as LoaderInfo;
-                loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
-
-                var loader:Loader = loaderInfo.loader;
-                var source:BitmapData;
-
-                var sx:Number;
-                var sy:Number;
-                var sw:Number;
-                var sh:Number;
-                var dx:Number;
-                var dy:Number;
-                var dw:Number;
-                var dh:Number;
-
-                if (args.length == 8)
-                {
-                    // Define the source and destination rectangles
-                    sx = args[0];
-                    sy = args[1];
-                    sw = args[2];
-                    sh = args[3];
-                    dx = args[4];
-                    dy = args[5];
-                    dw = args[6];
-                    dh = args[7];
-
-                    // Clip the region within the source rectangle
-                    var sourceRect:Rectangle = new Rectangle(sx, sy, sw, sh);
-                    var destPoint:Point      = new Point();
-                    source = new BitmapData(sw, sh, true, 0);
-                    source.copyPixels(Bitmap(loader.content).bitmapData, sourceRect, destPoint);
-                }
-                else
-                {
-                    // Get BitmapData of the image
-                    source = Bitmap(loader.content).bitmapData;
-
-                    // Define the destination rectangle
-                    dx = args[0];
-                    dy = args[1];
-                    dw = args[2] || source.width;
-                    dh = args[3] || source.height;
-                }
-
-                // Create transformation matrix
-                var matrix:Matrix = new Matrix();
-                matrix.scale(dw / source.width, dh / source.height);
-                matrix.translate(dx, dy);
-                matrix.concat(state.transformMatrix);
-
-                var colorTransform:ColorTransform = null;
-                if (state.globalAlpha < 1)
-                {
-                    // Make the image translucent
-                    colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
-                }
-
-                // Draw the image to the Canvas
-                _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
-
-                // Remove the prefix "external" from objectID
-                var canvasId:String = ExternalInterface.objectID.slice(8);
-
-                // Send JavaScript a message that the image has been drawn
-                ExternalInterface.call("FlashCanvas.unlock", canvasId);
-
-                // Release the memory
-                source.dispose();
-                loader.unload();
+                // Define the source and destination rectangles
+                sx = args[0];
+                sy = args[1];
+                sw = args[2];
+                sh = args[3];
+                dx = args[4];
+                dy = args[5];
+                dw = args[6];
+                dh = args[7];
             }
+            else
+            {
+                // Use whole of the image as a source
+                sx = 0;
+                sy = 0;
+                sw = bitmapData.width;
+                sh = bitmapData.height;
+                dx = args[0];
+                dy = args[1];
+                dw = args[2] || sw;
+                dh = args[3] || sh;
+            }
+
+            // Clip the region within the source rectangle
+            var source:BitmapData    = new BitmapData(sw, sh, true, 0);
+            var sourceRect:Rectangle = new Rectangle(sx, sy, sw, sh);
+            var destPoint:Point      = new Point();
+            source.copyPixels(bitmapData, sourceRect, destPoint);
+
+            // Create transformation matrix
+            var matrix:Matrix = new Matrix();
+            matrix.scale(dw / source.width, dh / source.height);
+            matrix.translate(dx, dy);
+            matrix.concat(state.transformMatrix);
+
+            var colorTransform:ColorTransform = null;
+            if (state.globalAlpha < 1)
+            {
+                // Make the image translucent
+                colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+            }
+
+            // Render the image to the Canvas
+            _canvas.bitmapData.draw(source, matrix, colorTransform, null, null, true);
+
+            // Release the memory
+            source.dispose();
         }
     }
 }
