@@ -238,9 +238,20 @@ package com.googlecode.flashcanvas
         public function set strokeStyle(value:*):void
         {
             if (value is String)
-                state.strokeStyle = new CSSColor(value);
+            {
+                try
+                {
+                    state.strokeStyle = new CSSColor(value);
+                }
+                catch (e:ArgumentError)
+                {
+                    // Ignore the value
+                }
+            }
             else if (value is CanvasGradient || value is CanvasPattern)
+            {
                 state.strokeStyle = value;
+            }
         }
 
         public function get fillStyle():*
@@ -254,9 +265,20 @@ package com.googlecode.flashcanvas
         public function set fillStyle(value:*):void
         {
             if (value is String)
-                state.fillStyle = new CSSColor(value);
+            {
+                try
+                {
+                    state.fillStyle = new CSSColor(value);
+                }
+                catch (e:ArgumentError)
+                {
+                    // Ignore the value
+                }
+            }
             else if (value is CanvasGradient || value is CanvasPattern)
+            {
                 state.fillStyle = value;
+            }
         }
 
         public function createLinearGradient(x0:Number, y0:Number, x1:Number, y1:Number):LinearGradient
@@ -385,7 +407,14 @@ package com.googlecode.flashcanvas
 
         public function set shadowColor(value:String):void
         {
-            state.shadowColor = new CSSColor(value);
+            try
+            {
+                state.shadowColor = new CSSColor(value);
+            }
+            catch (e:ArgumentError)
+            {
+                // Ignore the value
+            }
         }
 
         /*

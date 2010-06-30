@@ -241,6 +241,12 @@ package com.googlecode.flashcanvas
             {
                 _color = _names[str];
             }
+
+            // invalid color
+            else
+            {
+                throw new ArgumentError();
+            }
         }
 
         private function rgb2hex(rgb:Array):uint
