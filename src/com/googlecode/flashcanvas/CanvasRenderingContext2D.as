@@ -463,6 +463,9 @@ package com.googlecode.flashcanvas
 
         public function closePath():void
         {
+            if (path.length == 0)
+                return;
+
             path.push({
                 command: "lineTo",
                 data: [ startingPoint.x, startingPoint.y ]
