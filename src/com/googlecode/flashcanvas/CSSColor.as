@@ -188,6 +188,8 @@ package com.googlecode.flashcanvas
 
         public function CSSColor(str:String)
         {
+            str = str.toLowerCase();
+
             // #F00, #FF0000
             if (str.charAt(0) == "#")
             {
@@ -235,11 +237,9 @@ package com.googlecode.flashcanvas
             }
 
             // red
-            else
+            else if (str in _names)
             {
-                str = str.toLowerCase();
-                if (str in _names)
-                    _color = _names[str];
+                _color = _names[str];
             }
         }
 
