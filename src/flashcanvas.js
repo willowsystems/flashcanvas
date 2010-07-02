@@ -103,6 +103,9 @@ var isReady = {};
 // Monitor the number of loading files
 var lock = {};
 
+// SPAN element embedded in the canvas
+var spans = {};
+
 function getStyleId(ctx) {
 	var canvasId = ctx._canvasId;
 	if (!arguments.callee[canvasId]) arguments.callee[canvasId] = 0;
@@ -461,9 +464,11 @@ CanvasRenderingContext2D.prototype = {
 		this._queue.push(properties.strokeText, encode(text), x, y, maxWidth);
 	},
 
-	// TextMetrics measureText(in DOMString text);
 	measureText: function(text) {
-		// TODO: Implement
+		var span = spans[this._canvasId];
+		span.style.font = this.font;
+		span.innerText  = text;
+		return new TextMetrics(span.offsetWidth);
 	},
 
 	/*
@@ -613,6 +618,14 @@ var CanvasPattern = function(ctx) {
 	this.id = getStyleId(ctx);
 };
 
+/**
+ * TextMetrics stub
+ * @constructor
+ */
+var TextMetrics = function(width) {
+	this.width = width;
+};
+
 /*
  * Event handlers
  */
@@ -711,7 +724,7 @@ var FlashCanvas = {
 		isReady[canvasId] = false;
 		lock[canvasId]    = 1;
 
-		// embed swf
+		// embed swf and SPAN element
 		canvas.innerHTML =
 			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
 			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
@@ -720,8 +733,10 @@ var FlashCanvas = {
 			'<param name="movie" value="' + SWF_URL + '">' +
 			'<param name="quality" value="high">' +
 			'<param name="wmode" value="transparent">' +
-			'</object>';
-		var swf = canvas.firstChild;
+			'</object>' +
+			'<span style="margin:0;padding:0;border:0;display:inline;white-space:nowrap"></span>';
+		var swf         = canvas.firstChild;
+		spans[canvasId] = canvas.lastChild;
 
 		// initialize context
 		var ctx = new CanvasRenderingContext2D(canvas, swf);
@@ -827,6 +842,9 @@ window[G_VML_CANVAS_MANAGER] = {
 	init_: function(){},
 	initElement: FlashCanvas.initElement
 };
+
+// Prevent Closure Compiler from removing the function.
+keep = CanvasRenderingContext2D.measureText;
 
 })();
 
