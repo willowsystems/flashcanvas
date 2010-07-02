@@ -449,7 +449,7 @@ CanvasRenderingContext2D.prototype = {
 		this._setFillStyle();
 		this._setShadows();
 		this._setFontStyles();
-		this._queue.push(properties.fillText, text, x, y, maxWidth);
+		this._queue.push(properties.fillText, encode(text), x, y, maxWidth);
 	},
 
 	// void strokeText(in DOMString text, in float x, in float y, [Optional] in float maxWidth);
@@ -458,7 +458,7 @@ CanvasRenderingContext2D.prototype = {
 		this._setStrokeStyle();
 		this._setShadows();
 		this._setFontStyles();
-		this._queue.push(properties.strokeText, text, x, y, maxWidth);
+		this._queue.push(properties.strokeText, encode(text), x, y, maxWidth);
 	},
 
 	// TextMetrics measureText(in DOMString text);
@@ -781,6 +781,11 @@ function getScriptUrl() {
 	var scripts = document.getElementsByTagName("script");
 	var script  = scripts[scripts.length - 1];
 	return script.getAttribute("src", 4);
+}
+
+// Escape characters not permitted in XML.
+function encode(str) {
+	return ("" + str).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 }
 
 /*
