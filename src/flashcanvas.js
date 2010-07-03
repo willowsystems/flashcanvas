@@ -425,16 +425,17 @@ CanvasRenderingContext2D.prototype = {
 	_setFontStyles: function() {
 		var queue = this._queue;
 		if (this._font !== this.font) {
-			this._font = this.font;
-			
 			try {
-			  this._swf.style.font = this.font;
-			} catch (e) {}
-			var style = this._swf.currentStyle;
-			
-			// @fixme: The font size is not always in "px"
-			var font = [style.fontStyle, style.fontWeight, style.fontSize, style.fontFamily].join(" ");
-			queue.push(properties.font, font);
+				this._swf.style.font = this._font = this.font;
+				var style = this._swf.currentStyle;
+
+				// @fixme: The font size is not always in "px"
+				var font = [style.fontStyle, style.fontWeight, style.fontSize, style.fontFamily].join(" ");
+				queue.push(properties.font, font);
+			} catch(e) {
+				// If this.font cannot be parsed as a CSS font
+				// value, then it must be ignored.
+			}
 		}
 		if (this._textAlign !== this.textAlign) {
 			this._textAlign = this.textAlign;
@@ -466,8 +467,13 @@ CanvasRenderingContext2D.prototype = {
 
 	measureText: function(text) {
 		var span = spans[this._canvasId];
-		span.style.font = this.font;
-		span.innerText  = text;
+		try {
+			span.style.font = this.font;
+		} catch(e) {
+			// If this.font cannot be parsed as a CSS font value,
+			// then it must be ignored.
+		}
+		span.innerText = text;
 		return new TextMetrics(span.offsetWidth);
 	},
 
