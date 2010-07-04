@@ -426,11 +426,12 @@ CanvasRenderingContext2D.prototype = {
 		var queue = this._queue;
 		if (this._font !== this.font) {
 			try {
-				this._swf.style.font = this._font = this.font;
-				var style = this._swf.currentStyle;
+				var span = spans[this._canvasId];
+				span.style.font = this._font = this.font;
 
-				// @fixme: The font size is not always in "px"
-				var font = [style.fontStyle, style.fontWeight, style.fontSize, style.fontFamily].join(" ");
+				var style = span.currentStyle;
+				var fontSize = span.offsetHeight;
+				var font = [style.fontStyle, style.fontWeight, fontSize, style.fontFamily].join(" ");
 				queue.push(properties.font, font);
 			} catch(e) {
 				// If this.font cannot be parsed as a CSS font
@@ -740,9 +741,15 @@ var FlashCanvas = {
 			'<param name="quality" value="high">' +
 			'<param name="wmode" value="transparent">' +
 			'</object>' +
-			'<span style="margin:0;padding:0;border:0;display:inline;white-space:nowrap"></span>';
+			'<span style="margin:0;padding:0;border:0;display:inline-block;position:static;height:1em;overflow:visible;white-space:nowrap">' +
+			'</span>';
 		var swf         = canvas.firstChild;
 		spans[canvasId] = canvas.lastChild;
+
+		// If the browser is IE6 or in quirks mode
+		if (document.compatMode === "BackCompat" || !window.XMLHttpRequest) {
+			spans[canvasId].style.overflow = "hidden";
+		}
 
 		// initialize context
 		var ctx = new CanvasRenderingContext2D(canvas, swf);
