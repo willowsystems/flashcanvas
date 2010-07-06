@@ -723,11 +723,11 @@ package com.googlecode.flashcanvas
         private function _parseFont():TextFormat
         {
             var format:TextFormat = new TextFormat;
-            var fontData:Array = state.font.split(" ", 4);
+            var fontData:Array = state.font.split(" ");
 
             format.italic = fontData[0] == "italic";
             format.size = parseFloat(fontData[2]);
-            format.font = fontData[3];
+            format.font = fontData.slice(3).join(" ").replace(/["']/g, "");
 
             var weight:Number = parseInt(fontData[1]);
             format.bold = (!isNaN(weight) && weight > 400 || fontData[1] == "bold");
