@@ -787,7 +787,7 @@ package com.googlecode.flashcanvas
             var tf:TextField = new TextField();
             tf.defaultTextFormat = format;
             tf.autoSize = TextFieldAutoSize.LEFT;
-            tf.text = text;
+            tf.text = text.replace(/[\t\n\f\r]/g, " ");
 
             var metrics:TextLineMetrics = tf.getLineMetrics(0);
 
