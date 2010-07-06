@@ -30,7 +30,6 @@
 package
 {
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
-    import com.googlecode.flashcanvas.TextMetrics;
 
     public class Command
     {
@@ -432,10 +431,10 @@ package
             ctx.strokeText(text, x, y, maxWidth);
         }
 
-        private function measureText():TextMetrics
+        private function measureText():*
         {
-            // TODO: Implement
-            return new TextMetrics(0);
+            // This function is dummy. measureText() is implemented in
+            // JavaScript.
         }
 
         private function drawImage():void
