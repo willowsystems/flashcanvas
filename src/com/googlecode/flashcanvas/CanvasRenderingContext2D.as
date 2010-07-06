@@ -776,59 +776,12 @@ package com.googlecode.flashcanvas
 
         public function fillText(text:String, x:Number, y:Number, maxWidth:* = null):void
         {
-            if (!isFinite(x) || !isFinite(y))
-                return;
-
-            var format:TextFormat = _parseFont();
-
-            if (state.fillStyle is CSSColor)
-                format.color = state.fillStyle.color;
-
-            var tf:TextField = new TextField();
-            tf.defaultTextFormat = format;
-            tf.autoSize = TextFieldAutoSize.LEFT;
-            tf.text = text.replace(/[\t\n\f\r]/g, " ");
-
-            var metrics:TextLineMetrics = tf.getLineMetrics(0);
-
-            // 2px gutter
-            x -= 2;
-            y -= 2;
-
-            switch(state.textAlign) {
-                default:
-                case "left": break;
-                case "center": x -= metrics.width / 2; break;
-                case "right": x -= metrics.width; break;
-            }
-
-            switch(state.textBaseline) {
-                default:
-                case "top":
-                case "hanging": break;
-                case "middle": y -= metrics.height / 2; break;
-                case "alphabetic": y -= metrics.ascent; break;
-                case "ideographic":
-                case "bottom": y -= metrics.height; break;
-            }
-
-            var transMatrix:Matrix = new Matrix();
-            transMatrix.identity();
-            transMatrix.translate(x, y);
-            transMatrix.translate(state.transformMatrix.tx, state.transformMatrix.ty);
-
-            var colorTransform:ColorTransform = null;
-            if (state.globalAlpha < 1)
-            {
-                // Make the image translucent
-                colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
-            }
-            _canvas.bitmapData.draw(tf, transMatrix, colorTransform, null, null, true);
+            _renderText(text, x, y, maxWidth);
         }
 
         public function strokeText(text:String, x:Number, y:Number, maxWidth:* = null):void
         {
-            // TODO: Implement
+            _renderText(text, x, y, maxWidth, true);
         }
 
         public function measureText():*
@@ -1172,6 +1125,59 @@ package com.googlecode.flashcanvas
         {
             _canvas.bitmapData.draw(shape);
             shape.graphics.clear();
+        }
+
+        private function _renderText(text:String, x:Number, y:Number, maxWidth:* = null, isStroke:Boolean = false):void
+        {
+            if (!isFinite(x) || !isFinite(y))
+                return;
+
+            var format:TextFormat = _parseFont();
+
+            var style:Object = isStroke ? state.strokeStyle : state.fillStyle;
+            if (style is CSSColor)
+                format.color = style.color;
+
+            var tf:TextField = new TextField();
+            tf.defaultTextFormat = format;
+            tf.autoSize = TextFieldAutoSize.LEFT;
+            tf.text = text.replace(/[\t\n\f\r]/g, " ");
+
+            var metrics:TextLineMetrics = tf.getLineMetrics(0);
+
+            // 2px gutter
+            x -= 2;
+            y -= 2;
+
+            switch(state.textAlign) {
+                default:
+                case "left": break;
+                case "center": x -= metrics.width / 2; break;
+                case "right": x -= metrics.width; break;
+            }
+
+            switch(state.textBaseline) {
+                default:
+                case "top":
+                case "hanging": break;
+                case "middle": y -= metrics.height / 2; break;
+                case "alphabetic": y -= metrics.ascent; break;
+                case "ideographic":
+                case "bottom": y -= metrics.height; break;
+            }
+
+            var transMatrix:Matrix = new Matrix();
+            transMatrix.identity();
+            transMatrix.translate(x, y);
+            transMatrix.translate(state.transformMatrix.tx, state.transformMatrix.ty);
+
+            var colorTransform:ColorTransform = null;
+            if (state.globalAlpha < 1)
+            {
+                // Make the image translucent
+                colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+            }
+            _canvas.bitmapData.draw(tf, transMatrix, colorTransform, null, null, true);
         }
 
         private function _renderImage(bitmapData:BitmapData, args:Array, state:State = null):void
