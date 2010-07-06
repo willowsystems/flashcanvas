@@ -474,7 +474,11 @@ CanvasRenderingContext2D.prototype = {
 			// If this.font cannot be parsed as a CSS font value,
 			// then it must be ignored.
 		}
-		span.innerText = text;
+
+		// Replace space characters with tab characters because
+		// innerText removes trailing white spaces.
+		span.innerText = text.replace(/[ \n\f\r]/g, "\t");
+
 		return new TextMetrics(span.offsetWidth);
 	},
 
