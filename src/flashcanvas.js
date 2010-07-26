@@ -809,10 +809,17 @@ var FlashCanvas = {
  * Utility methods
  */
 
+// Get the absolute URL of flashcanvas.js
 function getScriptUrl() {
 	var scripts = document.getElementsByTagName("script");
 	var script  = scripts[scripts.length - 1];
-	return script.getAttribute("src", 4);
+
+	// @see http://msdn.microsoft.com/en-us/library/ms536429(VS.85).aspx
+	if (document.documentMode >= 8) {
+		return script.src;
+	} else {
+		return script.getAttribute("src", 4);
+	}
 }
 
 // Escape characters not permitted in XML.
