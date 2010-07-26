@@ -732,6 +732,7 @@ var FlashCanvas = {
 
 		// initialize lock
 		var canvasId      = canvas.uniqueID;
+		var objectId      = OBJECT_ID_PREFIX + canvasId;
 		isReady[canvasId] = false;
 		lock[canvasId]    = 1;
 
@@ -739,16 +740,30 @@ var FlashCanvas = {
 		canvas.innerHTML =
 			'<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
 			' codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
-			' width="100%" height="100%" id="' + OBJECT_ID_PREFIX + canvasId + '">' +
+			' width="100%" height="100%" id="' + objectId + '">' +
 			'<param name="allowScriptAccess" value="always">' +
-			'<param name="movie" value="' + SWF_URL + '">' +
-			'<param name="quality" value="high">' +
+			'<param name="flashvars" value="id=' + objectId + '">' +
 			'<param name="wmode" value="transparent">' +
 			'</object>' +
 			'<span style="margin:0;padding:0;border:0;display:inline-block;position:static;height:1em;overflow:visible;white-space:nowrap">' +
 			'</span>';
 		var swf         = canvas.firstChild;
 		spans[canvasId] = canvas.lastChild;
+
+		// Check whether the canvas element is in the DOM tree
+		var documentContains = document.body.contains;
+		if (documentContains(canvas)) {
+			// Load swf file immediately
+			swf["movie"] = SWF_URL;
+		} else {
+			// Wait until the element is added to the DOM tree
+			var intervalId = window.setInterval(function() {
+				if (documentContains(canvas)) {
+					window.clearInterval(intervalId);
+					swf["movie"] = SWF_URL;
+				}
+			}, 0);
+		}
 
 		// If the browser is IE6 or in quirks mode
 		if (document.compatMode === "BackCompat" || !window.XMLHttpRequest) {

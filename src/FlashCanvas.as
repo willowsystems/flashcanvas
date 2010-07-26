@@ -73,8 +73,21 @@ package
             command = new Command(context);
             addChild(canvas);
 
+            // Flash Player earlier than version 10.1 has a bug that
+            // ExternalInterface.objectID returns null under some conditions.
+            // In such cases, get objectID via FlashVars instead.
+            //
+            // @see http://bugs.adobe.com/jira/browse/FP-383
+
+            var objectId:String = ExternalInterface.objectID;
+            if (objectId == null)
+            {
+                objectId = loaderInfo.parameters.id;
+                resize(stage.stageWidth, stage.stageHeight);
+            }
+
             // Remove the prefix "external" from objectID
-            canvasId = ExternalInterface.objectID.slice(8);
+            canvasId = objectId.slice(8);
 
             // Send JavaScript a message that the swf is ready
             ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
