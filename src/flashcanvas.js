@@ -792,6 +792,15 @@ var FlashCanvas = {
 		return canvas;
 	},
 
+	setOptions: function(options) {
+		// TODO: Implement
+	},
+
+	trigger: function(canvasId, type) {
+		var canvas = document.getElementById(OBJECT_ID_PREFIX + canvasId).parentNode;
+		canvas.fireEvent("on" + type);
+	},
+
 	unlock: function(canvasId, ready) {
 		if (lock[canvasId]) {
 			--lock[canvasId];
@@ -809,11 +818,6 @@ var FlashCanvas = {
 			// ExternalInterface is now ready for use
 			isReady[canvasId] = true;
 		}
-	},
-
-	trigger: function(canvasId, type) {
-		var canvas = document.getElementById(OBJECT_ID_PREFIX + canvasId).parentNode;
-		canvas.fireEvent("on" + type);
 	}
 };
 

@@ -1,8 +1,9 @@
 swf.CallFunction;
 swf.resize;
 FlashCanvas.initElement;
-FlashCanvas.unlock;
+FlashCanvas.setOptions;
 FlashCanvas.trigger;
+FlashCanvas.unlock;
 G_vmlCanvasManager.init;
 G_vmlCanvasManager.init_;
 G_vmlCanvasManager.initElement;
