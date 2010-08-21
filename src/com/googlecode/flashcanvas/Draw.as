@@ -99,6 +99,17 @@ package com.googlecode.flashcanvas
 
                 graphics.curveTo(cpx, cpy, apx, apy);
             }
+
+            if (theta == PI2)
+            {
+                dx = Math.cos(endAngle) * radius;
+                dy = Math.sin(endAngle) * radius;
+                diff = matrix.deltaTransformPoint(new Point(dx, dy));
+                apx = cx + diff.x;
+                apy = cy + diff.y;
+
+                graphics.moveTo(apx, apy);
+            }
         }
     }
 }
