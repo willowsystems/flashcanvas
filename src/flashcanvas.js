@@ -35,7 +35,7 @@ var SWF_URL                     = getScriptUrl().replace(/[^\/]+$/, "flashcanvas
  * @constructor
  */
 function Lookup(array) {
-	for (var i = 0, len = array.length; i < len; i++)
+	for (var i = 0, n = array.length; i < n; i++)
 		this[array[i]] = i;
 }
 
@@ -391,8 +391,7 @@ CanvasRenderingContext2D.prototype = {
 	},
 
 	arc: function(x, y, radius, startAngle, endAngle, anticlockwise) {
-		anticlockwise = anticlockwise ? 1 : 0;
-		this._queue.push(properties.arc, x, y, radius, startAngle, endAngle, anticlockwise);
+		this._queue.push(properties.arc, x, y, radius, startAngle, endAngle, anticlockwise ? 1 : 0);
 	},
 
 	fill: function() {
@@ -448,22 +447,20 @@ CanvasRenderingContext2D.prototype = {
 		}
 	},
 
-	// void fillText(in DOMString text, in float x, in float y, [Optional] in float maxWidth);
 	fillText: function(text, x, y, maxWidth) {
 		this._setCompositing();
 		this._setFillStyle();
 		this._setShadows();
 		this._setFontStyles();
-		this._queue.push(properties.fillText, encode(text), x, y, maxWidth);
+		this._queue.push(properties.fillText, encode(text), x, y, maxWidth || 0);
 	},
 
-	// void strokeText(in DOMString text, in float x, in float y, [Optional] in float maxWidth);
 	strokeText: function(text, x, y, maxWidth) {
 		this._setCompositing();
 		this._setStrokeStyle();
 		this._setShadows();
 		this._setFontStyles();
-		this._queue.push(properties.strokeText, encode(text), x, y, maxWidth);
+		this._queue.push(properties.strokeText, encode(text), x, y, maxWidth || 0);
 	},
 
 	measureText: function(text) {
@@ -645,9 +642,9 @@ function onReadyStateChange() {
 	if (document.readyState === "complete") {
 		document.detachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
 
-		var elements = document.getElementsByTagName("canvas");
-		for (var i = 0, len = elements.length; i < len; ++i) {
-			var canvas = elements[i];
+		var canvases = document.getElementsByTagName("canvas");
+		for (var i = 0, n = canvases.length; i < n; ++i) {
+			var canvas = canvases[i];
 			if (!canvas.getContext) {
 				FlashCanvas.initElement(canvas);
 			}
@@ -680,9 +677,9 @@ function onFocus() {
 function onUnload() {
 	window.detachEvent(ON_UNLOAD, onUnload);
 
-	var elements = document.getElementsByTagName("canvas");
-	for (var i = 0, len = elements.length; i < len; ++i) {
-		var canvas = elements[i], swf = canvas.firstChild, prop;
+	var canvases = document.getElementsByTagName("canvas");
+	for (var i = 0, n = canvases.length; i < n; ++i) {
+		var canvas = canvases[i], swf = canvas.firstChild, prop;
 
 		// clean up the references of swf.postCommands and swf.resize
 		for (prop in swf) {
