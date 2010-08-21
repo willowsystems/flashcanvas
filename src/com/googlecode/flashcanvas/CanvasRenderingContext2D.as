@@ -924,16 +924,21 @@ package com.googlecode.flashcanvas
         {
             var strokeStyle:Object = state.strokeStyle;
             var thickness:Number   = state.lineWidth * state.lineScale;
+            var color:uint         = 0;
+            var alpha:Number       = 1.0;
 
             if (strokeStyle is CSSColor)
             {
-                var color:uint   = strokeStyle.color;
-                var alpha:Number = strokeStyle.alpha * state.globalAlpha;
+                color = strokeStyle.color;
+                alpha = strokeStyle.alpha * state.globalAlpha;
+
                 if (thickness < 1)
                     alpha *= thickness;
-                graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.NORMAL, state.lineCap, state.lineJoin, state.miterLimit);
             }
-            else if (strokeStyle is CanvasGradient)
+
+            graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.NORMAL, state.lineCap, state.lineJoin, state.miterLimit);
+
+            if (strokeStyle is CanvasGradient)
             {
                 var alphas:Array = strokeStyle.alphas;
                 if (state.globalAlpha < 1)
@@ -947,7 +952,6 @@ package com.googlecode.flashcanvas
                 var matrix:Matrix = strokeStyle.matrix.clone();
                 matrix.concat(state.transformMatrix);
 
-                graphics.lineStyle(thickness);
                 graphics.lineGradientStyle(strokeStyle.type, strokeStyle.colors, alphas, strokeStyle.ratios, matrix, SpreadMethod.PAD, InterpolationMethod.RGB, strokeStyle.focalPointRatio);
             }
             else if (strokeStyle is CanvasPattern)
