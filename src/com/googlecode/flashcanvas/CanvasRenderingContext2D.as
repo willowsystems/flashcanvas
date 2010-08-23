@@ -1167,8 +1167,8 @@ package com.googlecode.flashcanvas
                 case "top":
                 case "hanging": break;
                 case "middle": y -= metrics.height / 2; break;
-                case "alphabetic": y -= metrics.ascent; break;
-                case "ideographic":
+                case "alphabetic":
+                case "ideographic": y -= metrics.ascent; break;
                 case "bottom": y -= metrics.height; break;
             }
 
