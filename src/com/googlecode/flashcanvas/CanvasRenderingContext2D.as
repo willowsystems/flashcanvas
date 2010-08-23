@@ -1155,6 +1155,8 @@ package com.googlecode.flashcanvas
 
             switch(state.textAlign) {
                 default:
+                case "start": break;
+                case "end": x -= metrics.width; break;
                 case "left": break;
                 case "center": x -= metrics.width / 2; break;
                 case "right": x -= metrics.width; break;
