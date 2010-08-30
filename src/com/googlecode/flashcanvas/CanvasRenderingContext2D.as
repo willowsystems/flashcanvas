@@ -210,7 +210,8 @@ package com.googlecode.flashcanvas
 
         public function set globalAlpha(value:Number):void
         {
-            state.globalAlpha = value;
+            if (isFinite(value) && 0.0 <= value && value <= 1.0)
+                state.globalAlpha = value;
         }
 
         public function get globalCompositeOperation():String
