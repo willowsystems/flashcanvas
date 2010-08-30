@@ -992,8 +992,20 @@ package com.googlecode.flashcanvas
             }
             else if (style is CanvasPattern)
             {
+                var bitmap:BitmapData = style.bitmapData;
+
+                if (state.globalAlpha < 1)
+                {
+                    var colorTransform:ColorTransform =
+                        new ColorTransform(1, 1, 1, state.globalAlpha);
+
+                    // Make a translucent BitmapData
+                    bitmap = style.bitmapData.clone();
+                    bitmap.colorTransform(bitmap.rect, colorTransform);
+                }
+
                 // TODO: support repetition other than 'repeat'.
-                graphics.beginBitmapFill(style.bitmapData, state.transformMatrix);
+                graphics.beginBitmapFill(bitmap, state.transformMatrix);
             }
         }
 
