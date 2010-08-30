@@ -456,7 +456,7 @@ package com.googlecode.flashcanvas
             graphics.lineTo(p1.x, p1.y);
             graphics.endFill();
 
-            _renderVectors();
+            _renderShape();
         }
 
         public function strokeRect(x:Number, y:Number, w:Number, h:Number):void
@@ -471,14 +471,14 @@ package com.googlecode.flashcanvas
 
             var graphics:Graphics = shape.graphics;
 
-            _setLineStyle(graphics);
+            _setStrokeStyle(graphics);
             graphics.moveTo(p1.x, p1.y);
             graphics.lineTo(p2.x, p2.y);
             graphics.lineTo(p3.x, p3.y);
             graphics.lineTo(p4.x, p4.y);
             graphics.lineTo(p1.x, p1.y);
 
-            _renderVectors();
+            _renderShape();
         }
 
         /*
@@ -677,15 +677,15 @@ package com.googlecode.flashcanvas
             _setFillStyle(graphics);
             _drawPath(graphics, path);
             graphics.endFill();
-            _renderVectors();
+            _renderShape();
         }
 
         public function stroke():void
         {
             var graphics:Graphics = shape.graphics;
-            _setLineStyle(graphics);
+            _setStrokeStyle(graphics);
             _drawPath(graphics, path);
-            _renderVectors();
+            _renderShape();
         }
 
         public function clip():void
@@ -920,17 +920,18 @@ package com.googlecode.flashcanvas
             return state.transformMatrix.transformPoint(new Point(x, y));
         }
 
-        private function _setLineStyle(graphics:Graphics, pixelHinting:Boolean = true):void
+        private function _setStrokeStyle(graphics:Graphics):void
         {
-            var strokeStyle:Object = state.strokeStyle;
-            var thickness:Number   = state.lineWidth * state.lineScale;
-            var color:uint         = 0;
-            var alpha:Number       = 1.0;
+            var style:Object         = state.strokeStyle;
+            var thickness:Number     = state.lineWidth * state.lineScale;
+            var color:uint           = 0;
+            var alpha:Number         = 1.0;
+            var pixelHinting:Boolean = true;
 
-            if (strokeStyle is CSSColor)
+            if (style is CSSColor)
             {
-                color = strokeStyle.color;
-                alpha = strokeStyle.alpha * state.globalAlpha;
+                color = style.color;
+                alpha = style.alpha * state.globalAlpha;
 
                 if (thickness < 1)
                     alpha *= thickness;
@@ -938,9 +939,9 @@ package com.googlecode.flashcanvas
 
             graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.NORMAL, state.lineCap, state.lineJoin, state.miterLimit);
 
-            if (strokeStyle is CanvasGradient)
+            if (style is CanvasGradient)
             {
-                var alphas:Array = strokeStyle.alphas;
+                var alphas:Array = style.alphas;
                 if (state.globalAlpha < 1)
                 {
                     for (var i:int = 0, n:int = alphas.length; i < n; i++)
@@ -949,12 +950,12 @@ package com.googlecode.flashcanvas
                     }
                 }
 
-                var matrix:Matrix = strokeStyle.matrix.clone();
+                var matrix:Matrix = style.matrix.clone();
                 matrix.concat(state.transformMatrix);
 
-                graphics.lineGradientStyle(strokeStyle.type, strokeStyle.colors, alphas, strokeStyle.ratios, matrix, SpreadMethod.PAD, InterpolationMethod.RGB, strokeStyle.focalPointRatio);
+                graphics.lineGradientStyle(style.type, style.colors, alphas, style.ratios, matrix, SpreadMethod.PAD, InterpolationMethod.RGB, style.focalPointRatio);
             }
-            else if (strokeStyle is CanvasPattern)
+            else if (style is CanvasPattern)
             {
                 // Flash 9 does not support this API.
             }
@@ -965,16 +966,17 @@ package com.googlecode.flashcanvas
             // disable stroke
             graphics.lineStyle();
 
-            var fillStyle:Object = state.fillStyle;
-            if (fillStyle is CSSColor)
+            var style:Object = state.fillStyle;
+
+            if (style is CSSColor)
             {
-                var color:uint   = fillStyle.color;
-                var alpha:Number = fillStyle.alpha * state.globalAlpha;
+                var color:uint   = style.color;
+                var alpha:Number = style.alpha * state.globalAlpha;
                 graphics.beginFill(color, alpha);
             }
-            else if (fillStyle is CanvasGradient)
+            else if (style is CanvasGradient)
             {
-                var alphas:Array = fillStyle.alphas;
+                var alphas:Array = style.alphas;
                 if (state.globalAlpha < 1)
                 {
                     for (var i:int = 0, n:int = alphas.length; i < n; i++)
@@ -983,15 +985,15 @@ package com.googlecode.flashcanvas
                     }
                 }
 
-                var matrix:Matrix = fillStyle.matrix.clone();
+                var matrix:Matrix = style.matrix.clone();
                 matrix.concat(state.transformMatrix);
 
-                graphics.beginGradientFill(fillStyle.type, fillStyle.colors, alphas, fillStyle.ratios, matrix, SpreadMethod.PAD, InterpolationMethod.RGB, fillStyle.focalPointRatio);
+                graphics.beginGradientFill(style.type, style.colors, alphas, style.ratios, matrix, SpreadMethod.PAD, InterpolationMethod.RGB, style.focalPointRatio);
             }
-            else if (fillStyle is CanvasPattern)
+            else if (style is CanvasPattern)
             {
                 // TODO: support repetition other than 'repeat'.
-                graphics.beginBitmapFill(fillStyle.bitmapData, state.transformMatrix);
+                graphics.beginBitmapFill(style.bitmapData, state.transformMatrix);
             }
         }
 
@@ -1125,7 +1127,7 @@ package com.googlecode.flashcanvas
             d.arc(arg[0], arg[1], arg[2], arg[3], arg[4], arg[5]);
         }
 
-        private function _renderVectors():void
+        private function _renderShape():void
         {
             _canvas.bitmapData.draw(shape);
             shape.graphics.clear();
