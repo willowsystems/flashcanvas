@@ -131,7 +131,7 @@ var CanvasRenderingContext2D = function(canvas, swf) {
 
 	// frame update interval
 	var self = this;
-	window.setInterval(function() {
+	setInterval(function() {
 		if (lock[self._canvasId] === 0) {
 			self._postCommands();
 		}
@@ -754,9 +754,9 @@ var FlashCanvas = {
 			swf["movie"] = SWF_URL;
 		} else {
 			// Wait until the element is added to the DOM tree
-			var intervalId = window.setInterval(function() {
+			var intervalId = setInterval(function() {
 				if (documentContains(canvas)) {
-					window.clearInterval(intervalId);
+					clearInterval(intervalId);
 					swf["movie"] = SWF_URL;
 				}
 			}, 0);
