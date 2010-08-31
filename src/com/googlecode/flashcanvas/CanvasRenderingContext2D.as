@@ -1205,11 +1205,16 @@ package com.googlecode.flashcanvas
             matrix.translate(x, y);
             matrix.concat(state.transformMatrix);
 
+            // Calculate alpha multiplier
+            var alpha:Number = state.globalAlpha;
+            if (style is CSSColor)
+                alpha *= style.alpha;
+
             var colorTransform:ColorTransform = null;
-            if (state.globalAlpha < 1)
+            if (alpha < 1)
             {
                 // Make the BitmapData translucent
-                colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+                colorTransform = new ColorTransform(1, 1, 1, alpha);
             }
 
             // Render the BitmapData to the Canvas
