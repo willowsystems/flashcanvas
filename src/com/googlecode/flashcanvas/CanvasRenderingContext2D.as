@@ -1144,6 +1144,9 @@ package com.googlecode.flashcanvas
             if (!isFinite(x) || !isFinite(y))
                 return;
 
+            if (/^\s*$/.test(text))
+                return;
+
             var textFormat:TextFormat = _parseFont();
 
             var style:Object = isStroke ? state.strokeStyle : state.fillStyle;
