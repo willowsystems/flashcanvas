@@ -52,7 +52,6 @@ package com.googlecode.flashcanvas
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
-    import flash.text.TextLineMetrics;
     import flash.net.URLRequest;
     import flash.utils.ByteArray;
 
@@ -1151,54 +1150,73 @@ package com.googlecode.flashcanvas
             if (!isFinite(x) || !isFinite(y))
                 return;
 
-            var format:TextFormat = _parseFont();
+            var textFormat:TextFormat = _parseFont();
 
             var style:Object = isStroke ? state.strokeStyle : state.fillStyle;
+
+            // Set text color
             if (style is CSSColor)
-                format.color = style.color;
+                textFormat.color = style.color;
 
-            var tf:TextField = new TextField();
-            tf.defaultTextFormat = format;
-            tf.autoSize = TextFieldAutoSize.LEFT;
-            tf.text = text.replace(/[\t\n\f\r]/g, " ");
+            // Create TextField object
+            var textField:TextField     = new TextField();
+            textField.autoSize          = TextFieldAutoSize.LEFT;
+            textField.defaultTextFormat = textFormat;
+            textField.text              = text.replace(/[\t\n\f\r]/g, " ");
 
-            var metrics:TextLineMetrics = tf.getLineMetrics(0);
+            // Get the size of the text
+            var width:int  = textField.textWidth;
+            var height:int = textField.textHeight;
+            var ascent:int = textField.getLineMetrics(0).ascent;
 
-            // 2px gutter
-            x -= 2;
-            y -= 2;
+            // Remove 2px margins around the text
+            var matrix:Matrix = new Matrix();
+            matrix.translate(-2, -2);
 
-            switch(state.textAlign) {
+            // Convert the text into BitmapData
+            var bitmapData:BitmapData = new BitmapData(width, height, true, 0);
+            bitmapData.draw(textField, matrix);
+
+            // Adjust x coordinates
+            switch (state.textAlign)
+            {
                 default:
                 case "start": break;
-                case "end": x -= metrics.width; break;
+                case "end": x -= width; break;
                 case "left": break;
-                case "center": x -= metrics.width / 2; break;
-                case "right": x -= metrics.width; break;
+                case "center": x -= width / 2; break;
+                case "right": x -= width; break;
             }
 
-            switch(state.textBaseline) {
+            // Adjust y coordinates
+            switch (state.textBaseline)
+            {
                 default:
                 case "top":
                 case "hanging": break;
-                case "middle": y -= metrics.height / 2; break;
+                case "middle": y -= height / 2; break;
                 case "alphabetic":
-                case "ideographic": y -= metrics.ascent; break;
-                case "bottom": y -= metrics.height; break;
+                case "ideographic": y -= ascent; break;
+                case "bottom": y -= height; break;
             }
 
-            var transMatrix:Matrix = new Matrix();
-            transMatrix.identity();
-            transMatrix.translate(x, y);
-            transMatrix.translate(state.transformMatrix.tx, state.transformMatrix.ty);
+            // Create transformation matrix
+            matrix = new Matrix();
+            matrix.translate(x, y);
+            matrix.concat(state.transformMatrix);
 
             var colorTransform:ColorTransform = null;
             if (state.globalAlpha < 1)
             {
-                // Make the image translucent
+                // Make the BitmapData translucent
                 colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
             }
-            _canvas.bitmapData.draw(tf, transMatrix, colorTransform, null, null, true);
+
+            // Render the BitmapData to the Canvas
+            _canvas.bitmapData.draw(bitmapData, matrix, colorTransform, null, null, true);
+
+            // Release the memory
+            bitmapData.dispose();
         }
 
         private function _renderImage(bitmapData:BitmapData, args:Array, state:State = null):void
