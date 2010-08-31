@@ -742,9 +742,8 @@ package com.googlecode.flashcanvas
 
         public function set textAlign(value:String):void
         {
-            value = value.toLowerCase();
-
-            switch(value) {
+            switch (value)
+            {
                 case "start":
                 case "end":
                 case "left":
@@ -761,9 +760,8 @@ package com.googlecode.flashcanvas
 
         public function set textBaseline(value:String):void
         {
-            value = value.toLowerCase();
-
-            switch(value) {
+            switch (value)
+            {
                 case "top":
                 case "hanging":
                 case "middle":
@@ -1180,18 +1178,16 @@ package com.googlecode.flashcanvas
             // Adjust x coordinates
             switch (state.textAlign)
             {
-                default:
                 case "start": break;
                 case "end": x -= width; break;
                 case "left": break;
-                case "center": x -= width / 2; break;
                 case "right": x -= width; break;
+                case "center": x -= width / 2; break;
             }
 
             // Adjust y coordinates
             switch (state.textBaseline)
             {
-                default:
                 case "top":
                 case "hanging": break;
                 case "middle": y -= height / 2; break;
