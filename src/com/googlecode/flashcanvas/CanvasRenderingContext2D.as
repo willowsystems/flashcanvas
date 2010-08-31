@@ -323,8 +323,6 @@ package com.googlecode.flashcanvas
 
         public function set lineCap(value:String):void
         {
-            value = value.toLowerCase();
-
             if (value == "butt")
                 state.lineCap = CapsStyle.NONE;
             else if (value == "round")
@@ -345,8 +343,6 @@ package com.googlecode.flashcanvas
 
         public function set lineJoin(value:String):void
         {
-            value = value.toLowerCase();
-
             if (value == "bevel")
                 state.lineJoin = JointStyle.BEVEL;
             else if (value == "round")
