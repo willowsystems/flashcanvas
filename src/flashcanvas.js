@@ -653,7 +653,7 @@ function onReadyStateChange() {
 }
 
 function onPropertyChange() {
-	var event = window.event, prop = event.propertyName;
+	var prop = event.propertyName;
 	if (prop === "width" || prop === "height") {
 		var canvas = event.srcElement, ctx = canvas.getContext("2d");
 		var value = parseInt(canvas[prop]);
@@ -669,7 +669,7 @@ function onPropertyChange() {
 
 function onFocus() {
 	// forward the event to the parent
-	var swf = window.event.srcElement, canvas = swf.parentNode;
+	var swf = event.srcElement, canvas = swf.parentNode;
 	swf.blur();
 	canvas.focus();
 }
