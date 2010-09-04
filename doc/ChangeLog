@@ -5,6 +5,36 @@ You can view a complete ChangeLog at the project page:
 http://code.google.com/p/flashcanvas/source/list
 
 
+FlashCanvas-20100904
+--------------------
+
+(Enhancements)
+
+ - Reimplemented fillText().
+   - Supported transformations of text.
+   - Supported an alpha value of a color.
+   - Supported font size with a unit other than "px".
+   - Supported font family that contains white spaces in its name.
+   - Supported the textAlign attribute of "start" and "end".
+   - Gradients and patterns are not supported yet.
+ - Implemented strokeText().
+   - At present, strokeText() fills text as fillText() does.
+ - Implemented measureText().
+ - Made it possible to call initElement() before appendChild().
+ - Prepared FlashCanvas.setOptions() method for future use.
+
+(Bug fixes)
+
+ - Line styles were not set when the strokeStyle attribute was a
+   CanvasGradient or CanvasPattern object.
+ - Patterns were painted ignoring the globalAlpha attribute.
+ - arc() didn't add the end point to the subpath when the central angle
+   was greater than 2 pi.
+ - closePath() must do nothing if the context has no subpaths.
+ - IE8 didn't preload the swf file when the URL was a relative one.
+ - Many minor bug fixes.
+
+
 FlashCanvas-20100623
 --------------------
 
