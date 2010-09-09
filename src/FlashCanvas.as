@@ -46,6 +46,7 @@ package
     import com.adobe.images.PNGEncoder;
     import com.googlecode.flashcanvas.Canvas;
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+    import com.googlecode.flashcanvas.Config;
 
     public class FlashCanvas extends Sprite
     {
@@ -88,6 +89,9 @@ package
 
             // Remove the prefix "external" from objectID
             canvasId = objectId.slice(8);
+
+            // Set the URL of the proxy script
+            Config.proxy = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");
 
             // Send JavaScript a message that the swf is ready
             ExternalInterface.call("FlashCanvas.unlock", canvasId, true);

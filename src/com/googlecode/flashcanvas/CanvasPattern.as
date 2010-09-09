@@ -47,16 +47,26 @@ package com.googlecode.flashcanvas
             var url:String    = image.src;
             var loader:Loader = new Loader();
 
+            // Register a listener for a complete event
             loader.contentLoaderInfo.addEventListener(Event.COMPLETE, completeHandler);
 
             if (url.slice(0, 11) == "data:image/")
             {
+                // Decode data URI
                 var data:String         = url.slice(url.indexOf(",") + 1);
                 var byteArray:ByteArray = Base64.decode(data);
                 loader.loadBytes(byteArray);
             }
             else
             {
+                // If the file is in other domain
+                if (/^https?:\/\//.test(url))
+                {
+                    // Rewrite the URL to load the file via a proxy script
+                    url = Config.proxy + '?url=' + url;
+                }
+
+                // Load the image
                 var request:URLRequest = new URLRequest(url);
                 loader.load(request);
             }

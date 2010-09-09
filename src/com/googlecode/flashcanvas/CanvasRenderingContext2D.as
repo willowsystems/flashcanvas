@@ -834,6 +834,13 @@ package com.googlecode.flashcanvas
                     }
                     else
                     {
+                        // If the file is in other domain
+                        if (/^https?:\/\//.test(url))
+                        {
+                            // Rewrite the URL to load the file via a proxy script
+                            url = Config.proxy + '?url=' + url;
+                        }
+
                         // Load the image
                         var request:URLRequest = new URLRequest(url);
                         loader.load(request);

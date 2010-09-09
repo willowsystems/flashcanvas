@@ -27,6 +27,7 @@ FlashCanvas consists of JavaScript, Flash and PHP files:
 
  * flashcanvas.js
  * flashcanvas.swf
+ * proxy.php (proxy script to load a file from other domain)
  * save.php (used for "Save Image As...")
 
 These files can be found in the bin directory in this distribution
