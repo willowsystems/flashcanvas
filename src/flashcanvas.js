@@ -490,22 +490,24 @@ CanvasRenderingContext2D.prototype = {
 		// HTMLVideoElement. For now, only HTMLImageElement is supported.
 		if (a[0].tagName.toUpperCase() !== "IMG") return;
 
+		var src = a[0].getAttribute("src", 2), canvasId = this._canvasId;
+
 		this._setCompositing();
 		this._setShadows();
 
 		if (argc === 3) {
-			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2]);
+			this._queue.push(properties.drawImage, argc, src, a[1], a[2]);
 		} else if (argc === 5) {
-			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2], a[3], a[4]);
+			this._queue.push(properties.drawImage, argc, src, a[1], a[2], a[3], a[4]);
 		} else if (argc === 9) {
-			this._queue.push(properties.drawImage, argc, a[0].src, a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]);
+			this._queue.push(properties.drawImage, argc, src, a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]);
 		} else {
 			return;
 		}
 
-		if (isReady[this._canvasId]) {
+		if (isReady[canvasId]) {
 			this._postCommands();
-			++lock[this._canvasId];
+			++lock[canvasId];
 		}
 	},
 
