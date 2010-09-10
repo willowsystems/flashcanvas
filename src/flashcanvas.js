@@ -273,11 +273,13 @@ CanvasRenderingContext2D.prototype = {
         // HTMLVideoElement. For now, only HTMLImageElement is supported.
         if (image.tagName.toUpperCase() !== "IMG") return;
 
-        this._queue.push(properties.createPattern, image.src, repetition);
+        var src = image.getAttribute("src", 2), canvasId = this._canvasId;
+        this._queue.push(properties.createPattern, src, repetition);
+        this._subQueue.push(properties.createPattern, src, repetition);
 
-        if (isReady[this._canvasId]) {
+        if (isReady[canvasId]) {
             this._postCommands();
-            ++lock[this._canvasId];
+            ++lock[canvasId];
         }
 
         return new CanvasPattern(this);
