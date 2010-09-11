@@ -768,12 +768,12 @@ package com.googlecode.flashcanvas
             }
         }
 
-        public function fillText(text:String, x:Number, y:Number, maxWidth:* = null):void
+        public function fillText(text:String, x:Number, y:Number, maxWidth:Number = Infinity):void
         {
             _renderText(text, x, y, maxWidth);
         }
 
-        public function strokeText(text:String, x:Number, y:Number, maxWidth:* = null):void
+        public function strokeText(text:String, x:Number, y:Number, maxWidth:Number = Infinity):void
         {
             _renderText(text, x, y, maxWidth, true);
         }
@@ -1146,7 +1146,7 @@ package com.googlecode.flashcanvas
             shape.graphics.clear();
         }
 
-        private function _renderText(text:String, x:Number, y:Number, maxWidth:* = null, isStroke:Boolean = false):void
+        private function _renderText(text:String, x:Number, y:Number, maxWidth:Number, isStroke:Boolean = false):void
         {
             if (!isFinite(x) || !isFinite(y))
                 return;

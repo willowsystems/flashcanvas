@@ -19,6 +19,7 @@ if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
  * Constant
  */
 
+var UNDEFINED;
 var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
 var CANVAS_GRADIENT             = "CanvasGradient";
 var CANVAS_PATTERN              = "CanvasPattern";
@@ -454,7 +455,8 @@ CanvasRenderingContext2D.prototype = {
         this._setFillStyle();
         this._setShadows();
         this._setFontStyles();
-        this._queue.push(properties.fillText, encode(text), x, y, maxWidth || 0);
+        this._queue.push(properties.fillText, encode(text), x, y,
+                         maxWidth === UNDEFINED ? Infinity : maxWidth);
     },
 
     strokeText: function(text, x, y, maxWidth) {
@@ -462,7 +464,8 @@ CanvasRenderingContext2D.prototype = {
         this._setStrokeStyle();
         this._setShadows();
         this._setFontStyles();
-        this._queue.push(properties.strokeText, encode(text), x, y, maxWidth || 0);
+        this._queue.push(properties.strokeText, encode(text), x, y,
+                         maxWidth === UNDEFINED ? Infinity : maxWidth);
     },
 
     measureText: function(text) {
