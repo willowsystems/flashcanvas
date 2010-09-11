@@ -1148,10 +1148,15 @@ package com.googlecode.flashcanvas
 
         private function _renderText(text:String, x:Number, y:Number, maxWidth:Number, isStroke:Boolean = false):void
         {
-            if (!isFinite(x) || !isFinite(y))
+            if (/^\s*$/.test(text))
                 return;
 
-            if (/^\s*$/.test(text))
+            if (!isFinite(x) || !isFinite(y) || isNaN(maxWidth))
+                return;
+
+            // If maxWidth is less than or equal to zero, return without doing
+            // anything.
+            if (maxWidth <= 0)
                 return;
 
             var textFormat:TextFormat = _parseFont();
