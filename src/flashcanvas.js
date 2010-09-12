@@ -13,7 +13,7 @@
 // If the browser is IE and does not support HTML5 Canvas
 if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
 
-(function() {
+(function(window, document) {
 
 /*
  * Constant
@@ -885,6 +885,6 @@ window[G_VML_CANVAS_MANAGER] = {
 // Prevent Closure Compiler from removing the function.
 keep = CanvasRenderingContext2D.measureText;
 
-})();
+})(window, document);
 
 }
