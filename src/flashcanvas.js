@@ -95,7 +95,10 @@ var properties = new Lookup([
     "putImageData",
 
     // CanvasGradient
-    "addColorStop"
+    "addColorStop",
+
+    // Internal use
+    "resize"
 ]);
 
 // Whether swf is ready for use
@@ -259,13 +262,11 @@ CanvasRenderingContext2D.prototype = {
 
     createLinearGradient: function(x0, y0, x1, y1) {
         this._queue.push(properties.createLinearGradient, x0, y0, x1, y1);
-        this._subQueue.push(properties.createLinearGradient, x0, y0, x1, y1);
         return new CanvasGradient(this);
     },
 
     createRadialGradient: function(x0, y0, r0, x1, y1, r1) {
         this._queue.push(properties.createRadialGradient, x0, y0, r0, x1, y1, r1);
-        this._subQueue.push(properties.createRadialGradient, x0, y0, r0, x1, y1, r1);
         return new CanvasGradient(this);
     },
 
@@ -276,7 +277,6 @@ CanvasRenderingContext2D.prototype = {
 
         var src = image.getAttribute("src", 2), canvasId = this._canvasId;
         this._queue.push(properties.createPattern, src, repetition);
-        this._subQueue.push(properties.createPattern, src, repetition);
 
         if (isReady[canvasId]) {
             this._postCommands();
@@ -569,9 +569,6 @@ CanvasRenderingContext2D.prototype = {
         // command queue
         this._queue = [];
 
-        // command sub-queue
-        this._subQueue = [];
-
         // stack of drawing states
         this._stateStack = [];
     },
@@ -579,7 +576,6 @@ CanvasRenderingContext2D.prototype = {
     _flush: function() {
         var queue = this._queue;
         this._queue = [];
-        this._subQueue = [];
         return queue;
     },
 
@@ -595,17 +591,14 @@ CanvasRenderingContext2D.prototype = {
     },
 
     _resize: function(width, height) {
-        // resize frame
-        this._swf.resize(width, height);
+        // Flush commands in the queue
+        this._postCommands();
 
-        // execute commands in sub-queue
-        if (this._subQueue.length) {
-            this._queue = this._subQueue;
-            this._postCommands();
-        }
-
-        // clear back to the initial state
+        // Clear back to the initial state
         this._initialize();
+
+        // Execute a resize command at the start of the next frame
+        this._queue.push(properties.resize, width, height);
     }
 };
 
@@ -621,7 +614,6 @@ var CanvasGradient = function(ctx) {
 CanvasGradient.prototype = {
     addColorStop: function(offset, color) {
         this._ctx._queue.push(properties.addColorStop, this.id, offset, color);
-        this._ctx._subQueue.push(properties.addColorStop, this.id, offset, color);
     }
 };
 

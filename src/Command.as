@@ -89,7 +89,10 @@ package
             "putImageData",
 
             // CanvasGradient
-            "addColorStop"
+            "addColorStop",
+
+            // Internal use
+            "resize"
         ];
 
         private var ctx:CanvasRenderingContext2D;
@@ -500,6 +503,13 @@ package
             var offset:Number = input.readFloat();
             var color:String  = input.readUTF();
             styles[id].addColorStop(offset, color);
+        }
+
+        private function resize():void
+        {
+            var width:int  = input.readInt();
+            var height:int = input.readInt();
+            ctx.resize(width, height);
         }
     }
 }
