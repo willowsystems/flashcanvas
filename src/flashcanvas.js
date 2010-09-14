@@ -107,6 +107,9 @@ var isReady = {};
 // Monitor the number of loading files
 var lock = {};
 
+// Canvas elements
+var canvases = {};
+
 // SPAN element embedded in the canvas
 var spans = {};
 
@@ -651,6 +654,13 @@ function onReadyStateChange() {
     }
 }
 
+function onFocus() {
+    // forward the event to the parent
+    var swf = event.srcElement, canvas = swf.parentNode;
+    swf.blur();
+    canvas.focus();
+}
+
 function onPropertyChange() {
     var prop = event.propertyName;
     if (prop === "width" || prop === "height") {
@@ -666,19 +676,11 @@ function onPropertyChange() {
     }
 }
 
-function onFocus() {
-    // forward the event to the parent
-    var swf = event.srcElement, canvas = swf.parentNode;
-    swf.blur();
-    canvas.focus();
-}
-
 function onUnload() {
     window.detachEvent(ON_UNLOAD, onUnload);
 
-    var canvases = document.getElementsByTagName("canvas");
-    for (var i = 0, n = canvases.length; i < n; ++i) {
-        var canvas = canvases[i], swf = canvas.firstChild, prop;
+    for (var canvasId in canvases) {
+        var canvas = canvases[canvasId], swf = canvas.firstChild, prop;
 
         // clean up the references of swf.postCommands and swf.resize
         for (prop in swf) {
@@ -695,8 +697,8 @@ function onUnload() {
         }
 
         // remove event listeners
-        canvas.detachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
         swf.detachEvent(ON_FOCUS, onFocus);
+        canvas.detachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
     }
 
     // delete exported symbols
@@ -743,8 +745,10 @@ var FlashCanvas = {
             '</object>' +
             '<span style="margin:0;padding:0;border:0;display:inline-block;position:static;height:1em;overflow:visible;white-space:nowrap">' +
             '</span>';
-        var swf         = canvas.firstChild;
-        spans[canvasId] = canvas.lastChild;
+
+        canvases[canvasId] = canvas;
+        var swf            = canvas.firstChild;
+        spans[canvasId]    = canvas.lastChild;
 
         // Check whether the canvas element is in the DOM tree
         var documentContains = document.body.contains;
@@ -796,7 +800,7 @@ var FlashCanvas = {
     },
 
     trigger: function(canvasId, type) {
-        var canvas = document.getElementById(OBJECT_ID_PREFIX + canvasId).parentNode;
+        var canvas = canvases[canvasId];
         canvas.fireEvent("on" + type);
     },
 
@@ -805,8 +809,8 @@ var FlashCanvas = {
             --lock[canvasId];
         }
         if (ready) {
-            var swf = document.getElementById(OBJECT_ID_PREFIX + canvasId);
-            var canvas = swf.parentNode;
+            var canvas = canvases[canvasId];
+            var swf    = canvas.firstChild;
 
             // Add event listener
             canvas.attachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
