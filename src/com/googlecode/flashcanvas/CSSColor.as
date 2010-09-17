@@ -188,22 +188,21 @@ package com.googlecode.flashcanvas
 
         public function CSSColor(str:String)
         {
-            str = str.toLowerCase();
+            str = str.toLowerCase().replace(/^\s*/, "").replace(/\s*$/, "");
 
-            // #F00, #FF0000
-            if (str.charAt(0) == "#")
+            // #F00
+            if (/^#[0-9a-f]{3}$/.test(str))
             {
-                if (str.length == 4)
-                {
-                    var r:String = str.charAt(1);
-                    var g:String = str.charAt(2);
-                    var b:String = str.charAt(3);
-                    _color = parseInt("0x" + r + r + g + g + b + b);
-                }
-                else
-                {
-                    _color = parseInt("0x" + str.substr(1, 6));
-                }
+                var r:String = str.charAt(1);
+                var g:String = str.charAt(2);
+                var b:String = str.charAt(3);
+                _color = parseInt("0x" + r + r + g + g + b + b);
+            }
+
+            // #FF0000
+            else if (/^#[0-9a-f]{6}$/.test(str))
+            {
+                _color = parseInt("0x" + str.substr(1, 6));
             }
 
             // rgb(255,0,0), rgb(100%,0%,0%)
@@ -251,16 +250,29 @@ package com.googlecode.flashcanvas
 
         private function rgb2hex(rgb:Array):uint
         {
+            var percentage:int = 0;
+
             for (var i:int = 0; i <= 2; i++)
             {
                 var str:String = rgb[i];
                 if (str.indexOf("%") != -1)
+                {
                     rgb[i] = Math.round(2.55 * parseFloat(str));
+                    percentage++;
+                }
             }
-            var r:int = parseInt(rgb[0]) << 16;
-            var g:int = parseInt(rgb[1]) << 8;
-            var b:int = parseInt(rgb[2]);
-            return r + g + b;
+
+            if (percentage == 0 || percentage == 3)
+            {
+                var r:int = parseInt(rgb[0]);
+                var g:int = parseInt(rgb[1]);
+                var b:int = parseInt(rgb[2]);
+                return (r << 16) | (g << 8) | b;
+            }
+            else
+            {
+                throw new ArgumentError();
+            }
         }
 
         private function hsl2hex(hsl:Array):uint
