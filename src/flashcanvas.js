@@ -20,6 +20,7 @@ if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
  */
 
 var UNDEFINED;
+var NULL                        = null;
 var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
 var CANVAS_GRADIENT             = "CanvasGradient";
 var CANVAS_PATTERN              = "CanvasPattern";
@@ -685,14 +686,14 @@ function onUnload() {
         // clean up the references of swf.postCommands and swf.resize
         for (prop in swf) {
             if (typeof swf[prop] === "function") {
-                swf[prop] = null;
+                swf[prop] = NULL;
             }
         }
 
         // clean up the references of canvas.getContext and canvas.toDataURL
         for (prop in canvas) {
             if (typeof canvas[prop] === "function") {
-                canvas[prop] = null;
+                canvas[prop] = NULL;
             }
         }
 
@@ -702,11 +703,11 @@ function onUnload() {
     }
 
     // delete exported symbols
-    window[CANVAS_RENDERING_CONTEXT_2D] = null;
-    window[CANVAS_GRADIENT]             = null;
-    window[CANVAS_PATTERN]              = null;
-    window[FLASH_CANVAS]                = null;
-    window[G_VML_CANVAS_MANAGER]        = null;
+    window[CANVAS_RENDERING_CONTEXT_2D] = NULL;
+    window[CANVAS_GRADIENT]             = NULL;
+    window[CANVAS_PATTERN]              = NULL;
+    window[FLASH_CANVAS]                = NULL;
+    window[G_VML_CANVAS_MANAGER]        = NULL;
 }
 
 /*
@@ -775,7 +776,7 @@ var FlashCanvas = {
 
         // canvas API
         canvas.getContext = function(contextId) {
-            return contextId === "2d" ? ctx : null;
+            return contextId === "2d" ? ctx : NULL;
         };
 
         canvas.toDataURL = function() {
@@ -851,7 +852,7 @@ function encode(str) {
  */
 
 // IE HTML5 shiv
-document.createElement("canvas");
+document["createElement"]("canvas");
 
 // setup default CSS
 document.createStyleSheet().cssText =
@@ -867,7 +868,7 @@ window.attachEvent(ON_UNLOAD, onUnload);
 if (SWF_URL.indexOf(location.protocol + "//" + location.host + "/") === 0) {
     var req = new ActiveXObject("Microsoft.XMLHTTP");
     req.open("GET", SWF_URL, false);
-    req.send(null);
+    req.send(NULL);
 }
 
 /*
