@@ -21,6 +21,7 @@ if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
 
 var UNDEFINED;
 var NULL                        = null;
+var CANVAS                      = "canvas";
 var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
 var CANVAS_GRADIENT             = "CanvasGradient";
 var CANVAS_PATTERN              = "CanvasPattern";
@@ -645,7 +646,7 @@ function onReadyStateChange() {
     if (document.readyState === "complete") {
         document.detachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
 
-        var canvases = document.getElementsByTagName("canvas");
+        var canvases = document.getElementsByTagName(CANVAS);
         for (var i = 0, n = canvases.length; i < n; ++i) {
             FlashCanvas.initElement(canvases[i]);
         }
@@ -854,11 +855,11 @@ function encode(str) {
  */
 
 // IE HTML5 shiv
-document["createElement"]("canvas");
+document["createElement"](CANVAS);
 
 // setup default CSS
 document.createStyleSheet().cssText =
-    "canvas{display:inline-block;overflow:hidden;width:300px;height:150px}";
+    CANVAS + "{display:inline-block;overflow:hidden;width:300px;height:150px}";
 
 // initialize canvas elements
 document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
