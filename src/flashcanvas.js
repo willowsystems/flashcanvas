@@ -647,10 +647,7 @@ function onReadyStateChange() {
 
         var canvases = document.getElementsByTagName("canvas");
         for (var i = 0, n = canvases.length; i < n; ++i) {
-            var canvas = canvases[i];
-            if (!canvas.getContext) {
-                FlashCanvas.initElement(canvas);
-            }
+            FlashCanvas.initElement(canvases[i]);
         }
     }
 }
@@ -716,6 +713,11 @@ function onUnload() {
 
 var FlashCanvas = {
     initElement: function(canvas) {
+        // Check whether the initialization is required or not.
+        if (canvas.getContext) {
+            return canvas;
+        }
+
         // get element explicit size
         var width  = parseInt(canvas.getAttribute("width")),
             height = parseInt(canvas.getAttribute("height"));
