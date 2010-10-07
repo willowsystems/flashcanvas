@@ -798,6 +798,11 @@ var FlashCanvas = {
         return canvas;
     },
 
+    saveImage: function(canvas) {
+        var swf = canvas.firstChild;
+        swf.saveImage();
+    },
+
     setOptions: function(options) {
         // TODO: Implement
     },

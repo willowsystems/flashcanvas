@@ -67,6 +67,7 @@ package
             ExternalInterface.marshallExceptions = true;
             ExternalInterface.addCallback("postCommands", postCommands);
             ExternalInterface.addCallback("resize", resize);
+            ExternalInterface.addCallback("saveImage", saveImage);
 
             // create canvas
             canvas  = new Canvas();
@@ -106,7 +107,7 @@ package
             var saveItem:ContextMenuItem  = new ContextMenuItem("Save Image As...");
             var aboutItem:ContextMenuItem = new ContextMenuItem("About FlashCanvas");
 
-            saveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveItemSelectHandler);
+            saveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveImage);
             aboutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, aboutItemSelectHandler);
 
             contextMenu.hideBuiltInItems();
@@ -126,16 +127,7 @@ package
             context.resize(width, height);
         }
 
-        private function mouseEventHandler(event:MouseEvent):void
-        {
-            var type:String = event.type;
-            if (type == MouseEvent.DOUBLE_CLICK)
-                type = "dblclick";
-
-            ExternalInterface.call("FlashCanvas.trigger", canvasId, type);
-        }
-
-        private function saveItemSelectHandler(event:Event):void
+        public function saveImage(event:Event = null):void
         {
             var url:String = loaderInfo.url.replace(/[^\/]+$/, "save.php");
             var request:URLRequest = new URLRequest(url);
@@ -145,6 +137,15 @@ package
             request.data        = PNGEncoder.encode(canvas.bitmapData);
 
             navigateToURL(request, "_self");
+        }
+
+        private function mouseEventHandler(event:MouseEvent):void
+        {
+            var type:String = event.type;
+            if (type == MouseEvent.DOUBLE_CLICK)
+                type = "dblclick";
+
+            ExternalInterface.call("FlashCanvas.trigger", canvasId, type);
         }
 
         private function aboutItemSelectHandler(event:Event):void

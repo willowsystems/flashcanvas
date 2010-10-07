@@ -5,6 +5,7 @@ var G_vmlCanvasManager;
 swf.CallFunction;
 swf.resize;
 FlashCanvas.initElement;
+FlashCanvas.saveImage;
 FlashCanvas.setOptions;
 FlashCanvas.trigger;
 FlashCanvas.unlock;
