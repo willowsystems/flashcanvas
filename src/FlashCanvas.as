@@ -48,6 +48,7 @@ package
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
     import com.googlecode.flashcanvas.Config;
 
+    [SWF(backgroundColor="#FFFFFF")]
     public class FlashCanvas extends Sprite
     {
         private var canvas:Canvas;
