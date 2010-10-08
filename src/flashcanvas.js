@@ -601,6 +601,10 @@ CanvasRenderingContext2D.prototype = {
         // Clear back to the initial state
         this._initialize();
 
+        // Adjust the size of Flash to that of the canvas
+        this._swf.width  = width;
+        this._swf.height = height;
+
         // Execute a resize command at the start of the next frame
         this._queue.push(properties.resize, width, height);
     }
@@ -718,19 +722,6 @@ var FlashCanvas = {
             return canvas;
         }
 
-        // get element explicit size
-        var width  = parseInt(canvas.getAttribute("width")),
-            height = parseInt(canvas.getAttribute("height"));
-
-        if (isNaN(width) || width < 0) {
-            width = 300;
-        }
-        if (isNaN(height) || height < 0) {
-            height = 150;
-        }
-        canvas.style.width  = width  + "px";
-        canvas.style.height = height + "px";
-
         // initialize lock
         var canvasId      = canvas.uniqueID;
         var objectId      = OBJECT_ID_PREFIX + canvasId;
@@ -819,12 +810,25 @@ var FlashCanvas = {
         if (ready) {
             var canvas = canvases[canvasId];
             var swf    = canvas.firstChild;
+            var width  = parseInt(canvas.width);
+            var height = parseInt(canvas.height);
+
+            if (isNaN(width) || width < 0) {
+                width = 300;
+            }
+            if (isNaN(height) || height < 0) {
+                height = 150;
+            }
+            canvas.style.width  = width  + "px";
+            canvas.style.height = height + "px";
+
+            // Adjust the size of Flash to that of the canvas
+            swf.width  = canvas.width  = width;
+            swf.height = canvas.height = height;
+            swf.resize(width, height);
 
             // Add event listener
             canvas.attachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
-
-            // Adjust the size of Flash to be the same size as the canvas
-            swf.resize(swf.clientWidth, swf.clientHeight);
 
             // ExternalInterface is now ready for use
             isReady[canvasId] = true;
