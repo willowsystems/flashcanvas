@@ -115,12 +115,6 @@ var canvases = {};
 // SPAN element embedded in the canvas
 var spans = {};
 
-function getStyleId(ctx) {
-    var canvasId = ctx._canvasId;
-    if (!arguments.callee[canvasId]) arguments.callee[canvasId] = 0;
-    return arguments.callee[canvasId]++;
-}
-
 /**
  * 2D context
  * @constructor
@@ -137,6 +131,9 @@ var CanvasRenderingContext2D = function(canvas, swf) {
 
     // initialize drawing states
     this._initialize();
+
+    // Count CanvasGradient and CanvasPattern objects
+    this._gradientPatternId = 0;
 
     // frame update interval
     var self = this;
@@ -616,7 +613,7 @@ CanvasRenderingContext2D.prototype = {
  */
 var CanvasGradient = function(ctx) {
     this._ctx = ctx;
-    this.id   = getStyleId(ctx);
+    this.id   = ctx._gradientPatternId++;
 };
 
 CanvasGradient.prototype = {
@@ -630,7 +627,7 @@ CanvasGradient.prototype = {
  * @constructor
  */
 var CanvasPattern = function(ctx) {
-    this.id = getStyleId(ctx);
+    this.id = ctx._gradientPatternId++;
 };
 
 /**
