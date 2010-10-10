@@ -150,25 +150,6 @@ CanvasRenderingContext2D.prototype = {
      */
 
     save: function() {
-        // push state
-        this._stateStack.push({
-            globalAlpha: this.globalAlpha,
-            globalCompositeOperation: this.globalCompositeOperation,
-            strokeStyle: this.strokeStyle,
-            fillStyle: this.fillStyle,
-            lineWidth: this.lineWidth,
-            lineCap: this.lineCap,
-            lineJoin: this.lineJoin,
-            miterLimit: this.miterLimit,
-            shadowOffsetX: this.shadowOffsetX,
-            shadowOffsetY: this.shadowOffsetY,
-            shadowBlur: this.shadowBlur,
-            shadowColor: this.shadowColor,
-            font: this.font,
-            textAlign: this.textAlign,
-            textBaseline: this.textBaseline
-        });
-
         // write all properties
         this._setCompositing();
         this._setShadows();
@@ -177,28 +158,48 @@ CanvasRenderingContext2D.prototype = {
         this._setLineStyles();
         this._setFontStyles();
 
+        // push state
+        this._stateStack.push([
+            this._globalAlpha,
+            this._globalCompositeOperation,
+            this._strokeStyle,
+            this._fillStyle,
+            this._lineWidth,
+            this._lineCap,
+            this._lineJoin,
+            this._miterLimit,
+            this._shadowOffsetX,
+            this._shadowOffsetY,
+            this._shadowBlur,
+            this._shadowColor,
+            this._font,
+            this._textAlign,
+            this._textBaseline
+        ]);
+
         this._queue.push(properties.save);
     },
 
     restore: function() {
         // pop state
-        if (this._stateStack.length > 0) {
-            var state = this._stateStack.pop();
-            this.globalAlpha = state.globalAlpha;
-            this.globalCompositeOperation = state.globalCompositeOperation;
-            this.strokeStyle = state.strokeStyle;
-            this.fillStyle = state.fillStyle;
-            this.lineWidth = state.lineWidth;
-            this.lineCap = state.lineCap;
-            this.lineJoin = state.lineJoin;
-            this.miterLimit = state.miterLimit;
-            this.shadowOffsetX = state.shadowOffsetX;
-            this.shadowOffsetY = state.shadowOffsetY;
-            this.shadowBlur = state.shadowBlur;
-            this.shadowColor = state.shadowColor;
-            this.font = state.font;
-            this.textAlign = state.textAlign;
-            this.textBaseline = state.textBaseline;
+        var stateStack = this._stateStack;
+        if (stateStack.length) {
+            var state = stateStack.pop();
+            this.globalAlpha              = state[0];
+            this.globalCompositeOperation = state[1];
+            this.strokeStyle              = state[2];
+            this.fillStyle                = state[3];
+            this.lineWidth                = state[4];
+            this.lineCap                  = state[5];
+            this.lineJoin                 = state[6];
+            this.miterLimit               = state[7];
+            this.shadowOffsetX            = state[8];
+            this.shadowOffsetY            = state[9];
+            this.shadowBlur               = state[10];
+            this.shadowColor              = state[11];
+            this.font                     = state[12];
+            this.textAlign                = state[13];
+            this.textBaseline             = state[14];
         }
 
         this._queue.push(properties.restore);
