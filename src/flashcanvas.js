@@ -100,6 +100,7 @@ var properties = new Lookup([
     "addColorStop",
 
     // Internal use
+    "direction",
     "resize"
 ]);
 
@@ -134,6 +135,9 @@ var CanvasRenderingContext2D = function(canvas, swf) {
 
     // Count CanvasGradient and CanvasPattern objects
     this._gradientPatternId = 0;
+
+    // Directionality of the canvas element
+    this._direction = "";
 
     // frame update interval
     var self = this;
@@ -450,6 +454,10 @@ CanvasRenderingContext2D.prototype = {
         if (this._textBaseline !== this.textBaseline) {
             this._textBaseline = this.textBaseline;
             queue.push(properties.textBaseline, this._textBaseline);
+        }
+        if (this._direction !== this.canvas.currentStyle.direction) {
+            this._direction = this.canvas.currentStyle.direction;
+            queue.push(properties.direction, this._direction);
         }
     },
 

@@ -92,6 +92,7 @@ package
             "addColorStop",
 
             // Internal use
+            "direction",
             "resize"
         ];
 
@@ -503,6 +504,11 @@ package
             var offset:Number = input.readFloat();
             var color:String  = input.readUTF();
             styles[id].addColorStop(offset, color);
+        }
+
+        private function direction():void
+        {
+            ctx.canvas.dir = input.readUTF();
         }
 
         private function resize():void

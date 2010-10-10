@@ -1189,8 +1189,8 @@ package com.googlecode.flashcanvas
             // Adjust x coordinates
             switch (state.textAlign)
             {
-                case "start": break;
-                case "end": x -= width; break;
+                case "start": if (_canvas.dir == "rtl") x -= width; break;
+                case "end": if (_canvas.dir != "rtl") x -= width; break;
                 case "left": break;
                 case "right": x -= width; break;
                 case "center": x -= width / 2; break;

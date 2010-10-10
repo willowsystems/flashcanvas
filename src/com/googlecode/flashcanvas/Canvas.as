@@ -38,6 +38,9 @@ package com.googlecode.flashcanvas
 
     public class Canvas extends Bitmap
     {
+        // Directionality of the canvas
+        public var dir:String = "ltr";
+
         private var _context:*;
 
         public function Canvas(width:int = 300, height:int = 150)
