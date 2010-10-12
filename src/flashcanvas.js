@@ -143,7 +143,7 @@ var CanvasRenderingContext2D = function(canvas, swf) {
     var self = this;
     setInterval(function() {
         if (lock[self._canvasId] === 0) {
-            self._postCommands();
+            self._executeCommand();
         }
     }, 30);
 };
@@ -286,7 +286,7 @@ CanvasRenderingContext2D.prototype = {
         this._queue.push(properties.createPattern, src, repetition);
 
         if (isReady[canvasId]) {
-            this._postCommands();
+            this._executeCommand();
             ++lock[canvasId];
         }
 
@@ -466,7 +466,7 @@ CanvasRenderingContext2D.prototype = {
         this._setFillStyle();
         this._setShadows();
         this._setFontStyles();
-        this._queue.push(properties.fillText, encode(text), x, y,
+        this._queue.push(properties.fillText, encodeXML(text), x, y,
                          maxWidth === UNDEFINED ? Infinity : maxWidth);
     },
 
@@ -475,7 +475,7 @@ CanvasRenderingContext2D.prototype = {
         this._setStrokeStyle();
         this._setShadows();
         this._setFontStyles();
-        this._queue.push(properties.strokeText, encode(text), x, y,
+        this._queue.push(properties.strokeText, encodeXML(text), x, y,
                          maxWidth === UNDEFINED ? Infinity : maxWidth);
     },
 
@@ -521,7 +521,7 @@ CanvasRenderingContext2D.prototype = {
         }
 
         if (isReady[canvasId]) {
-            this._postCommands();
+            this._executeCommand();
             ++lock[canvasId];
         }
     },
@@ -589,12 +589,12 @@ CanvasRenderingContext2D.prototype = {
         return queue;
     },
 
-    _postCommands: function() {
-        // post commands
+    _executeCommand: function() {
+        // execute commands
         var commands = this._flush();
         if (commands.length > 0) {
             return eval(this._swf.CallFunction(
-                '<invoke name="postCommands" returntype="javascript"><arguments><string>'
+                '<invoke name="executeCommand" returntype="javascript"><arguments><string>'
                 + commands.join("&#0;") + "</string></arguments></invoke>"
             ));
         }
@@ -602,7 +602,7 @@ CanvasRenderingContext2D.prototype = {
 
     _resize: function(width, height) {
         // Flush commands in the queue
-        this._postCommands();
+        this._executeCommand();
 
         // Clear back to the initial state
         this._initialize();
@@ -690,7 +690,7 @@ function onUnload() {
     for (var canvasId in canvases) {
         var canvas = canvases[canvasId], swf = canvas.firstChild, prop;
 
-        // clean up the references of swf.postCommands and swf.resize
+        // clean up the references of swf.executeCommand and swf.resize
         for (prop in swf) {
             if (typeof swf[prop] === "function") {
                 swf[prop] = NULL;
@@ -786,7 +786,7 @@ var FlashCanvas = {
             } else {
                 ctx._queue.push(properties.toDataURL, type);
             }
-            return ctx._postCommands();
+            return ctx._executeCommand();
         };
 
         // add event listener
@@ -860,7 +860,7 @@ function getScriptUrl() {
 }
 
 // Escape characters not permitted in XML.
-function encode(str) {
+function encodeXML(str) {
     return ("" + str).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 }
 

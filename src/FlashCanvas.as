@@ -66,7 +66,7 @@ package
             Security.allowDomain("*");
 
             ExternalInterface.marshallExceptions = true;
-            ExternalInterface.addCallback("postCommands", postCommands);
+            ExternalInterface.addCallback("executeCommand", executeCommand);
             ExternalInterface.addCallback("resize", resize);
             ExternalInterface.addCallback("saveImage", saveImage);
 
@@ -116,7 +116,7 @@ package
             this.contextMenu = contextMenu;
         }
 
-        public function postCommands(data:String):*
+        public function executeCommand(data:String):*
         {
             if (data.length > 0)
                 return command.parse(data);
