@@ -32,12 +32,17 @@
  * @link       http://code.google.com/p/flashcanvas/
  */
 
-// Check that the request is from flashcanvas.swf
-if (empty($_SERVER['HTTP_REFERER'])) {
-    exit;
-}
-if (!preg_match('#/flash\d*canvas\.swf$#', $_SERVER['HTTP_REFERER'])) {
-    exit;
+// Whether we check referrer or not
+define('CHECK_REFERRER', true);
+
+// Check that the request is from FlashCanvas
+if (CHECK_REFERRER) {
+    if (empty($_SERVER['HTTP_REFERER'])) {
+        exit;
+    }
+    if (!preg_match('#/flash\d*canvas\.swf$#', $_SERVER['HTTP_REFERER'])) {
+        exit;
+    }
 }
 
 // Check that the request has a valid URL parameter
