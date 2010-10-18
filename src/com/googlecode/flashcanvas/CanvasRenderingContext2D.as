@@ -45,6 +45,7 @@ package com.googlecode.flashcanvas
     import flash.display.SpreadMethod;
     import flash.events.Event;
     import flash.external.ExternalInterface;
+    import flash.filters.GlowFilter;
     import flash.geom.ColorTransform;
     import flash.geom.Matrix;
     import flash.geom.Point;
@@ -1181,6 +1182,15 @@ package com.googlecode.flashcanvas
             // Remove 2px margins around the text
             var matrix:Matrix = new Matrix();
             matrix.translate(-2, -2);
+
+            if (isStroke)
+            {
+                // Draw an outline of the text
+                var color:uint = style is CSSColor ? style.color : 0x000000;
+                var glowFilter:GlowFilter =
+                    new GlowFilter(color, 1.0, 2, 2, 8, 1, true, true);
+                textField.filters = [glowFilter];
+            }
 
             // Convert the text into BitmapData
             var bitmapData:BitmapData = new BitmapData(width, height, true, 0);
