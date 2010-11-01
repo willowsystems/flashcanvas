@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Save an input as a PNG file
+ * Save the input as a PNG file
  *
  * PHP versions 4 and 5
  *
@@ -33,14 +33,17 @@
  */
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Force download
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename="canvas.png"');
 
     if (isset($_POST['dataurl'])) {
+        // Decode the base64-encoded data
         $data = $_POST['dataurl'];
         $data = substr($data, strpos($data, ',') + 1);
         echo base64_decode($data);
     } else {
+        // Output the raw data
         readfile('php://input');
     }
 }
