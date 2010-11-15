@@ -32,7 +32,7 @@ Third-party libraries used in FlashCanvas
    http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
 
  * BitString.as, JPGEncoder.as and PNGEncoder.as by Adobe Systems Incorporated
-   http://code.google.com/p/as3corelib/
+   https://github.com/mikechambers/as3corelib
    New BSD License
 
 
@@ -41,7 +41,7 @@ Examples included in this package
 
 This package includes examples from the following pages. The examples
 are modified so as to use FlashCanvas if the browser is Internet
-Explorer.
+Explorer 8 or earlier.
 
  * ExplorerCanvas
    http://code.google.com/p/explorercanvas/
