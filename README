@@ -27,15 +27,16 @@ FlashCanvas consists of JavaScript, Flash and PHP files:
 
  * flashcanvas.js
  * flashcanvas.swf
- * proxy.php (proxy script to load a file from other domain)
- * save.php (used for "Save Image As...")
+ * canvas2png.js (helps you to save a canvas image)
+ * proxy.php     (used to load a file from other domain)
+ * save.php      (used to save a canvas image)
 
 These files can be found in the bin directory in this distribution
 package. To install FlashCanvas, copy these files into some directory on
 a Web server, and then add the following HTML code between <head> and
 </head> tags on your web page.
 
-    <!--[if IE]>
+    <!--[if lt IE 9]>
     <script type="text/javascript" src="path/to/flashcanvas.js"></script>
     <![endif]-->
 
