@@ -33,76 +33,82 @@ package
 
     public class Command
     {
-        static private var properties:Array =
-        [
-            // Canvas element
-            "toDataURL",
-
-            // CanvasRenderingContext2D
-            "save",
-            "restore",
-            "scale",
-            "rotate",
-            "translate",
-            "transform",
-            "setTransform",
-            "globalAlpha",
-            "globalCompositeOperation",
-            "strokeStyle",
-            "fillStyle",
-            "createLinearGradient",
-            "createRadialGradient",
-            "createPattern",
-            "lineWidth",
-            "lineCap",
-            "lineJoin",
-            "miterLimit",
-            "shadowOffsetX",
-            "shadowOffsetY",
-            "shadowBlur",
-            "shadowColor",
-            "clearRect",
-            "fillRect",
-            "strokeRect",
-            "beginPath",
-            "closePath",
-            "moveTo",
-            "lineTo",
-            "quadraticCurveTo",
-            "bezierCurveTo",
-            "arcTo",
-            "rect",
-            "arc",
-            "fill",
-            "stroke",
-            "clip",
-            "isPointInPath",
-            "font",
-            "textAlign",
-            "textBaseline",
-            "fillText",
-            "strokeText",
-            "measureText",
-            "drawImage",
-            "createImageData",
-            "getImageData",
-            "putImageData",
-
-            // CanvasGradient
-            "addColorStop",
-
-            // Internal use
-            "direction",
-            "resize"
-        ];
-
         private var ctx:CanvasRenderingContext2D;
+        private var commands:Array;
         private var input:CommandArray;
         private var styles:Array = [];
 
         public function Command(ctx:CanvasRenderingContext2D)
         {
             this.ctx = ctx;
+            initializeDispatchTable();
+        }
+
+        private function initializeDispatchTable():void
+        {
+            commands =
+            [
+                // Canvas element
+                toDataURL,
+
+                // CanvasRenderingContext2D
+                save,
+                restore,
+                scale,
+                rotate,
+                translate,
+                transform,
+                setTransform,
+                globalAlpha,
+                globalCompositeOperation,
+                strokeStyle,
+                fillStyle,
+                createLinearGradient,
+                createRadialGradient,
+                createPattern,
+                lineWidth,
+                lineCap,
+                lineJoin,
+                miterLimit,
+                shadowOffsetX,
+                shadowOffsetY,
+                shadowBlur,
+                shadowColor,
+                clearRect,
+                fillRect,
+                strokeRect,
+                beginPath,
+                closePath,
+                moveTo,
+                lineTo,
+                quadraticCurveTo,
+                bezierCurveTo,
+                arcTo,
+                rect,
+                arc,
+                fill,
+                stroke,
+                clip,
+                isPointInPath,
+//              drawFocusRing,
+                font,
+                textAlign,
+                textBaseline,
+                fillText,
+                strokeText,
+                measureText,
+                drawImage,
+                createImageData,
+                getImageData,
+                putImageData,
+
+                // CanvasGradient
+                addColorStop,
+
+                // Internal use
+                direction,
+                resize
+            ];
         }
 
         public function parse(data:String):*
@@ -111,8 +117,8 @@ package
             var ret:* = "";
 
             while (input.position < input.length) {
-                var prop:String = properties[input.readInt()];
-                ret = this[prop]();
+                var command:Function = commands[input.readInt()];
+                ret = command();
             }
             return ret;
         }

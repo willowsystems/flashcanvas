@@ -85,6 +85,7 @@ var properties = new Lookup([
     "stroke",
     "clip",
     "isPointInPath",
+//  "drawFocusRing",
     "font",
     "textAlign",
     "textBaseline",
