@@ -5,6 +5,30 @@ You can view a complete ChangeLog at the project page:
 http://code.google.com/p/flashcanvas/source/list
 
 
+FlashCanvas-20101115
+--------------------
+
+(Enhancements)
+
+ - Made it possible to load image files from other domain.
+ - Prepared FlashCanvas.saveImage() method.
+ - Modified strokeText() to draw an outline of the text.
+ - textAlign gets to support the directionality of "rtl".
+ - Refactored the handling of resize event.
+
+(Bug fixes)
+
+ - Canvas was rendered incorrectly when printed.
+   - Canvas was expanded if the page was in quirks mode.
+   - The background was painted gray.
+ - Tweaked the color parser to check the input more strictly.
+
+(etc.)
+
+ - Included canvas2png.js script that can be used to save a canvas image.
+ - Made the examples compatible with IE9.
+
+
 FlashCanvas-20100904
 --------------------
 
