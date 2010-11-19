@@ -1288,7 +1288,7 @@ package com.googlecode.flashcanvas
 
             // Create transformation matrix
             var matrix:Matrix = new Matrix();
-            matrix.scale(dw / source.width, dh / source.height);
+            matrix.scale(dw / sw, dh / sh);
             matrix.translate(dx, dy);
             matrix.concat(state.transformMatrix);
 
