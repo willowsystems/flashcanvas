@@ -629,7 +629,7 @@ package com.googlecode.flashcanvas
             startingPoint.y = currentPoint.y = p1.y;
         }
 
-        public function arc(x:Number, y:Number, radius:Number, startAngle:Number, endAngle:Number, anticlockwise:Boolean):void
+        public function arc(x:Number, y:Number, radius:Number, startAngle:Number, endAngle:Number, anticlockwise:Boolean = false):void
         {
             var startX:Number = x + radius * Math.cos(startAngle);
             var startY:Number = y + radius * Math.sin(startAngle);
