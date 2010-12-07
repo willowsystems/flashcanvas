@@ -279,11 +279,27 @@ CanvasRenderingContext2D.prototype = {
     },
 
     createPattern: function(image, repetition) {
+        var tagName = image.tagName, src;
+        var canvasId = this._canvasId;
+
         // The first argument is HTMLImageElement, HTMLCanvasElement or
         // HTMLVideoElement. For now, only HTMLImageElement is supported.
-        if (image.tagName.toUpperCase() !== "IMG") return;
+        if (tagName) {
+            if (tagName.toLowerCase() === "img") {
+                src = image.getAttribute("src", 2);
+            } else {
+                return;
+            }
+        }
 
-        var src = image.getAttribute("src", 2), canvasId = this._canvasId;
+        // Additionally, we accept any object that has a src property.
+        // This is useful when you'd like to specify a long data URI.
+        else if (image.src) {
+            src = image.src;
+        } else {
+            return;
+        }
+
         this._queue.push(properties.createPattern, src, repetition);
 
         if (isReady[canvasId]) {
@@ -501,12 +517,26 @@ CanvasRenderingContext2D.prototype = {
      */
 
     drawImage: function(image, x1, y1, w1, h1, x2, y2, w2, h2) {
+        var tagName = image.tagName, src, argc = arguments.length;
+        var canvasId = this._canvasId;
+
         // The first argument is HTMLImageElement, HTMLCanvasElement or
         // HTMLVideoElement. For now, only HTMLImageElement is supported.
-        if (image.tagName.toUpperCase() !== "IMG") return;
+        if (tagName) {
+            if (tagName.toLowerCase() === "img") {
+                src = image.getAttribute("src", 2);
+            } else {
+                return;
+            }
+        }
 
-        var argc = arguments.length, src = image.getAttribute("src", 2);
-        var canvasId = this._canvasId;
+        // Additionally, we accept any object that has a src property.
+        // This is useful when you'd like to specify a long data URI.
+        else if (image.src) {
+            src = image.src;
+        } else {
+            return;
+        }
 
         this._setCompositing();
         this._setShadows();
