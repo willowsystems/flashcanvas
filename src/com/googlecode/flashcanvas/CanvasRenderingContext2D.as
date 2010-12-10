@@ -631,6 +631,10 @@ package com.googlecode.flashcanvas
 
         public function arc(x:Number, y:Number, radius:Number, startAngle:Number, endAngle:Number, anticlockwise:Boolean = false):void
         {
+            if (!isFinite(x) || !isFinite(y) || !isFinite(radius) ||
+                !isFinite(startAngle) || !isFinite(endAngle))
+                return;
+
             var startX:Number = x + radius * Math.cos(startAngle);
             var startY:Number = y + radius * Math.sin(startAngle);
             var endX:Number   = x + radius * Math.cos(endAngle);
