@@ -157,46 +157,63 @@ package com.googlecode.flashcanvas
          * transformations
          */
 
-        public function scale(sx:Number, sy:Number):void
+        public function scale(x:Number, y:Number):void
         {
-            var matrix:Matrix = state.transformMatrix.clone();
-            state.transformMatrix.identity();
-            state.transformMatrix.scale(sx, sy);
-            state.transformMatrix.concat(matrix);
+            if (isFinite(x) && isFinite(y))
+            {
+                var matrix:Matrix = state.transformMatrix.clone();
+                state.transformMatrix.identity();
+                state.transformMatrix.scale(x, y);
+                state.transformMatrix.concat(matrix);
 
-            state.lineScale *= Math.sqrt(Math.abs(sx * sy));
+                state.lineScale *= Math.sqrt(Math.abs(x * y));
+            }
         }
 
         public function rotate(angle:Number):void
         {
-            var matrix:Matrix = state.transformMatrix.clone();
-            state.transformMatrix.identity();
-            state.transformMatrix.rotate(angle);
-            state.transformMatrix.concat(matrix);
+            if (isFinite(angle))
+            {
+                var matrix:Matrix = state.transformMatrix.clone();
+                state.transformMatrix.identity();
+                state.transformMatrix.rotate(angle);
+                state.transformMatrix.concat(matrix);
+            }
         }
 
-        public function translate(tx:Number, ty:Number):void
+        public function translate(x:Number, y:Number):void
         {
-            var matrix:Matrix = state.transformMatrix.clone();
-            state.transformMatrix.identity();
-            state.transformMatrix.translate(tx, ty);
-            state.transformMatrix.concat(matrix);
+            if (isFinite(x) && isFinite(y))
+            {
+                var matrix:Matrix = state.transformMatrix.clone();
+                state.transformMatrix.identity();
+                state.transformMatrix.translate(x, y);
+                state.transformMatrix.concat(matrix);
+            }
         }
 
         public function transform(m11:Number, m12:Number, m21:Number, m22:Number, dx:Number, dy:Number):void
         {
-            var matrix:Matrix = state.transformMatrix.clone();
-            state.transformMatrix = new Matrix(m11, m12, m21, m22, dx, dy);
-            state.transformMatrix.concat(matrix);
+            if (isFinite(m11) && isFinite(m21) && isFinite(dx) &&
+                isFinite(m12) && isFinite(m22) && isFinite(dy))
+            {
+                var matrix:Matrix = state.transformMatrix.clone();
+                state.transformMatrix = new Matrix(m11, m12, m21, m22, dx, dy);
+                state.transformMatrix.concat(matrix);
 
-            state.lineScale *= Math.sqrt(Math.abs(m11 * m22 - m12 * m21));
+                state.lineScale *= Math.sqrt(Math.abs(m11 * m22 - m12 * m21));
+            }
         }
 
         public function setTransform(m11:Number, m12:Number, m21:Number, m22:Number, dx:Number, dy:Number):void
         {
-            state.transformMatrix = new Matrix(m11, m12, m21, m22, dx, dy);
+            if (isFinite(m11) && isFinite(m21) && isFinite(dx) &&
+                isFinite(m12) && isFinite(m22) && isFinite(dy))
+            {
+                state.transformMatrix = new Matrix(m11, m12, m21, m22, dx, dy);
 
-            state.lineScale = Math.sqrt(Math.abs(m11 * m22 - m12 * m21));
+                state.lineScale = Math.sqrt(Math.abs(m11 * m22 - m12 * m21));
+            }
         }
 
         /*
