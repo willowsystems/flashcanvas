@@ -1287,6 +1287,17 @@ package com.googlecode.flashcanvas
                 dy = args[5];
                 dw = args[6];
                 dh = args[7];
+
+                if (sw < 0)
+                {
+                    sx += sw;
+                    sw = -sw;
+                }
+                if (sh < 0)
+                {
+                    sy += sh;
+                    sh = -sh;
+                }
             }
             else
             {
@@ -1299,6 +1310,17 @@ package com.googlecode.flashcanvas
                 dy = args[1];
                 dw = args[2] || sw;
                 dh = args[3] || sh;
+            }
+
+            if (dw < 0)
+            {
+                dx += dw;
+                dw = -dw;
+            }
+            if (dh < 0)
+            {
+                dy += dh;
+                dh = -dh;
             }
 
             // Clip the region within the source rectangle
