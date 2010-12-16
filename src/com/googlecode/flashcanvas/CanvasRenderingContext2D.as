@@ -811,6 +811,17 @@ package com.googlecode.flashcanvas
 
         public function drawImage(image:*, ...args:Array):void
         {
+            var argc:int = args.length;
+
+            if (!(argc == 2 && isFinite(args[0]) && isFinite(args[1]) ||
+                  argc == 4 && isFinite(args[0]) && isFinite(args[1])
+                            && isFinite(args[2]) && isFinite(args[3]) ||
+                  argc == 8 && isFinite(args[0]) && isFinite(args[1])
+                            && isFinite(args[2]) && isFinite(args[3])
+                            && isFinite(args[4]) && isFinite(args[5])
+                            && isFinite(args[6]) && isFinite(args[7])))
+                return;
+
             var url:String = image.src;
 
             // If the image is already in the cache
