@@ -127,7 +127,7 @@ package
         {
             var type:String = input.readUTF();
 
-            if (type == "image/jpeg")
+            if (/^image\/jpeg$/i.test(type))
             {
                 var quality:Number = input.readFloat();
                 return ctx.canvas.toDataURL(type, quality);

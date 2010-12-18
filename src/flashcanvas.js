@@ -810,10 +810,9 @@ var FlashCanvas = {
         };
 
         canvas.toDataURL = function(type, quality) {
-            type = type ? type.toLowerCase() : "image/png";
-
-            if (type === "image/jpeg") {
-                ctx._queue.push(properties.toDataURL, type, quality || 0.5);
+            if (("" + type).replace(/[A-Z]+/g, toLowerCase) === "image/jpeg") {
+                ctx._queue.push(properties.toDataURL, type,
+                                typeof quality === "number" ? quality : "");
             } else {
                 ctx._queue.push(properties.toDataURL, type);
             }
@@ -893,6 +892,10 @@ function getScriptUrl() {
 // Escape characters not permitted in XML.
 function encodeXML(str) {
     return ("" + str).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+}
+
+function toLowerCase(str) {
+    return str.toLowerCase();
 }
 
 /*

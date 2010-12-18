@@ -83,16 +83,18 @@ package com.googlecode.flashcanvas
                 return "data:,";
             }
 
-            type = type.toLowerCase();
             var byteArray:ByteArray;
 
-            if (type == "image/jpeg")
+            if (/^image\/jpeg$/i.test(type))
             {
                 var quality:* = args[0];
-                if (typeof quality != "number" || quality < 0 || quality > 1)
+                if (typeof quality != "number" || isNaN(quality) ||
+                    quality < 0 || quality > 1)
                     quality = 0.5;
 
                 var jpgEncoder:JPGEncoder = new JPGEncoder(quality * 100);
+
+                type      = "image/jpeg";
                 byteArray = jpgEncoder.encode(bitmapData);
             }
             else
