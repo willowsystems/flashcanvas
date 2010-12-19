@@ -35,6 +35,18 @@ package com.googlecode.flashcanvas
         private var _color:uint   = 0x000000;
         private var _alpha:Number = 1.0;
 
+        private static var _regexp:Object =
+        {
+            hex3:  /^#[0-9a-f]{3}$/,
+            hex6:  /^#[0-9a-f]{6}$/,
+            rgb1:  /^rgb\(\s*[+-]?\d+\s*,\s*[+-]?\d+\s*,\s*[+-]?\d+\s*\)$/,
+            rgb2:  /^rgb\(\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+%\s*\)$/,
+            rgba1: /^rgba\(\s*[+-]?\d+\s*,\s*[+-]?\d+\s*,\s*[+-]?\d+\s*,\s*[+-]?[\d.]+\s*\)$/,
+            rgba2: /^rgba\(\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+\s*\)$/,
+            hsl:   /^hsl\(\s*[+-]?[\d.]+\s*,\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+%\s*\)$/,
+            hsla:  /^hsla\(\s*[+-]?[\d.]+\s*,\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+%\s*,\s*[+-]?[\d.]+\s*\)$/
+        };
+
         private static var _names:Object =
         {
             aliceblue:            0xF0F8FF,
@@ -191,7 +203,7 @@ package com.googlecode.flashcanvas
             str = str.toLowerCase().replace(/^\s*/, "").replace(/\s*$/, "");
 
             // #F00
-            if (/^#[0-9a-f]{3}$/.test(str))
+            if (_regexp.hex3.test(str))
             {
                 var r:String = str.charAt(1);
                 var g:String = str.charAt(2);
@@ -200,37 +212,37 @@ package com.googlecode.flashcanvas
             }
 
             // #FF0000
-            else if (/^#[0-9a-f]{6}$/.test(str))
+            else if (_regexp.hex6.test(str))
             {
                 _color = parseInt("0x" + str.substr(1, 6));
             }
 
             // rgb(255,0,0), rgb(100%,0%,0%)
-            else if (str.indexOf("rgb(") == 0)
+            else if (_regexp.rgb1.test(str) || _regexp.rgb2.test(str))
             {
-                var rgb:Array = str.substring(4, str.length - 1).split(",");
+                var rgb:Array = str.slice(4, -1).split(",");
                 _color = rgb2hex(rgb);
             }
 
             // rgba(255,0,0,1), rgba(100%,0%,0%,1)
-            else if (str.indexOf("rgba(") == 0)
+            else if (_regexp.rgba1.test(str) || _regexp.rgba2.test(str))
             {
-                var rgba:Array = str.substring(5, str.length - 1).split(",");
+                var rgba:Array = str.slice(5, -1).split(",");
                 _color = rgb2hex(rgba);
                 _alpha = parseFloat(rgba[3]);
             }
 
             // hsl(0,100%,50%)
-            else if (str.indexOf("hsl(") == 0)
+            else if (_regexp.hsl.test(str))
             {
-                var hsl:Array = str.substring(4, str.length - 1).split(",");
+                var hsl:Array = str.slice(4, -1).split(",");
                 _color = hsl2hex(hsl);
             }
 
             // hsla(0,100%,50%,1)
-            else if (str.indexOf("hsla(") == 0)
+            else if (_regexp.hsla.test(str))
             {
-                var hsla:Array = str.substring(5, str.length - 1).split(",");
+                var hsla:Array = str.slice(5, -1).split(",");
                 _color = hsl2hex(hsla);
                 _alpha = parseFloat(hsla[3]);
             }
@@ -239,6 +251,13 @@ package com.googlecode.flashcanvas
             else if (str in _names)
             {
                 _color = _names[str];
+            }
+
+            // transparent
+            else if (str == "transparent")
+            {
+                _color = 0x000000;
+                _alpha = 0.0;
             }
 
             // invalid color
@@ -250,29 +269,22 @@ package com.googlecode.flashcanvas
 
         private function rgb2hex(rgb:Array):uint
         {
-            var percentage:int = 0;
+            var str:String;
+            var num:Number;
 
             for (var i:int = 0; i <= 2; i++)
             {
-                var str:String = rgb[i];
-                if (str.indexOf("%") != -1)
-                {
-                    rgb[i] = Math.round(2.55 * parseFloat(str));
-                    percentage++;
-                }
+                str = rgb[i];
+                if (str.indexOf("%") == -1)
+                    num = parseInt(str);
+                else
+                    num = Math.round(2.55 * parseFloat(str));
+
+                // These values should be in the range [0, 255].
+                rgb[i] = (num < 0) ? 0 : (num > 255) ? 255 : num;
             }
 
-            if (percentage == 0 || percentage == 3)
-            {
-                var r:int = parseInt(rgb[0]);
-                var g:int = parseInt(rgb[1]);
-                var b:int = parseInt(rgb[2]);
-                return (r << 16) | (g << 8) | b;
-            }
-            else
-            {
-                throw new ArgumentError();
-            }
+            return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
         }
 
         private function hsl2hex(hsl:Array):uint
@@ -333,10 +345,11 @@ package com.googlecode.flashcanvas
             }
             else
             {
-                var r:int = _color >> 16 & 255;
-                var g:int = _color >>  8 & 255;
-                var b:int = _color       & 255;
-                str = "rgba(" + r + ", " + g + ", " + b + ", " + _alpha + ")";
+                var r:int    = _color >> 16 & 255;
+                var g:int    = _color >>  8 & 255;
+                var b:int    = _color       & 255;
+                var a:String = _alpha ? ("" + _alpha) : "0.0";
+                str = "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
             }
             return str;
         }
