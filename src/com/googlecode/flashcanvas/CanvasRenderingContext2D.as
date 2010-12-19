@@ -958,8 +958,8 @@ package com.googlecode.flashcanvas
         {
             var style:Object         = state.strokeStyle;
             var thickness:Number     = state.lineWidth * state.lineScale;
-            var color:uint           = 0;
-            var alpha:Number         = 1.0;
+            var color:uint           = 0x000000;
+            var alpha:Number         = 0.0;
             var pixelHinting:Boolean = true;
 
             if (style is CSSColor)
@@ -976,6 +976,11 @@ package com.googlecode.flashcanvas
             if (style is CanvasGradient)
             {
                 var alphas:Array = style.alphas;
+
+                // When there are no stops, the gradient is transparent black.
+                if (alphas.length == 0)
+                    return;
+
                 if (state.globalAlpha < 1)
                 {
                     for (var i:int = 0, n:int = alphas.length; i < n; i++)
@@ -1011,6 +1016,14 @@ package com.googlecode.flashcanvas
             else if (style is CanvasGradient)
             {
                 var alphas:Array = style.alphas;
+
+                // When there are no stops, the gradient is transparent black.
+                if (alphas.length == 0)
+                {
+                    graphics.beginFill(0x000000, 0.0);
+                    return;
+                }
+
                 if (state.globalAlpha < 1)
                 {
                     for (var i:int = 0, n:int = alphas.length; i < n; i++)

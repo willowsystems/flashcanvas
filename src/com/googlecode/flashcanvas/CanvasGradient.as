@@ -36,7 +36,7 @@ package com.googlecode.flashcanvas
     {
         public var type:String;
         public var colorStops:Array = [];
-        public var matrix:Matrix;
+        public var matrix:Matrix = null;
         public var focalPointRatio:Number = 0;
 
         public function CanvasGradient()
@@ -45,8 +45,24 @@ package com.googlecode.flashcanvas
 
         public function addColorStop(offset:Number, color:String):void
         {
-            colorStops.push(new ColorStop(offset, color));
-            colorStops.sortOn("offset");
+            var deleteCount:int = 0;
+
+            for (var i:int = colorStops.length; i > 0; i--)
+            {
+                if (colorStops[i - 1].offset <= offset)
+                {
+                    // All but the first and last stop added at each point
+                    // to be ignored.
+                    if (i > 1 && colorStops[i - 2].offset == offset)
+                    {
+                        i--;
+                        deleteCount = 1;
+                    }
+                    break;
+                }
+            }
+
+            colorStops.splice(i, deleteCount, new ColorStop(offset, color));
         }
 
         public function get colors():Array
@@ -74,7 +90,7 @@ package com.googlecode.flashcanvas
             var ary:Array = [];
             for (var i:int = 0, n:int = colorStops.length; i < n; i++)
             {
-                ary[i] = Math.round(colorStops[i].offset * 255);
+                ary[i] = colorStops[i].offset * 255;
             }
             return ary;
         }

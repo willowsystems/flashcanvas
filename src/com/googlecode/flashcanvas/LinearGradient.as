@@ -39,6 +39,11 @@ package com.googlecode.flashcanvas
         {
             type = GradientType.LINEAR;
 
+            // If x0 = x1 and y0 = y1, then the linear gradient must paint
+            // nothing.
+            if (x0 == x1 && y0 == y1)
+                return;
+
             var dx:Number = x1 - x0;
             var dy:Number = y1 - y0;
             var cx:Number = (x0 + x1) / 2;

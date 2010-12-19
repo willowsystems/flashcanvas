@@ -43,6 +43,11 @@ package com.googlecode.flashcanvas
         {
             type = GradientType.RADIAL;
 
+            // If x0 = x1 and y0 = y1 and r0 = r1, then the radial gradient
+            // must paint nothing.
+            if (x0 == x1 && y0 == y1 && r0 == r1)
+                return;
+
             // find which radius is longer, that will be outer ring
             var tx:Number, ty:Number, d:Number, dx:Number, dy:Number;
 
@@ -90,7 +95,7 @@ package com.googlecode.flashcanvas
             var ary:Array = [];
             for (var i:int = 0, n:int = colorStops.length; i < n; i++)
             {
-                ary[i] = Math.round(colorStops[i].offset * range + minRatio);
+                ary[i] = colorStops[i].offset * range + minRatio;
             }
             return ary;
         }
