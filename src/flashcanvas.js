@@ -34,6 +34,14 @@ var ON_READY_STATE_CHANGE       = "onreadystatechange";
 var ON_UNLOAD                   = "onunload";
 var SWF_URL                     = getScriptUrl().replace(/[^\/]+$/, "flashcanvas.swf");
 
+// DOMException code
+var INDEX_SIZE_ERR              =  1;
+var NOT_SUPPORTED_ERR           =  9;
+var INVALID_STATE_ERR           = 11;
+var SYNTAX_ERR                  = 12;
+var TYPE_MISMATCH_ERR           = 17;
+var SECURITY_ERR                = 18;
+
 /**
  * @constructor
  */
@@ -678,6 +686,26 @@ var TextMetrics = function(width) {
     this.width = width;
 };
 
+/**
+ * DOMException
+ * @constructor
+ */
+var DOMException = function(code) {
+    this.code    = code;
+    this.message = DOMExceptionNames[code];
+};
+
+DOMException.prototype = new Error;
+
+var DOMExceptionNames = {
+    1:  "INDEX_SIZE_ERR",
+    9:  "NOT_SUPPORTED_ERR",
+    11: "INVALID_STATE_ERR",
+    12: "SYNTAX_ERR",
+    17: "TYPE_MISMATCH_ERR",
+    18: "SECURITY_ERR"
+};
+
 /*
  * Event handlers
  */
@@ -896,6 +924,10 @@ function encodeXML(str) {
 
 function toLowerCase(str) {
     return str.toLowerCase();
+}
+
+function throwException(code) {
+    throw new DOMException(code);
 }
 
 /*
