@@ -671,7 +671,7 @@ CanvasRenderingContext2D.prototype = {
         this.shadowOffsetX = this._shadowOffsetX = 0;
         this.shadowOffsetY = this._shadowOffsetY = 0;
         this.shadowBlur    = this._shadowBlur    = 0;
-        this.shadowColor   = this._shadowColor   = "rgba(0,0,0,0)";
+        this.shadowColor   = this._shadowColor   = "rgba(0, 0, 0, 0.0)";
 
         // text
         this.font         = this._font         = "10px sans-serif";
