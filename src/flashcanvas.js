@@ -277,26 +277,55 @@ CanvasRenderingContext2D.prototype = {
     },
 
     createLinearGradient: function(x0, y0, x1, y1) {
+        // If any of the arguments are not finite numbers, throws a
+        // NOT_SUPPORTED_ERR exception.
+        if (!(isFinite(x0) && isFinite(y0) && isFinite(x1) && isFinite(y1))) {
+            throwException(NOT_SUPPORTED_ERR);
+        }
+
         this._queue.push(properties.createLinearGradient, x0, y0, x1, y1);
         return new CanvasGradient(this);
     },
 
     createRadialGradient: function(x0, y0, r0, x1, y1, r1) {
+        // If any of the arguments are not finite numbers, throws a
+        // NOT_SUPPORTED_ERR exception.
+        if (!(isFinite(x0) && isFinite(y0) && isFinite(r0) &&
+              isFinite(x1) && isFinite(y1) && isFinite(r1))) {
+            throwException(NOT_SUPPORTED_ERR);
+        }
+
+        // If either of the radii are negative, throws an INDEX_SIZE_ERR
+        // exception.
+        if (r0 < 0 || r1 < 0) {
+            throwException(INDEX_SIZE_ERR);
+        }
+
         this._queue.push(properties.createRadialGradient, x0, y0, r0, x1, y1, r1);
         return new CanvasGradient(this);
     },
 
     createPattern: function(image, repetition) {
+        // If the image is null, the implementation must raise a
+        // TYPE_MISMATCH_ERR exception.
+        if (!image) {
+            throwException(TYPE_MISMATCH_ERR);
+        }
+
         var tagName = image.tagName, src;
         var canvasId = this._canvasId;
 
-        // The first argument is HTMLImageElement, HTMLCanvasElement or
-        // HTMLVideoElement. For now, only HTMLImageElement is supported.
+        // If the first argument isn't an img, canvas, or video element,
+        // throws a TYPE_MISMATCH_ERR exception.
         if (tagName) {
-            if (tagName.toLowerCase() === "img") {
+            tagName = tagName.toLowerCase();
+            if (tagName === "img") {
                 src = image.getAttribute("src", 2);
-            } else {
+            } else if (tagName === CANVAS || tagName === "video") {
+                // For now, only HTMLImageElement is supported.
                 return;
+            } else {
+                throwException(TYPE_MISMATCH_ERR);
             }
         }
 
@@ -305,7 +334,15 @@ CanvasRenderingContext2D.prototype = {
         else if (image.src) {
             src = image.src;
         } else {
-            return;
+            throwException(TYPE_MISMATCH_ERR);
+        }
+
+        // If the second argument isn't one of the allowed values, throws a
+        // SYNTAX_ERR exception.
+        if (!(repetition === "repeat"   || repetition === "no-repeat" ||
+              repetition === "repeat-x" || repetition === "repeat-y"  ||
+              repetition === ""         || repetition === NULL)) {
+            throwException(SYNTAX_ERR);
         }
 
         this._queue.push(properties.createPattern, src, repetition);
@@ -418,6 +455,11 @@ CanvasRenderingContext2D.prototype = {
     },
 
     arcTo: function(x1, y1, x2, y2, radius) {
+        // Throws an INDEX_SIZE_ERR exception if the given radius is negative.
+        if (radius < 0 && isFinite(radius)) {
+            throwException(INDEX_SIZE_ERR);
+        }
+
         this._queue.push(properties.arcTo, x1, y1, x2, y2, radius);
     },
 
@@ -426,6 +468,11 @@ CanvasRenderingContext2D.prototype = {
     },
 
     arc: function(x, y, radius, startAngle, endAngle, anticlockwise) {
+        // Throws an INDEX_SIZE_ERR exception if the given radius is negative.
+        if (radius < 0 && isFinite(radius)) {
+            throwException(INDEX_SIZE_ERR);
+        }
+
         this._queue.push(properties.arc, x, y, radius, startAngle, endAngle, anticlockwise ? 1 : 0);
     },
 
@@ -525,16 +572,26 @@ CanvasRenderingContext2D.prototype = {
      */
 
     drawImage: function(image, x1, y1, w1, h1, x2, y2, w2, h2) {
+        // If the image is null, the implementation must raise a
+        // TYPE_MISMATCH_ERR exception.
+        if (!image) {
+            throwException(TYPE_MISMATCH_ERR);
+        }
+
         var tagName = image.tagName, src, argc = arguments.length;
         var canvasId = this._canvasId;
 
-        // The first argument is HTMLImageElement, HTMLCanvasElement or
-        // HTMLVideoElement. For now, only HTMLImageElement is supported.
+        // If the first argument isn't an img, canvas, or video element,
+        // throws a TYPE_MISMATCH_ERR exception.
         if (tagName) {
-            if (tagName.toLowerCase() === "img") {
+            tagName = tagName.toLowerCase();
+            if (tagName === "img") {
                 src = image.getAttribute("src", 2);
-            } else {
+            } else if (tagName === CANVAS || tagName === "video") {
+                // For now, only HTMLImageElement is supported.
                 return;
+            } else {
+                throwException(TYPE_MISMATCH_ERR);
             }
         }
 
@@ -543,7 +600,7 @@ CanvasRenderingContext2D.prototype = {
         else if (image.src) {
             src = image.src;
         } else {
-            return;
+            throwException(TYPE_MISMATCH_ERR);
         }
 
         this._setCompositing();
@@ -554,6 +611,12 @@ CanvasRenderingContext2D.prototype = {
         } else if (argc === 5) {
             this._queue.push(properties.drawImage, argc, src, x1, y1, w1, h1);
         } else if (argc === 9) {
+            // If one of the sw or sh arguments is zero, the implementation
+            // must raise an INDEX_SIZE_ERR exception.
+            if (w1 === 0 || h1 === 0) {
+                throwException(INDEX_SIZE_ERR);
+            }
+
             this._queue.push(properties.drawImage, argc, src, x1, y1, w1, h1, x2, y2, w2, h2);
         } else {
             return;
@@ -666,6 +729,11 @@ var CanvasGradient = function(ctx) {
 
 CanvasGradient.prototype = {
     addColorStop: function(offset, color) {
+        // Throws an INDEX_SIZE_ERR exception if the offset is out of range.
+        if (isNaN(offset) || offset < 0 || offset > 1) {
+            throwException(INDEX_SIZE_ERR);
+        }
+
         this._ctx._queue.push(properties.addColorStop, this.id, offset, color);
     }
 };
