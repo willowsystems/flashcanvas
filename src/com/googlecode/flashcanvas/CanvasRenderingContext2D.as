@@ -440,7 +440,6 @@ package com.googlecode.flashcanvas
             if (!isFinite(x) || !isFinite(y) || !isFinite(w) || !isFinite(h))
                 return;
 
-            var shape:Shape       = new Shape();
             var graphics:Graphics = shape.graphics;
 
             graphics.beginFill(0x000000);
@@ -448,6 +447,8 @@ package com.googlecode.flashcanvas
             graphics.endFill();
 
             _canvas.bitmapData.draw(shape, state.transformMatrix, null, BlendMode.ERASE);
+
+            graphics.clear();
         }
 
         public function fillRect(x:Number, y:Number, w:Number, h:Number):void
