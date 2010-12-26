@@ -710,13 +710,13 @@ package com.googlecode.flashcanvas
         public function clip():void
         {
             // extract path
-            state.clipPath = path;
+            state.clipPath = path.concat();
 
             // draw paths
             var graphics:Graphics = clippingMask.graphics;
             graphics.clear();
             graphics.beginFill(0x000000);
-            _drawPath(graphics, state.clipPath);
+            _drawPath(graphics, path);
             graphics.endFill();
         }
 

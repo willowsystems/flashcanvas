@@ -82,7 +82,7 @@ package com.googlecode.flashcanvas
         {
             var state:State = new State();
             state.transformMatrix          = transformMatrix.clone();
-            state.clipPath                 = clipPath;
+            state.clipPath                 = clipPath.concat();
             state.strokeStyle              = strokeStyle;
             state.fillStyle                = fillStyle;
             state.globalAlpha              = globalAlpha;
