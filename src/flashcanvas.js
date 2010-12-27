@@ -710,8 +710,12 @@ CanvasRenderingContext2D.prototype = {
         this._initialize();
 
         // Adjust the size of Flash to that of the canvas
-        this._swf.width  = width;
-        this._swf.height = height;
+        if (width > 0) {
+            this._swf.width = width;
+        }
+        if (height > 0) {
+            this._swf.height = height;
+        }
 
         // Execute a resize command at the start of the next frame
         this._queue.push(properties.resize, width, height);
@@ -804,13 +808,11 @@ function onPropertyChange() {
 
         if (isNaN(number) || number < 0) {
             number = (prop === "width") ? 300 : 150;
-        } else if (number === 0) {
-            number = 1;
         }
 
         if (value === number) {
             canvas.style[prop] = number + "px";
-            ctx._resize(canvas.clientWidth, canvas.clientHeight);
+            ctx._resize(canvas.width, canvas.height);
         } else {
             canvas[prop] = number;
         }
@@ -957,12 +959,19 @@ var FlashCanvas = {
             if (isNaN(height) || height < 0) {
                 height = 150;
             }
+
+            canvas.width        = width;
+            canvas.height       = height;
             canvas.style.width  = width  + "px";
             canvas.style.height = height + "px";
 
             // Adjust the size of Flash to that of the canvas
-            swf.width  = canvas.width  = width;
-            swf.height = canvas.height = height;
+            if (width > 0) {
+                swf.width = width;
+            }
+            if (height > 0) {
+                swf.height = height;
+            }
             swf.resize(width, height);
 
             // Add event listener

@@ -42,6 +42,8 @@ package com.googlecode.flashcanvas
         public var dir:String = "ltr";
 
         private var _context:*;
+        private var _width:int  = 300;
+        private var _height:int = 150;
 
         public function Canvas(width:int = 300, height:int = 150)
         {
@@ -49,9 +51,19 @@ package com.googlecode.flashcanvas
             resize(width, height);
         }
 
+        override public function get width():Number
+        {
+            return _width;
+        }
+
         override public function set width(value:Number):void
         {
             resize(value, height);
+        }
+
+        override public function get height():Number
+        {
+            return _height;
         }
 
         override public function set height(value:Number):void
@@ -78,7 +90,7 @@ package com.googlecode.flashcanvas
 
         public function toDataURL(type:String = "image/png", ...args:Array):String
         {
-            if (width == 0 || height == 0)
+            if (_width == 0 || _height == 0)
             {
                 return "data:,";
             }
@@ -108,9 +120,18 @@ package com.googlecode.flashcanvas
 
         public function resize(width:int, height:int):void
         {
+            this._width  = width;
+            this._height = height;
+
             // purge existing
             if (bitmapData)
                 bitmapData.dispose();
+
+            // The dimension of bitmapdata needs to be a positive value.
+            if (width <= 0)
+                width = 1;
+            if (height <= 0)
+                height = 1;
 
             // create new bitmapdata
             bitmapData = new BitmapData(width, height, true, 0x00000000);
