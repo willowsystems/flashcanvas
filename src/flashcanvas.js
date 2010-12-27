@@ -800,14 +800,20 @@ function onPropertyChange() {
     var prop = event.propertyName;
     if (prop === "width" || prop === "height") {
         var canvas = event.srcElement, ctx = canvas.getContext("2d");
-        var value = parseInt(canvas[prop]);
-        if (isNaN(value) || value < 0) {
-            value = (prop === "width") ? 300 : 150;
-        } else if (value === 0) {
-            value = 1;
+        var value = canvas[prop], number = parseInt(value, 10);
+
+        if (isNaN(number) || number < 0) {
+            number = (prop === "width") ? 300 : 150;
+        } else if (number === 0) {
+            number = 1;
         }
-        canvas.style[prop] = value + "px";
-        ctx._resize(canvas.clientWidth, canvas.clientHeight);
+
+        if (value === number) {
+            canvas.style[prop] = number + "px";
+            ctx._resize(canvas.clientWidth, canvas.clientHeight);
+        } else {
+            canvas[prop] = number;
+        }
     }
 }
 
@@ -942,8 +948,8 @@ var FlashCanvas = {
         if (ready) {
             var canvas = canvases[canvasId];
             var swf    = canvas.firstChild;
-            var width  = parseInt(canvas.width);
-            var height = parseInt(canvas.height);
+            var width  = parseInt(canvas.width, 10);
+            var height = parseInt(canvas.height, 10);
 
             if (isNaN(width) || width < 0) {
                 width = 300;
