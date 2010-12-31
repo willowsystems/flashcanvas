@@ -32,6 +32,8 @@ package com.googlecode.flashcanvas
     import flash.display.Bitmap;
     import flash.display.BitmapData;
     import flash.display.PixelSnapping;
+    import flash.geom.Point;
+    import flash.geom.Rectangle;
     import flash.utils.ByteArray;
     import com.adobe.images.JPGEncoder;
     import com.adobe.images.PNGEncoder;
@@ -104,10 +106,23 @@ package com.googlecode.flashcanvas
                     quality < 0 || quality > 1)
                     quality = 0.5;
 
+                // For image types that do not support an alpha channel, the
+                // image must be composited onto a solid black background
+                // using the source-over operator.
+                var image:BitmapData     =
+                    new BitmapData(width, height, true, 0xFF000000);
+                var sourceRect:Rectangle = bitmapData.rect;
+                var destPoint:Point      = new Point(0, 0);
+                image.copyPixels(
+                    bitmapData, sourceRect, destPoint, null, null, true);
+
                 var jpgEncoder:JPGEncoder = new JPGEncoder(quality * 100);
 
                 type      = "image/jpeg";
-                byteArray = jpgEncoder.encode(bitmapData);
+                byteArray = jpgEncoder.encode(image);
+
+                // Release the memory
+                image.dispose();
             }
             else
             {
