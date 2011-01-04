@@ -50,10 +50,10 @@ package com.googlecode.flashcanvas
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
+    import flash.net.URLRequest;
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
-    import flash.net.URLRequest;
     import flash.utils.ByteArray;
 
     public class CanvasRenderingContext2D
@@ -67,8 +67,8 @@ package com.googlecode.flashcanvas
         // clipping region
         private var clippingMask:Shape;
 
-        // current path
-        private var path:Array = [];
+        // path commands and data
+        private var path:Path;
 
         // first point of the current subpath
         private var startingPoint:Point;
@@ -96,6 +96,7 @@ package com.googlecode.flashcanvas
             clippingMask = new Shape();
             shape.mask   = clippingMask;
 
+            path          = new Path();
             startingPoint = new Point();
             currentPoint  = new Point();
 
@@ -149,7 +150,7 @@ package com.googlecode.flashcanvas
             var graphics:Graphics = clippingMask.graphics;
             graphics.clear();
             graphics.beginFill(0x000000);
-            _drawPath(graphics, state.clipPath);
+            state.clippingPath.draw(graphics);
             graphics.endFill();
         }
 
@@ -502,18 +503,16 @@ package com.googlecode.flashcanvas
 
         public function beginPath():void
         {
-            path = [];
+            path.initialize();
         }
 
         public function closePath():void
         {
-            if (path.length == 0)
+            if (path.commands.length == 0)
                 return;
 
-            path.push({
-                command: "lineTo",
-                data: [ startingPoint.x, startingPoint.y ]
-            });
+            path.commands.push(GraphicsPathCommand.LINE_TO);
+            path.data.push(startingPoint.x, startingPoint.y);
 
             currentPoint.x = startingPoint.x;
             currentPoint.y = startingPoint.y;
@@ -526,10 +525,8 @@ package com.googlecode.flashcanvas
 
             var p:Point = _getTransformedPoint(x, y);
 
-            path.push({
-                command: "moveTo",
-                data: [ p.x, p.y ]
-            });
+            path.commands.push(GraphicsPathCommand.MOVE_TO);
+            path.data.push(p.x, p.y);
 
             startingPoint.x = currentPoint.x = p.x;
             startingPoint.y = currentPoint.y = p.y;
@@ -541,15 +538,13 @@ package com.googlecode.flashcanvas
                 return;
 
             // check that path contains subpaths
-            if (path.length == 0)
+            if (path.commands.length == 0)
                 moveTo(x, y);
 
             var p:Point = _getTransformedPoint(x, y);
 
-            path.push({
-                command: "lineTo",
-                data: [ p.x, p.y ]
-            });
+            path.commands.push(GraphicsPathCommand.LINE_TO);
+            path.data.push(p.x, p.y);
 
             currentPoint.x = p.x;
             currentPoint.y = p.y;
@@ -561,71 +556,126 @@ package com.googlecode.flashcanvas
                 return;
 
             // check that path contains subpaths
-            if (path.length == 0)
+            if (path.commands.length == 0)
                 moveTo(cpx, cpy);
 
             var cp:Point = _getTransformedPoint(cpx, cpy);
             var  p:Point = _getTransformedPoint(x, y);
 
-            path.push({
-                command: "quadraticCurveTo",
-                data: [ cp.x, cp.y, p.x, p.y ]
-            });
+            path.commands.push(GraphicsPathCommand.CURVE_TO);
+            path.data.push(cp.x, cp.y, p.x, p.y);
 
             currentPoint.x = p.x;
             currentPoint.y = p.y;
         }
 
+        /*
+         * Cubic bezier curve is approximated by four quadratic bezier curves.
+         * The approximation uses MidPoint algorithm by Timothee Groleau.
+         *
+         * @see http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
+         */
         public function bezierCurveTo(cp1x:Number, cp1y:Number, cp2x:Number, cp2y:Number, x:Number, y:Number):void
         {
             if (!isFinite(cp1x) || !isFinite(cp1y) || !isFinite(cp2x) || !isFinite(cp2y) || !isFinite(x) || !isFinite(y))
                 return;
 
             // check that path contains subpaths
-            if (path.length == 0)
+            if (path.commands.length == 0)
                 moveTo(cp1x, cp1y);
 
-            var cp1:Point = _getTransformedPoint(cp1x, cp1y);
-            var cp2:Point = _getTransformedPoint(cp2x, cp2y);
-            var   p:Point = _getTransformedPoint(x, y);
+            var p0:Point = currentPoint;
+            var p1:Point = _getTransformedPoint(cp1x, cp1y);
+            var p2:Point = _getTransformedPoint(cp2x, cp2y);
+            var p3:Point = _getTransformedPoint(x, y);
 
-            path.push({
-                command: "bezierCurveTo",
-                data: [ cp1.x, cp1.y, cp2.x, cp2.y, p.x, p.y, currentPoint.x, currentPoint.y ]
-            });
+            // calculate base points
+            var bp1:Point = Point.interpolate(p0, p1, 0.25);
+            var bp2:Point = Point.interpolate(p3, p2, 0.25);
 
-            currentPoint.x = p.x;
-            currentPoint.y = p.y;
+            // get 1/16 of the [p3, p0] segment
+            var dx:Number = (p3.x - p0.x) / 16;
+            var dy:Number = (p3.y - p0.y) / 16;
+
+            // calculate control points
+            var cp1:Point = Point.interpolate( p1,  p0, 0.375);
+            var cp2:Point = Point.interpolate(bp2, bp1, 0.375);
+            var cp3:Point = Point.interpolate(bp1, bp2, 0.375);
+            var cp4:Point = Point.interpolate( p2,  p3, 0.375);
+            cp2.x -= dx;
+            cp2.y -= dy;
+            cp3.x += dx;
+            cp3.y += dy;
+
+            // calculate anchor points
+            var ap1:Point = Point.interpolate(cp1, cp2, 0.5);
+            var ap2:Point = Point.interpolate(bp1, bp2, 0.5);
+            var ap3:Point = Point.interpolate(cp3, cp4, 0.5);
+
+            // four quadratic subsegments
+            path.commands.push(
+                GraphicsPathCommand.CURVE_TO,
+                GraphicsPathCommand.CURVE_TO,
+                GraphicsPathCommand.CURVE_TO,
+                GraphicsPathCommand.CURVE_TO
+            );
+            path.data.push(
+                cp1.x, cp1.y, ap1.x, ap1.y,
+                cp2.x, cp2.y, ap2.x, ap2.y,
+                cp3.x, cp3.y, ap3.x, ap3.y,
+                cp4.x, cp4.y,  p3.x,  p3.y
+            );
+
+            currentPoint.x = p3.x;
+            currentPoint.y = p3.y;
         }
 
+        /*
+         * arcTo() is decomposed into lineTo() and arc().
+         *
+         * @see http://d.hatena.ne.jp/mindcat/20100131/1264958828
+         */
         public function arcTo(x1:Number, y1:Number, x2:Number, y2:Number, radius:Number):void
         {
             if (!isFinite(x1) || !isFinite(y1) || !isFinite(x2) || !isFinite(y2) || !isFinite(radius))
                 return;
 
             // check that path contains subpaths
-            if (path.length == 0)
+            if (path.commands.length == 0)
                 moveTo(x1, y1);
 
-            var p1:Point = _getTransformedPoint(x1, y1);
-            var p2:Point = _getTransformedPoint(x2, y2);
+            var p0:Point  = _getUntransformedPoint(currentPoint.x, currentPoint.y);
+            var a1:Number = p0.y - y1;
+            var b1:Number = p0.x - x1;
+            var a2:Number = y2   - y1;
+            var b2:Number = x2   - x1;
+            var mm:Number = Math.abs(a1 * b2 - b1 * a2);
 
-            // check that coordinates aren't equal
-            if (currentPoint.equals(p1))
+            if (mm < 1.0e-8 || radius === 0)
             {
-                path.push({
-                    command: "lineTo",
-                    data: [ p1.x, p1.y ]
-                });
+                lineTo(x1, y1);
             }
+            else
+            {
+                var dd:Number = a1 * a1 + b1 * b1;
+                var cc:Number = a2 * a2 + b2 * b2;
+                var tt:Number = a1 * a2 + b1 * b2;
+                var k1:Number = radius * Math.sqrt(dd) / mm;
+                var k2:Number = radius * Math.sqrt(cc) / mm;
+                var j1:Number = k1 * tt / dd;
+                var j2:Number = k2 * tt / cc;
+                var cx:Number = k1 * b2 + k2 * b1;
+                var cy:Number = k1 * a2 + k2 * a1;
+                var px:Number = b1 * (k2 + j1);
+                var py:Number = a1 * (k2 + j1);
+                var qx:Number = b2 * (k1 + j2);
+                var qy:Number = a2 * (k1 + j2);
+                var startAngle:Number = Math.atan2(py - cy, px - cx);
+                var endAngle:Number   = Math.atan2(qy - cy, qx - cx);
 
-            path.push({
-                command: "arcTo",
-                data: [ p1.x, p1.y, p2.x, p2.y, radius, currentPoint.x, currentPoint.y ]
-            });
-
-            currentPoint.x = p2.x;
-            currentPoint.y = p2.y;
+                lineTo(px + x1, py + y1);
+                arc(cx + x1, cy + y1, radius, startAngle, endAngle, b1 * a2 > b2 * a1);
+            }
         }
 
         public function rect(x:Number, y:Number, w:Number, h:Number):void
@@ -638,15 +688,28 @@ package com.googlecode.flashcanvas
             var p3:Point = _getTransformedPoint(x + w, y + h);
             var p4:Point = _getTransformedPoint(x, y + h);
 
-            path.push({
-                command: "rect",
-                data: [ p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y ]
-            });
+            path.commands.push(
+                GraphicsPathCommand.MOVE_TO,
+                GraphicsPathCommand.LINE_TO,
+                GraphicsPathCommand.LINE_TO,
+                GraphicsPathCommand.LINE_TO,
+                GraphicsPathCommand.LINE_TO
+            );
+            path.data.push(
+                p1.x, p1.y,
+                p2.x, p2.y,
+                p3.x, p3.y,
+                p4.x, p4.y,
+                p1.x, p1.y
+            );
 
             startingPoint.x = currentPoint.x = p1.x;
             startingPoint.y = currentPoint.y = p1.y;
         }
 
+        /*
+         * Arc is approximated by quadratic bezier curves.
+         */
         public function arc(x:Number, y:Number, radius:Number, startAngle:Number, endAngle:Number, anticlockwise:Boolean = false):void
         {
             if (!isFinite(x) || !isFinite(y) || !isFinite(radius) ||
@@ -655,46 +718,73 @@ package com.googlecode.flashcanvas
 
             var startX:Number = x + radius * Math.cos(startAngle);
             var startY:Number = y + radius * Math.sin(startAngle);
-            var endX:Number   = x + radius * Math.cos(endAngle);
-            var endY:Number   = y + radius * Math.sin(endAngle);
-
-            var p:Point  = _getTransformedPoint(x, y);
-            var p1:Point = _getTransformedPoint(startX, startY);
-            var p2:Point = _getTransformedPoint(endX, endY);
 
             // check that path contains subpaths
-            if (path.length == 0)
-            {
-                path.push({
-                    command: "moveTo",
-                    data: [ p1.x, p1.y ]
-                });
+            if (path.commands.length == 0)
+                moveTo(startX, startY);
+            else
+                lineTo(startX, startY);
 
-                startingPoint.x = p1.x;
-                startingPoint.y = p1.y;
+            if (startAngle == endAngle)
+                return;
+
+            var theta:Number = endAngle - startAngle;
+            var PI2:Number   = Math.PI * 2;
+
+            if (anticlockwise)
+            {
+                if (theta <= -PI2)
+                    theta = PI2;
+                else while (theta >= 0)
+                    theta -= PI2;
             }
             else
             {
-                path.push({
-                    command: "lineTo",
-                    data: [ p1.x, p1.y ]
-                });
+                if (theta >= PI2)
+                    theta = PI2;
+                else while (theta <= 0)
+                    theta += PI2;
             }
 
-            path.push({
-                command: "arc",
-                data: [ p.x, p.y, radius, startAngle, endAngle, anticlockwise ]
-            });
+            var angle:Number     = startAngle;
+            var segments:Number  = Math.ceil(Math.abs(theta) / (Math.PI / 4));
+            var delta:Number     = theta / (segments * 2);
+            var radiusMid:Number = radius / Math.cos(delta);
 
-            currentPoint.x = p2.x;
-            currentPoint.y = p2.y;
+            for (var i:int = 0; i < segments; i++)
+            {
+                angle += delta;
+                var cpx:Number = x + Math.cos(angle) * radiusMid;
+                var cpy:Number = y + Math.sin(angle) * radiusMid;
+                var cp:Point   = _getTransformedPoint(cpx, cpy);
+
+                angle += delta;
+                var apx:Number = x + Math.cos(angle) * radius;
+                var apy:Number = y + Math.sin(angle) * radius;
+                var ap:Point   = _getTransformedPoint(apx, apy);
+
+                path.commands.push(GraphicsPathCommand.CURVE_TO);
+                path.data.push(cp.x, cp.y, ap.x, ap.y);
+            }
+
+            if (theta == PI2)
+            {
+                var endX:Number = x + radius * Math.cos(endAngle);
+                var endY:Number = y + radius * Math.sin(endAngle);
+                moveTo(endX, endY);
+            }
+            else
+            {
+                currentPoint.x = ap.x;
+                currentPoint.y = ap.y;
+            }
         }
 
         public function fill():void
         {
             var graphics:Graphics = shape.graphics;
             _setFillStyle(graphics);
-            _drawPath(graphics, path);
+            path.draw(graphics);
             graphics.endFill();
             _renderShape();
         }
@@ -703,20 +793,20 @@ package com.googlecode.flashcanvas
         {
             var graphics:Graphics = shape.graphics;
             _setStrokeStyle(graphics);
-            _drawPath(graphics, path);
+            path.draw(graphics);
             _renderShape();
         }
 
         public function clip():void
         {
             // extract path
-            state.clipPath = path.concat();
+            state.clippingPath = path.clone();
 
             // draw paths
             var graphics:Graphics = clippingMask.graphics;
             graphics.clear();
             graphics.beginFill(0x000000);
-            _drawPath(graphics, path);
+            path.draw(graphics);
             graphics.endFill();
         }
 
@@ -955,6 +1045,13 @@ package com.googlecode.flashcanvas
             return state.transformMatrix.transformPoint(new Point(x, y));
         }
 
+        private function _getUntransformedPoint(x:Number, y:Number):Point
+        {
+            var matrix:Matrix = state.transformMatrix.clone();
+            matrix.invert();
+            return matrix.transformPoint(new Point(x, y));
+        }
+
         private function _setStrokeStyle(graphics:Graphics):void
         {
             var style:Object         = state.strokeStyle;
@@ -1055,136 +1152,6 @@ package com.googlecode.flashcanvas
                 // TODO: support repetition other than 'repeat'.
                 graphics.beginBitmapFill(bitmap, state.transformMatrix);
             }
-        }
-
-        private function _drawPath(graphics:Graphics, path:Array):void
-        {
-            for (var i:int = 0, n:int = path.length; i < n; i++)
-            {
-                var command:String = path[i].command;
-                var data:Array     = path[i].data;
-
-                switch (command) {
-                    case "moveTo":
-                        _moveTo(graphics, data);
-                        break;
-
-                    case "lineTo":
-                        _lineTo(graphics, data);
-                        break;
-
-                    case "quadraticCurveTo":
-                        _quadraticCurveTo(graphics, data);
-                        break;
-
-                    case "bezierCurveTo":
-                        _bezierCurveTo(graphics, data);
-                        break;
-
-                    case "arcTo":
-                        _arcTo(graphics, data);
-                        break;
-
-                    case "rect":
-                        _rect(graphics, data);
-                        break;
-
-                    case "arc":
-                        _arc(graphics, data);
-                        break;
-                }
-            }
-        }
-
-        private function _moveTo(graphics:Graphics, arg:Array):void
-        {
-            var x:Number = arg[0];
-            var y:Number = arg[1];
-            graphics.moveTo(x, y);
-        }
-
-        private function _lineTo(graphics:Graphics, arg:Array):void
-        {
-            var x:Number = arg[0];
-            var y:Number = arg[1];
-            graphics.lineTo(x, y);
-        }
-
-        private function _quadraticCurveTo(graphics:Graphics, arg:Array):void
-        {
-            var cpx:Number = arg[0];
-            var cpy:Number = arg[1];
-            var   x:Number = arg[2];
-            var   y:Number = arg[3];
-            graphics.curveTo(cpx, cpy, x, y);
-        }
-
-        private function _bezierCurveTo(graphics:Graphics, arg:Array):void
-        {
-            var p0:Point = new Point(arg[6], arg[7]);
-            var p1:Point = new Point(arg[0], arg[1]);
-            var p2:Point = new Point(arg[2], arg[3]);
-            var p3:Point = new Point(arg[4], arg[5]);
-
-            var bezier:Bezier = new Bezier(graphics);
-            bezier.drawCubicBezier(p0, p1, p2, p3, 4);
-        }
-
-        private function _arcTo(graphics:Graphics, arg:Array):void
-        {
-            var x0:Number = arg[5];
-            var y0:Number = arg[6];
-            var x1:Number = arg[0];
-            var y1:Number = arg[1];
-            var x2:Number = arg[2];
-            var y2:Number = arg[3];
-            var radius:Number = arg[4];
-
-            var theta:Number = Math.atan2(y0 - y1, x0 - x1) - Math.atan2(y2 - y1, x2 - x1);
-            var lengthFromP1ToT1:Number = Math.abs(radius / Math.tan(theta / 2));
-            var lengthFromP1ToC1:Number = Math.abs(radius / Math.sin(theta / 2));
-
-            var xt0:Number = (x0 - x1);
-            var yt0:Number = (y0 - y1);
-            var l:Number = Math.sqrt((xt0 * xt0) + (yt0 * yt0));
-            xt0 = xt0 * lengthFromP1ToT1 / l + x1;
-            yt0 = yt0 * lengthFromP1ToT1 / l + y1;
-
-            var xt2:Number = (x2 - x1);
-            var yt2:Number = (y2 - y1);
-            l = Math.sqrt((xt2 * xt2) + (yt2 * yt2));
-            xt2 = xt2 * lengthFromP1ToT1 / l + x1;
-            yt2 = yt2 * lengthFromP1ToT1 / l + y1;
-
-            var cx:Number = (xt0 + xt2) * 0.5 - x1;
-            var cy:Number = (yt0 + yt2) * 0.5 - y1;
-            l = Math.sqrt((cx * cx) + (cy * cy));
-            cx = cx * lengthFromP1ToC1 / l + x1;
-            cy = cy * lengthFromP1ToC1 / l + y1;
-
-            var d:Draw = new Draw(graphics, state.transformMatrix);
-            var startAngle:Number = Math.atan2(yt0 - cy, xt0 - cx);
-            var endAngle:Number = Math.atan2(yt2 - cy, xt2 - cx);
-            var anticlockwise:Boolean = (x0 - x1) * (y2 - y1) > (x2 - x1) * (y0 - y1);
-
-            graphics.moveTo(x0, y0);
-            graphics.lineTo(xt0, yt0);
-            d.arc(cx, cy, radius, startAngle, endAngle, anticlockwise);
-        }
-
-        private function _rect(graphics:Graphics, arg:Array):void
-        {
-            graphics.moveTo(arg[0], arg[1]);
-            graphics.lineTo(arg[2], arg[3]);
-            graphics.lineTo(arg[4], arg[5]);
-            graphics.lineTo(arg[6], arg[7]);
-            graphics.lineTo(arg[0], arg[1]);
-        }
-
-        private function _arc(graphics:Graphics, arg:Array):void
-        {
-            var d:Draw = new Draw(graphics, state.transformMatrix);
-            d.arc(arg[0], arg[1], arg[2], arg[3], arg[4], arg[5]);
         }
 
         private function _renderShape():void

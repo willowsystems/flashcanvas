@@ -38,7 +38,7 @@ package com.googlecode.flashcanvas
     public class State
     {
         public var transformMatrix:Matrix;
-        public var clipPath:Array;
+        public var clippingPath:Path;
         public var strokeStyle:Object;
         public var fillStyle:Object;
         public var globalAlpha:Number;
@@ -59,7 +59,7 @@ package com.googlecode.flashcanvas
         public function State()
         {
             transformMatrix          = new Matrix();
-            clipPath                 = [];
+            clippingPath             = new Path();
             strokeStyle              = new CSSColor("#000000");
             fillStyle                = new CSSColor("#000000");
             globalAlpha              = 1.0;
@@ -82,7 +82,7 @@ package com.googlecode.flashcanvas
         {
             var state:State = new State();
             state.transformMatrix          = transformMatrix.clone();
-            state.clipPath                 = clipPath.concat();
+            state.clippingPath             = clippingPath.clone();
             state.strokeStyle              = strokeStyle;
             state.fillStyle                = fillStyle;
             state.globalAlpha              = globalAlpha;
