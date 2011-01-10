@@ -345,7 +345,8 @@ CanvasRenderingContext2D.prototype = {
             throwException(SYNTAX_ERR);
         }
 
-        this._queue.push(properties.createPattern, src, repetition);
+        // Special characters in the filename need escaping.
+        this._queue.push(properties.createPattern, encodeXML(src), repetition);
 
         if (isReady[canvasId]) {
             this._executeCommand();
@@ -605,6 +606,9 @@ CanvasRenderingContext2D.prototype = {
 
         this._setCompositing();
         this._setShadows();
+
+        // Special characters in the filename need escaping.
+        src = encodeXML(src);
 
         if (argc === 3) {
             this._queue.push(properties.drawImage, argc, src, x1, y1);
