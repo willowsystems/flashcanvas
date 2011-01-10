@@ -28,70 +28,78 @@
 
 package com.googlecode.flashcanvas
 {
-    import flash.display.Bitmap;
     import flash.display.BitmapData;
-    import flash.display.Loader;
-    import flash.display.LoaderInfo;
+    import flash.events.ErrorEvent;
     import flash.events.Event;
-    import flash.external.ExternalInterface;
-    import flash.net.URLRequest;
-    import flash.utils.ByteArray;
+    import flash.geom.Point;
+    import flash.geom.Rectangle;
 
     public class CanvasPattern
     {
-        public var bitmapData:BitmapData;
-        public var repetition:String;
+        private var _image:Image;
+        private var _repetition:String;
+        private var _bitmapData:BitmapData;
 
-        public function CanvasPattern(image:*, repetition:String)
+        public function CanvasPattern(image:Image, repetition:String)
         {
-            var url:String    = image.src;
-            var loader:Loader = new Loader();
+            _image      = image;
+            _repetition = repetition;
 
-            // Register a listener for a complete event
-            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, completeHandler);
-
-            if (url.slice(0, 11) == "data:image/")
+            // If the image is ready for use
+            if (image.complete)
             {
-                // Decode data URI
-                var data:String         = url.slice(url.indexOf(",") + 1);
-                var byteArray:ByteArray = Base64.decode(data);
-                loader.loadBytes(byteArray);
+                // Set BitmapData immediately
+                _setBitmapData();
             }
+
+            // If the image is not yet ready
             else
             {
-                // If the file is in other domain
-                if (/^https?:\/\//.test(url))
-                {
-                    // Rewrite the URL to load the file via a proxy script
-                    url = Config.proxy + '?url=' + url;
-                }
-
-                // Load the image
-                var request:URLRequest = new URLRequest(url);
-                loader.load(request);
+                // Register event listeners
+                image.addEventListener("load", _loadHandler);
+                image.addEventListener(ErrorEvent.ERROR, _errorHandler);
             }
-
-            this.repetition = repetition;
         }
 
-        private function completeHandler(event:Event):void
+        private function _loadHandler(event:Event):void
         {
-            // Remove the event listener
-            var loaderInfo:LoaderInfo = event.target as LoaderInfo;
-            loaderInfo.removeEventListener(Event.COMPLETE, arguments.callee);
+            // Remove the event listeners
+            var image:Image = event.target as Image;
+            image.removeEventListener("load", _loadHandler);
+            image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
 
-            // Get BitmapData of the image
-            var loader:Loader = loaderInfo.loader;
-            bitmapData = Bitmap(loader.content).bitmapData;
+            // Set BitmapData
+            _setBitmapData();
+        }
 
-            // Remove the prefix "external" from objectID
-            var canvasId:String = ExternalInterface.objectID.slice(8);
+        private function _errorHandler(event:ErrorEvent):void
+        {
+            // Remove the event listeners
+            var image:Image = event.target as Image;
+            image.removeEventListener("load", _loadHandler);
+            image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
+        }
 
-            // Send JavaScript a message that the image has been loaded
-            ExternalInterface.call("FlashCanvas.unlock", canvasId);
+        private function _setBitmapData():void
+        {
+            var sourceBitmapData:BitmapData = _image.bitmapData;
+            var width:int                   = sourceBitmapData.width;
+            var height:int                  = sourceBitmapData.height;
+            var sourceRect:Rectangle        = sourceBitmapData.rect;
+            var destPoint:Point             = new Point(0, 0);
 
-            // Release the memory
-            loader.unload();
+            _bitmapData = new BitmapData(width, height, true, 0);
+            _bitmapData.copyPixels(sourceBitmapData, sourceRect, destPoint);
+        }
+
+        public function get bitmapData():BitmapData
+        {
+            return _bitmapData;
+        }
+
+        public function get repetition():String
+        {
+            return _repetition;
         }
     }
 }

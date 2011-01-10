@@ -39,18 +39,15 @@ package com.googlecode.flashcanvas
     import flash.display.InterpolationMethod;
     import flash.display.JointStyle;
     import flash.display.LineScaleMode;
-    import flash.display.Loader;
-    import flash.display.LoaderInfo;
     import flash.display.Shape;
     import flash.display.SpreadMethod;
+    import flash.events.ErrorEvent;
     import flash.events.Event;
-    import flash.external.ExternalInterface;
     import flash.filters.GlowFilter;
     import flash.geom.ColorTransform;
     import flash.geom.Matrix;
     import flash.geom.Point;
     import flash.geom.Rectangle;
-    import flash.net.URLRequest;
     import flash.text.TextField;
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
@@ -81,9 +78,6 @@ package com.googlecode.flashcanvas
 
         // drawing state
         private var state:State;
-
-        // cache for BitmapData
-        private var imageCache:Object = {};
 
         // queue used in drawImage()
         private var taskQueue:Array = [];
@@ -900,7 +894,7 @@ package com.googlecode.flashcanvas
          * drawing images
          */
 
-        public function drawImage(image:*, ...args:Array):void
+        public function drawImage(image:Image, ...args:Array):void
         {
             var argc:int = args.length;
 
@@ -913,106 +907,68 @@ package com.googlecode.flashcanvas
                             && isFinite(args[6]) && isFinite(args[7])))
                 return;
 
-            var url:String = image.src;
-
-            // If the image is already in the cache
-            if (imageCache[url])
+            // If the image is ready for use
+            if (image.complete)
             {
                 // Render the image immediately
-                _renderImage(imageCache[url], args);
+                _renderImage(image.bitmapData, args);
             }
 
-            // If the image is not in the cache
+            // If the image is not yet ready
             else
             {
                 // Enqueue the task
                 taskQueue.push({
-                    url:   url,
+                    image: image,
                     args:  args,
                     state: state.clone()
                 });
 
-                // If the image is being loaded
-                if (url in imageCache)
-                {
-                    // Do nothing
-                }
-
-                // If this is the first time to access the URL
-                else
-                {
-                    // Use the URL as a hash key
-                    imageCache[url] = null;
-
-                    var loader:Loader = new Loader();
-
-                    // Register a listener for a complete event
-                    loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler(url));
-
-                    if (url.slice(0, 11) == "data:image/")
-                    {
-                        // Decode data URI
-                        var data:String         = url.slice(url.indexOf(",") + 1);
-                        var byteArray:ByteArray = Base64.decode(data);
-                        loader.loadBytes(byteArray);
-                    }
-                    else
-                    {
-                        // If the file is in other domain
-                        if (/^https?:\/\//.test(url))
-                        {
-                            // Rewrite the URL to load the file via a proxy script
-                            url = Config.proxy + '?url=' + url;
-                        }
-
-                        // Load the image
-                        var request:URLRequest = new URLRequest(url);
-                        loader.load(request);
-                    }
-                }
+                // Register event listeners
+                image.addEventListener("load", _loadHandler);
+                image.addEventListener(ErrorEvent.ERROR, _errorHandler);
             }
         }
 
-        private function _completeHandler(url:String):Function
+        private function _loadHandler(event:Event):void
         {
-            return function(event:Event):void
+            // Remove the event listeners
+            var image:Image = event.target as Image;
+            image.removeEventListener("load", _loadHandler);
+            image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
+
+            // Process the tasks in order
+            while (taskQueue.length > 0)
             {
-                // Remove the event listener
-                var loaderInfo:LoaderInfo = event.target as LoaderInfo;
-                loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
+                // Get the next image object
+                image = taskQueue[0].image;
 
-                // Cache BitmapData of the image
-                imageCache[url] = Bitmap(loaderInfo.content).bitmapData;
+                // If the BitmapData is not ready, we defer the execution of
+                // the remaining tasks.
+                if (!image.complete)
+                    return;
 
-                // Process the tasks in order
-                while (taskQueue.length > 0)
-                {
-                    // Get the URL property
-                    url = taskQueue[0].url;
+                // Dequeue a task object
+                var task:Object = taskQueue.shift();
 
-                    // If the BitmapData is not ready, we defer the execution
-                    // of the remaining tasks.
-                    if (!imageCache[url])
-                        break;
-
-                    // Dequeue the object
-                    var task:Object = taskQueue.shift();
-
-                    // Render the image
-                    var args:Array  = task.args;
-                    var state:State = task.state;
-                    _renderImage(imageCache[url], args, state);
-                }
-
-                // Remove the prefix "external" from objectID
-                var canvasId:String = ExternalInterface.objectID.slice(8);
-
-                // Send JavaScript a message that the image has been drawn
-                ExternalInterface.call("FlashCanvas.unlock", canvasId);
-
-                // Release the memory
-                loaderInfo.loader.unload();
+                // Render the image
+                var args:Array  = task.args;
+                var state:State = task.state;
+                _renderImage(image.bitmapData, args, state);
             }
+        }
+
+        private function _errorHandler(event:ErrorEvent):void
+        {
+            // Remove tasks for the image which made an error.
+            for (var i:int = taskQueue.length - 1; i >= 0; i--)
+            {
+                if (taskQueue[i].image == event.target)
+                    taskQueue.splice(i, 1);
+            }
+
+            // Process the remaining tasks in the queue.
+            _loadHandler(event);
         }
 
         /*
@@ -1138,6 +1094,12 @@ package com.googlecode.flashcanvas
             else if (style is CanvasPattern)
             {
                 var bitmap:BitmapData = style.bitmapData;
+
+                if (!bitmap)
+                {
+                    graphics.beginFill(0x000000, state.globalAlpha);
+                    return;
+                }
 
                 if (state.globalAlpha < 1)
                 {

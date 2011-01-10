@@ -73,7 +73,6 @@ package
             // create canvas
             canvas  = new Canvas();
             context = canvas.getContext("2d");
-            command = new Command(context);
             addChild(canvas);
 
             // Flash Player earlier than version 10.1 has a bug that
@@ -91,6 +90,9 @@ package
 
             // Remove the prefix "external" from objectID
             canvasId = objectId.slice(8);
+
+            // Create a command parser object
+            command = new Command(context, canvasId);
 
             // Set the URL of the proxy script
             Config.proxy = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");

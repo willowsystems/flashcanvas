@@ -29,18 +29,27 @@
 
 package
 {
+    import flash.events.ErrorEvent;
+    import flash.events.Event;
+    import flash.external.ExternalInterface;
+
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+    import com.googlecode.flashcanvas.CSSColor;
+    import com.googlecode.flashcanvas.Image;
 
     public class Command
     {
         private var ctx:CanvasRenderingContext2D;
+        private var canvasId:String;
         private var commands:Array;
         private var input:CommandArray;
         private var styles:Array = [];
+        private var images:Object = {};
 
-        public function Command(ctx:CanvasRenderingContext2D)
+        public function Command(ctx:CanvasRenderingContext2D, canvasId:String)
         {
-            this.ctx = ctx;
+            this.ctx      = ctx;
+            this.canvasId = canvasId;
             initializeDispatchTable();
         }
 
@@ -242,9 +251,13 @@ package
 
         private function createPattern():void
         {
-            var image:Object      = { src: input.readUTF() };
+            var src:String        = input.readUTF();
             var repetition:String = input.readUTF();
-            styles.push(ctx.createPattern(image, repetition));
+            var image:Image       = getImageObject(src);
+            if (image)
+                styles.push(ctx.createPattern(image, repetition));
+            else
+                styles.push(new CSSColor("#000000"));
         }
 
         private function lineWidth():void
@@ -449,9 +462,10 @@ package
 
         private function drawImage():void
         {
-            var argc:int     = input.readInt();
-            var image:Object = { src: input.readUTF() };
+            var argc:int   = input.readInt();
+            var src:String = input.readUTF();
 
+            var image:Image = getImageObject(src);
             var sx:Number;
             var sy:Number;
             var sw:Number;
@@ -465,7 +479,8 @@ package
             {
                 dx = input.readFloat();
                 dy = input.readFloat();
-                ctx.drawImage(image, dx, dy);
+                if (image)
+                    ctx.drawImage(image, dx, dy);
             }
             else if (argc == 5)
             {
@@ -473,7 +488,8 @@ package
                 dy = input.readFloat();
                 dw = input.readFloat();
                 dh = input.readFloat();
-                ctx.drawImage(image, dx, dy, dw, dh);
+                if (image)
+                    ctx.drawImage(image, dx, dy, dw, dh);
             }
             else if (argc == 9)
             {
@@ -485,7 +501,8 @@ package
                 dy = input.readFloat();
                 dw = input.readFloat();
                 dh = input.readFloat();
-                ctx.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+                if (image)
+                    ctx.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
             }
         }
 
@@ -522,6 +539,51 @@ package
             var width:int  = input.readInt();
             var height:int = input.readInt();
             ctx.resize(width, height);
+        }
+
+        private function getImageObject(src:String):Image
+        {
+            var image:Image;
+
+            if (src in images)
+            {
+                // Return a cached Image object
+                image = images[src];
+            }
+            else
+            {
+                // Load the image asynchronously
+                image = new Image();
+                image.addEventListener("load", loadHandler);
+                image.addEventListener(ErrorEvent.ERROR, errorHandler);
+                image.src = src;
+
+                // Cache the Image object
+                images[src] = image;
+            }
+
+            return image;
+        }
+
+        private function loadHandler(event:Event):void
+        {
+            // Remove the event listeners
+            var image:Image = event.target as Image;
+            image.removeEventListener("load", loadHandler);
+            image.removeEventListener(ErrorEvent.ERROR, errorHandler);
+
+            // Send JavaScript a message that the image has been loaded
+            ExternalInterface.call("FlashCanvas.unlock", canvasId);
+        }
+
+        private function errorHandler(event:ErrorEvent):void
+        {
+            // Remove the image object from the cache.
+            var image:Image = event.target as Image;
+            images[image.src] = null;
+
+            // Cleanup.
+            loadHandler(event);
         }
     }
 }
