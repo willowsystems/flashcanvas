@@ -35,6 +35,7 @@ package
     import flash.events.ContextMenuEvent;
     import flash.events.Event;
     import flash.events.MouseEvent;
+    import flash.events.TimerEvent;
     import flash.external.ExternalInterface;
     import flash.net.navigateToURL;
     import flash.net.URLRequest;
@@ -42,6 +43,7 @@ package
     import flash.system.Security;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
+    import flash.utils.Timer;
 
     import com.adobe.images.PNGEncoder;
     import com.googlecode.flashcanvas.Canvas;
@@ -55,6 +57,7 @@ package
         private var context:CanvasRenderingContext2D;
         private var command:Command;
         private var canvasId:String;
+        private var timer:Timer;
 
         public function FlashCanvas()
         {
@@ -97,9 +100,6 @@ package
             // Set the URL of the proxy script
             Config.proxy = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");
 
-            // Send JavaScript a message that the swf is ready
-            ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
-
             // mouse event listeners
             stage.doubleClickEnabled = true;
             stage.addEventListener(MouseEvent.CLICK,        mouseEventHandler);
@@ -116,6 +116,18 @@ package
             contextMenu.hideBuiltInItems();
             contextMenu.customItems.push(saveItem, aboutItem);
             this.contextMenu = contextMenu;
+
+            timer = new Timer(0, 1);
+            timer.addEventListener(TimerEvent.TIMER, timerHandler);
+            timer.start();
+        }
+
+        private function timerHandler(event:TimerEvent):void
+        {
+            timer.removeEventListener(TimerEvent.TIMER, timerHandler);
+
+            // Send JavaScript a message that the swf is ready
+            ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
         }
 
         public function executeCommand(data:String):*

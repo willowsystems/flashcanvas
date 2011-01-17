@@ -32,7 +32,10 @@ var ON_FOCUS                    = "onfocus";
 var ON_PROPERTY_CHANGE          = "onpropertychange";
 var ON_READY_STATE_CHANGE       = "onreadystatechange";
 var ON_UNLOAD                   = "onunload";
-var SWF_URL                     = getScriptUrl().replace(/[^\/]+$/, "flashcanvas.swf");
+
+var config   = window[FLASH_CANVAS] || {};
+var BASE_URL = config["swfPath"] || getScriptUrl().replace(/[^\/]+$/, "");
+var SWF_URL  = BASE_URL + "flashcanvas.swf";
 
 // DOMException code
 var INDEX_SIZE_ERR              =  1;
@@ -1029,7 +1032,11 @@ document.createStyleSheet().cssText =
     CANVAS + "{display:inline-block;overflow:hidden;width:300px;height:150px}";
 
 // initialize canvas elements
-document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
+if (document.readyState === "complete") {
+    onReadyStateChange();
+} else {
+    document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
+}
 
 // prevent IE6 memory leaks
 window.attachEvent(ON_UNLOAD, onUnload);
