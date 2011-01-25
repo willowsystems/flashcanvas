@@ -810,8 +810,9 @@ function onFocus() {
 function onPropertyChange() {
     var prop = event.propertyName;
     if (prop === "width" || prop === "height") {
-        var canvas = event.srcElement, ctx = canvas.getContext("2d");
-        var value = canvas[prop], number = parseInt(value, 10);
+        var canvas = event.srcElement;
+        var value  = canvas[prop];
+        var number = parseInt(value, 10);
 
         if (isNaN(number) || number < 0) {
             number = (prop === "width") ? 300 : 150;
@@ -819,7 +820,7 @@ function onPropertyChange() {
 
         if (value === number) {
             canvas.style[prop] = number + "px";
-            ctx._resize(canvas.width, canvas.height);
+            canvas.getContext("2d")._resize(canvas.width, canvas.height);
         } else {
             canvas[prop] = number;
         }
@@ -875,6 +876,9 @@ var FlashCanvas = {
         var objectId      = OBJECT_ID_PREFIX + canvasId;
         isReady[canvasId] = false;
         lock[canvasId]    = 1;
+
+        // Set the width and height attributes.
+        setCanvasSize(canvas);
 
         // embed swf and SPAN element
         canvas.innerHTML =
@@ -957,18 +961,14 @@ var FlashCanvas = {
         if (ready) {
             var canvas = canvases[canvasId];
             var swf    = canvas.firstChild;
-            var width  = parseInt(canvas.width, 10);
-            var height = parseInt(canvas.height, 10);
+            var width;
+            var height;
 
-            if (isNaN(width) || width < 0) {
-                width = 300;
-            }
-            if (isNaN(height) || height < 0) {
-                height = 150;
-            }
+            // Set the width and height attributes of the canvas element.
+            setCanvasSize(canvas);
+            width  = canvas.width;
+            height = canvas.height;
 
-            canvas.width        = width;
-            canvas.height       = height;
             canvas.style.width  = width  + "px";
             canvas.style.height = height + "px";
 
@@ -1018,6 +1018,23 @@ function toLowerCase(str) {
 
 function throwException(code) {
     throw new DOMException(code);
+}
+
+// The width and height attributes of a canvas element must have values that
+// are valid non-negative integers.
+function setCanvasSize(canvas) {
+    var width  = parseInt(canvas.width, 10);
+    var height = parseInt(canvas.height, 10);
+
+    if (isNaN(width) || width < 0) {
+        width = 300;
+    }
+    if (isNaN(height) || height < 0) {
+        height = 150;
+    }
+
+    canvas.width  = width;
+    canvas.height = height;
 }
 
 /*
