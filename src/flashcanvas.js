@@ -33,7 +33,7 @@ var ON_PROPERTY_CHANGE          = "onpropertychange";
 var ON_READY_STATE_CHANGE       = "onreadystatechange";
 var ON_UNLOAD                   = "onunload";
 
-var config   = window[FLASH_CANVAS] || {};
+var config   = window[FLASH_CANVAS + "Options"] || {};
 var BASE_URL = config["swfPath"] || getScriptUrl().replace(/[^\/]+$/, "");
 var SWF_URL  = BASE_URL + "flashcanvas.swf";
 
