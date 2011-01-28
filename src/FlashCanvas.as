@@ -117,9 +117,16 @@ package
             contextMenu.customItems.push(saveItem, aboutItem);
             this.contextMenu = contextMenu;
 
-            timer = new Timer(0, 1);
-            timer.addEventListener(TimerEvent.TIMER, timerHandler);
-            timer.start();
+            try
+            {
+                ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
+            }
+            catch (error:Error)
+            {
+                timer = new Timer(0, 1);
+                timer.addEventListener(TimerEvent.TIMER, timerHandler);
+                timer.start();
+            }
         }
 
         private function timerHandler(event:TimerEvent):void
