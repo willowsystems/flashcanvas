@@ -1042,7 +1042,7 @@ function setCanvasSize(canvas) {
  */
 
 // IE HTML5 shiv
-document["createElement"](CANVAS);
+document.createElement(CANVAS);
 
 // setup default CSS
 document.createStyleSheet().cssText =
