@@ -5,6 +5,29 @@ You can view a complete ChangeLog at the project page:
 http://code.google.com/p/flashcanvas/source/list
 
 
+FlashCanvas-20110201
+--------------------
+
+(Enhancements)
+
+ - Improvements to drawImage() and createPattern().
+   - Implement error handling.
+   - Accept any object that has a src property.
+ - Supported asynchronous loading of flashcanvas.js.
+ - Throw an exception if the given arguments are invalid.
+
+(Bug fixes)
+
+ - Backported the arcTo() code from FlashCanvas Pro.
+ - restore() didn't restore the clipping region correctly.
+ - clearRect() should not clear the pixels outside the clipping region.
+ - Special characters in a url need to be escaped when passed to Flash.
+ - toDataURL("image/jpeg") must composite the image to a black
+   background.
+ - Many minor bug fixes thanks to the canvas test suite developed by
+   Philip Taylor.
+
+
 FlashCanvas-20101115
 --------------------
 
