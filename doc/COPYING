@@ -31,6 +31,10 @@ Third-party libraries used in FlashCanvas
  * bezier_lib.as by Timothée Groleau
    http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
 
+ * JavaScript implementation of arcTo() by MindCat
+   http://d.hatena.ne.jp/mindcat/20100131/1264958828
+   Public domain
+
  * BitString.as, JPGEncoder.as and PNGEncoder.as by Adobe Systems Incorporated
    https://github.com/mikechambers/as3corelib
    New BSD License
