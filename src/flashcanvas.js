@@ -140,7 +140,7 @@ var CanvasRenderingContext2D = function(canvas, swf) {
     this._swf = swf;
 
     // unique ID of canvas
-    this._canvasId = canvas.uniqueID;
+    this._canvasId = swf.id.slice(8);
 
     // initialize drawing states
     this._initialize();
@@ -872,7 +872,7 @@ var FlashCanvas = {
         }
 
         // initialize lock
-        var canvasId      = canvas.uniqueID;
+        var canvasId      = getUniqueId();
         var objectId      = OBJECT_ID_PREFIX + canvasId;
         isReady[canvasId] = false;
         lock[canvasId]    = 1;
@@ -1005,6 +1005,11 @@ function getScriptUrl() {
     } else {
         return script.getAttribute("src", 4);
     }
+}
+
+// Get a unique ID composed of alphanumeric characters.
+function getUniqueId() {
+    return Math.random().toString(36).slice(2) || "0";
 }
 
 // Escape characters not permitted in XML.
