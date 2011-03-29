@@ -13,13 +13,12 @@
 // If the browser is IE and does not support HTML5 Canvas
 if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
 
-(function(window, document) {
+(function(window, document, undefined) {
 
 /*
  * Constant
  */
 
-var UNDEFINED;
 var NULL                        = null;
 var CANVAS                      = "canvas";
 var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
@@ -543,7 +542,7 @@ CanvasRenderingContext2D.prototype = {
         this._setShadows();
         this._setFontStyles();
         this._queue.push(properties.fillText, encodeXML(text), x, y,
-                         maxWidth === UNDEFINED ? Infinity : maxWidth);
+                         maxWidth === undefined ? Infinity : maxWidth);
     },
 
     strokeText: function(text, x, y, maxWidth) {
@@ -552,7 +551,7 @@ CanvasRenderingContext2D.prototype = {
         this._setShadows();
         this._setFontStyles();
         this._queue.push(properties.strokeText, encodeXML(text), x, y,
-                         maxWidth === UNDEFINED ? Infinity : maxWidth);
+                         maxWidth === undefined ? Infinity : maxWidth);
     },
 
     measureText: function(text) {
