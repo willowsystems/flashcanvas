@@ -502,11 +502,10 @@ package com.googlecode.flashcanvas
 
         public function closePath():void
         {
-            if (path.commands.length == 0)
+            if (path.length == 0)
                 return;
 
-            path.commands.push(GraphicsPathCommand.LINE_TO);
-            path.data.push(startingPoint.x, startingPoint.y);
+            path.lineTo(startingPoint.x, startingPoint.y);
 
             currentPoint.x = startingPoint.x;
             currentPoint.y = startingPoint.y;
@@ -519,8 +518,7 @@ package com.googlecode.flashcanvas
 
             var p:Point = _getTransformedPoint(x, y);
 
-            path.commands.push(GraphicsPathCommand.MOVE_TO);
-            path.data.push(p.x, p.y);
+            path.moveTo(p.x, p.y);
 
             startingPoint.x = currentPoint.x = p.x;
             startingPoint.y = currentPoint.y = p.y;
@@ -532,13 +530,12 @@ package com.googlecode.flashcanvas
                 return;
 
             // check that path contains subpaths
-            if (path.commands.length == 0)
+            if (path.length == 0)
                 moveTo(x, y);
 
             var p:Point = _getTransformedPoint(x, y);
 
-            path.commands.push(GraphicsPathCommand.LINE_TO);
-            path.data.push(p.x, p.y);
+            path.lineTo(p.x, p.y);
 
             currentPoint.x = p.x;
             currentPoint.y = p.y;
@@ -550,14 +547,13 @@ package com.googlecode.flashcanvas
                 return;
 
             // check that path contains subpaths
-            if (path.commands.length == 0)
+            if (path.length == 0)
                 moveTo(cpx, cpy);
 
             var cp:Point = _getTransformedPoint(cpx, cpy);
             var  p:Point = _getTransformedPoint(x, y);
 
-            path.commands.push(GraphicsPathCommand.CURVE_TO);
-            path.data.push(cp.x, cp.y, p.x, p.y);
+            path.curveTo(cp.x, cp.y, p.x, p.y);
 
             currentPoint.x = p.x;
             currentPoint.y = p.y;
@@ -575,7 +571,7 @@ package com.googlecode.flashcanvas
                 return;
 
             // check that path contains subpaths
-            if (path.commands.length == 0)
+            if (path.length == 0)
                 moveTo(cp1x, cp1y);
 
             var p0:Point = currentPoint;
@@ -607,18 +603,10 @@ package com.googlecode.flashcanvas
             var ap3:Point = Point.interpolate(cp3, cp4, 0.5);
 
             // four quadratic subsegments
-            path.commands.push(
-                GraphicsPathCommand.CURVE_TO,
-                GraphicsPathCommand.CURVE_TO,
-                GraphicsPathCommand.CURVE_TO,
-                GraphicsPathCommand.CURVE_TO
-            );
-            path.data.push(
-                cp1.x, cp1.y, ap1.x, ap1.y,
-                cp2.x, cp2.y, ap2.x, ap2.y,
-                cp3.x, cp3.y, ap3.x, ap3.y,
-                cp4.x, cp4.y,  p3.x,  p3.y
-            );
+            path.curveTo(cp1.x, cp1.y, ap1.x, ap1.y);
+            path.curveTo(cp2.x, cp2.y, ap2.x, ap2.y);
+            path.curveTo(cp3.x, cp3.y, ap3.x, ap3.y);
+            path.curveTo(cp4.x, cp4.y,  p3.x,  p3.y);
 
             currentPoint.x = p3.x;
             currentPoint.y = p3.y;
@@ -635,7 +623,7 @@ package com.googlecode.flashcanvas
                 return;
 
             // check that path contains subpaths
-            if (path.commands.length == 0)
+            if (path.length == 0)
                 moveTo(x1, y1);
 
             var p0:Point  = _getUntransformedPoint(currentPoint.x, currentPoint.y);
@@ -682,20 +670,11 @@ package com.googlecode.flashcanvas
             var p3:Point = _getTransformedPoint(x + w, y + h);
             var p4:Point = _getTransformedPoint(x, y + h);
 
-            path.commands.push(
-                GraphicsPathCommand.MOVE_TO,
-                GraphicsPathCommand.LINE_TO,
-                GraphicsPathCommand.LINE_TO,
-                GraphicsPathCommand.LINE_TO,
-                GraphicsPathCommand.LINE_TO
-            );
-            path.data.push(
-                p1.x, p1.y,
-                p2.x, p2.y,
-                p3.x, p3.y,
-                p4.x, p4.y,
-                p1.x, p1.y
-            );
+            path.moveTo(p1.x, p1.y);
+            path.lineTo(p2.x, p2.y);
+            path.lineTo(p3.x, p3.y);
+            path.lineTo(p4.x, p4.y);
+            path.lineTo(p1.x, p1.y);
 
             startingPoint.x = currentPoint.x = p1.x;
             startingPoint.y = currentPoint.y = p1.y;
@@ -714,7 +693,7 @@ package com.googlecode.flashcanvas
             var startY:Number = y + radius * Math.sin(startAngle);
 
             // check that path contains subpaths
-            if (path.commands.length == 0)
+            if (path.length == 0)
                 moveTo(startX, startY);
             else
                 lineTo(startX, startY);
@@ -757,8 +736,7 @@ package com.googlecode.flashcanvas
                 var apy:Number = y + Math.sin(angle) * radius;
                 var ap:Point   = _getTransformedPoint(apx, apy);
 
-                path.commands.push(GraphicsPathCommand.CURVE_TO);
-                path.data.push(cp.x, cp.y, ap.x, ap.y);
+                path.curveTo(cp.x, cp.y, ap.x, ap.y);
             }
 
             if (theta == PI2)

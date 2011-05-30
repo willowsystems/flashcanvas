@@ -31,8 +31,8 @@ package com.googlecode.flashcanvas
 
     public class Path
     {
-        public var commands:Array;
-        public var data:Array;
+        private var commands:Array;
+        private var data:Array;
 
         public function Path()
         {
@@ -51,6 +51,30 @@ package com.googlecode.flashcanvas
         {
             commands = [];
             data     = [];
+        }
+
+        public function get length():int
+        {
+            return commands.length;
+        }
+
+        public function moveTo(x:Number, y:Number):void
+        {
+            commands.push(GraphicsPathCommand.MOVE_TO);
+            data.push(x, y);
+        }
+
+        public function lineTo(x:Number, y:Number):void
+        {
+            commands.push(GraphicsPathCommand.LINE_TO);
+            data.push(x, y);
+        }
+
+        public function curveTo(controlX:Number, controlY:Number,
+                                 anchorX:Number,  anchorY:Number):void
+        {
+            commands.push(GraphicsPathCommand.CURVE_TO);
+            data.push(controlX, controlY, anchorX, anchorY);
         }
 
         public function draw(graphics:Graphics):void
