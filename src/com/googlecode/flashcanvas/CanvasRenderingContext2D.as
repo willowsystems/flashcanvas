@@ -88,7 +88,6 @@ package com.googlecode.flashcanvas
 
             shape        = new Shape();
             clippingMask = new Shape();
-            shape.mask   = clippingMask;
 
             path          = new Path();
             startingPoint = new Point();
@@ -106,10 +105,8 @@ package com.googlecode.flashcanvas
             stateStack = [];
             state = new State();
 
-            // draw initial clipping region
-            beginPath();
-            rect(0, 0, width, height);
-            clip();
+            // disable clipping
+            shape.mask = null;
 
             // clear the current path
             beginPath();
@@ -139,13 +136,24 @@ package com.googlecode.flashcanvas
                 return;
 
             state = stateStack.pop();
+            var clippingPath:Path = state.clippingPath;
 
-            // redraw clipping image
-            var graphics:Graphics = clippingMask.graphics;
-            graphics.clear();
-            graphics.beginFill(0x000000);
-            state.clippingPath.draw(graphics);
-            graphics.endFill();
+            if (clippingPath.length > 0)
+            {
+                // redraw clipping image
+                var graphics:Graphics = clippingMask.graphics;
+                graphics.clear();
+                graphics.beginFill(0x000000);
+                clippingPath.draw(graphics);
+                graphics.endFill();
+
+                shape.mask = clippingMask;
+            }
+            else
+            {
+                // disable clipping
+                shape.mask = null;
+            }
         }
 
         /*
@@ -773,6 +781,7 @@ package com.googlecode.flashcanvas
         {
             // extract path
             state.clippingPath = path.clone();
+            shape.mask         = clippingMask;
 
             // draw paths
             var graphics:Graphics = clippingMask.graphics;
