@@ -72,7 +72,8 @@ package com.googlecode.flashcanvas
             else
             {
                 // If the file is in other domain
-                if (/^https?:\/\//.test(value))
+                if (/^https?:\/\//.test(value) &&
+                    (!Config.domain || value.indexOf(Config.domain)))
                 {
                     // Rewrite the URL to load the file via a proxy script
                     value = Config.proxy + '?url=' + value;

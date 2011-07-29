@@ -29,6 +29,7 @@ package com.googlecode.flashcanvas
 {
     public class Config
     {
+        public static var domain:String = "";
         public static var proxy:String;
     }
 }

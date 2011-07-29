@@ -98,7 +98,8 @@ package
             command = new Command(context, canvasId);
 
             // Set the URL of the proxy script
-            Config.proxy = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");
+            Config.domain = loaderInfo.url.match(/^[^\/]+\/\/[^\/]+\//)[0];
+            Config.proxy  = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");
 
             // mouse event listeners
             stage.doubleClickEnabled = true;
