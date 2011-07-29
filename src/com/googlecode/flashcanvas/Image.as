@@ -75,8 +75,14 @@ package com.googlecode.flashcanvas
                 if (/^https?:\/\//.test(value) &&
                     (!Config.domain || value.indexOf(Config.domain)))
                 {
-                    // Rewrite the URL to load the file via a proxy script
-                    value = Config.proxy + '?url=' + value;
+                    var separator:String;
+                    if (Config.proxy.indexOf("?") == -1)
+                        separator = "?";
+                    else
+                        separator = "&";
+
+                    // Rewrite the URL to load the file via a proxy script.
+                    value = Config.proxy + separator + "url=" + value;
                 }
 
                 // Load the image
