@@ -985,6 +985,13 @@ var FlashCanvas = {
 
             // ExternalInterface is now ready for use
             isReady[canvasId] = true;
+
+            // Call the onload event handler
+            if (typeof canvas.onload === "function") {
+                setTimeout(function() {
+                    canvas.onload();
+                }, 0);
+            }
         }
     }
 };
