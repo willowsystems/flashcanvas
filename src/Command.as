@@ -554,8 +554,8 @@ package
             {
                 // Load the image asynchronously
                 image = new Image();
-                image.addEventListener("load", loadHandler);
                 image.addEventListener(ErrorEvent.ERROR, errorHandler);
+                image.addEventListener("load", loadHandler);
                 image.src = src;
 
                 // Cache the Image object
@@ -563,17 +563,6 @@ package
             }
 
             return image;
-        }
-
-        private function loadHandler(event:Event):void
-        {
-            // Remove the event listeners
-            var image:Image = event.target as Image;
-            image.removeEventListener("load", loadHandler);
-            image.removeEventListener(ErrorEvent.ERROR, errorHandler);
-
-            // Send JavaScript a message that the image has been loaded
-            ExternalInterface.call("FlashCanvas.unlock", canvasId);
         }
 
         private function errorHandler(event:ErrorEvent):void
@@ -584,6 +573,17 @@ package
 
             // Cleanup.
             loadHandler(event);
+        }
+
+        private function loadHandler(event:Event):void
+        {
+            // Remove the event listeners
+            var image:Image = event.target as Image;
+            image.removeEventListener(ErrorEvent.ERROR, errorHandler);
+            image.removeEventListener("load", loadHandler);
+
+            // Send JavaScript a message that the image has been loaded
+            ExternalInterface.call("FlashCanvas.unlock", canvasId);
         }
     }
 }

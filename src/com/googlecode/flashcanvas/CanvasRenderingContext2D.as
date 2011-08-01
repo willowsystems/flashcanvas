@@ -912,17 +912,30 @@ package com.googlecode.flashcanvas
                 });
 
                 // Register event listeners
-                image.addEventListener("load", _loadHandler);
                 image.addEventListener(ErrorEvent.ERROR, _errorHandler);
+                image.addEventListener("load", _loadHandler);
             }
+        }
+
+        private function _errorHandler(event:ErrorEvent):void
+        {
+            // Remove tasks for the image which made an error.
+            for (var i:int = taskQueue.length - 1; i >= 0; i--)
+            {
+                if (taskQueue[i].image == event.target)
+                    taskQueue.splice(i, 1);
+            }
+
+            // Process the remaining tasks in the queue.
+            _loadHandler(event);
         }
 
         private function _loadHandler(event:Event):void
         {
             // Remove the event listeners
             var image:Image = event.target as Image;
-            image.removeEventListener("load", _loadHandler);
             image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
+            image.removeEventListener("load", _loadHandler);
 
             // Process the tasks in order
             while (taskQueue.length > 0)
@@ -943,19 +956,6 @@ package com.googlecode.flashcanvas
                 var state:State = task.state;
                 _renderImage(image.bitmapData, args, state);
             }
-        }
-
-        private function _errorHandler(event:ErrorEvent):void
-        {
-            // Remove tasks for the image which made an error.
-            for (var i:int = taskQueue.length - 1; i >= 0; i--)
-            {
-                if (taskQueue[i].image == event.target)
-                    taskQueue.splice(i, 1);
-            }
-
-            // Process the remaining tasks in the queue.
-            _loadHandler(event);
         }
 
         /*

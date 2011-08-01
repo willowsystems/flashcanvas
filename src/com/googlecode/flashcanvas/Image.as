@@ -59,8 +59,8 @@ package com.googlecode.flashcanvas
             var loader:Loader = new Loader();
 
             // Register event listeners
-            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler);
             loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, _ioErrorHandler);
+            loader.contentLoaderInfo.addEventListener(Event.COMPLETE, _completeHandler);
 
             if (value.slice(0, 11) == "data:image/")
             {
@@ -91,12 +91,23 @@ package com.googlecode.flashcanvas
             }
         }
 
+        private function _ioErrorHandler(event:IOErrorEvent):void
+        {
+            // Remove the event listeners
+            var loaderInfo:LoaderInfo = event.target as LoaderInfo;
+            loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _ioErrorHandler);
+            loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
+
+            // Fire an error event
+            dispatchEvent(new ErrorEvent(ErrorEvent.ERROR));
+        }
+
         private function _completeHandler(event:Event):void
         {
             // Remove the event listeners
             var loaderInfo:LoaderInfo = event.target as LoaderInfo;
-            loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
             loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _ioErrorHandler);
+            loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
 
             // Set BitmapData of the image
             _bitmapData = Bitmap(loaderInfo.content).bitmapData;
@@ -109,17 +120,6 @@ package com.googlecode.flashcanvas
 
             // Release the memory
             loaderInfo.loader.unload();
-        }
-
-        private function _ioErrorHandler(event:IOErrorEvent):void
-        {
-            // Remove the event listeners
-            var loaderInfo:LoaderInfo = event.target as LoaderInfo;
-            loaderInfo.removeEventListener(Event.COMPLETE, _completeHandler);
-            loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _ioErrorHandler);
-
-            // Fire an error event
-            dispatchEvent(new ErrorEvent(ErrorEvent.ERROR));
         }
 
         public function get src():String

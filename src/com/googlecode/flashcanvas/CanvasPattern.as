@@ -56,28 +56,28 @@ package com.googlecode.flashcanvas
             else
             {
                 // Register event listeners
-                image.addEventListener("load", _loadHandler);
                 image.addEventListener(ErrorEvent.ERROR, _errorHandler);
+                image.addEventListener("load", _loadHandler);
             }
-        }
-
-        private function _loadHandler(event:Event):void
-        {
-            // Remove the event listeners
-            var image:Image = event.target as Image;
-            image.removeEventListener("load", _loadHandler);
-            image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
-
-            // Set BitmapData
-            _setBitmapData();
         }
 
         private function _errorHandler(event:ErrorEvent):void
         {
             // Remove the event listeners
             var image:Image = event.target as Image;
-            image.removeEventListener("load", _loadHandler);
             image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
+            image.removeEventListener("load", _loadHandler);
+        }
+
+        private function _loadHandler(event:Event):void
+        {
+            // Remove the event listeners
+            var image:Image = event.target as Image;
+            image.removeEventListener(ErrorEvent.ERROR, _errorHandler);
+            image.removeEventListener("load", _loadHandler);
+
+            // Set BitmapData
+            _setBitmapData();
         }
 
         private function _setBitmapData():void
