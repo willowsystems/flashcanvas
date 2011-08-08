@@ -1,7 +1,9 @@
+var CanvasRenderingContext2D;
 var FlashCanvas;
 var G_vmlCanvasManager;
 var swf;
 
+CanvasRenderingContext2D.loadImage;
 FlashCanvas.initElement;
 FlashCanvas.saveImage;
 FlashCanvas.setOptions;

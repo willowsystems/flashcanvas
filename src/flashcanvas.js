@@ -668,6 +668,14 @@ CanvasRenderingContext2D.prototype = {
     },
 
     /*
+     * extended functions
+     */
+
+    loadImage: function(image) {
+        this.drawImage(image, -1e5, -1e5);
+    },
+
+    /*
      * private methods
      */
 
@@ -1107,7 +1115,10 @@ window[G_VML_CANVAS_MANAGER] = {
 };
 
 // Prevent Closure Compiler from removing the function.
-keep = CanvasRenderingContext2D.measureText;
+keep = [
+    CanvasRenderingContext2D.measureText,
+    CanvasRenderingContext2D.loadImage
+];
 
 })(window, document);
 
