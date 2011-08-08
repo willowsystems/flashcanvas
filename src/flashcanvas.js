@@ -118,6 +118,9 @@ var properties = new Lookup([
 // Whether swf is ready for use
 var isReady = {};
 
+// Cache of images loaded by createPattern() or drawImage()
+var images = {};
+
 // Monitor the number of loading files
 var lock = {};
 
@@ -354,9 +357,12 @@ CanvasRenderingContext2D.prototype = {
         // Special characters in the filename need escaping.
         this._queue.push(properties.createPattern, encodeXML(src), repetition);
 
-        if (isReady[canvasId]) {
+        // If this is the first time to access the URL, the canvas should be
+        // locked while the image is being loaded asynchronously.
+        if (!images[canvasId][src] && isReady[canvasId]) {
             this._executeCommand();
             ++lock[canvasId];
+            images[canvasId][src] = true;
         }
 
         return new CanvasPattern(this);
@@ -632,9 +638,12 @@ CanvasRenderingContext2D.prototype = {
             return;
         }
 
-        if (isReady[canvasId]) {
+        // If this is the first time to access the URL, the canvas should be
+        // locked while the image is being loaded asynchronously.
+        if (!images[canvasId][src] && isReady[canvasId]) {
             this._executeCommand();
             ++lock[canvasId];
+            images[canvasId][src] = true;
         }
     },
 
@@ -878,6 +887,7 @@ var FlashCanvas = {
         var canvasId      = getUniqueId();
         var objectId      = OBJECT_ID_PREFIX + canvasId;
         isReady[canvasId] = false;
+        images[canvasId]  = {};
         lock[canvasId]    = 1;
 
         // Set the width and height attributes.
