@@ -150,6 +150,10 @@ var CanvasRenderingContext2D = function(canvas, swf) {
     // Directionality of the canvas element
     this._direction = "";
 
+    // This ensures that font properties of the canvas element is
+    // transmitted to Flash.
+    this._font = "";
+
     // frame update interval
     var self = this;
     setInterval(function() {
