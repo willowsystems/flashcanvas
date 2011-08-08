@@ -43,6 +43,7 @@ package com.googlecode.flashcanvas
     import flash.display.SpreadMethod;
     import flash.events.ErrorEvent;
     import flash.events.Event;
+    import flash.events.TimerEvent;
     import flash.filters.GlowFilter;
     import flash.geom.ColorTransform;
     import flash.geom.Matrix;
@@ -52,6 +53,7 @@ package com.googlecode.flashcanvas
     import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
     import flash.utils.ByteArray;
+    import flash.utils.Timer;
 
     public class CanvasRenderingContext2D
     {
@@ -82,6 +84,11 @@ package com.googlecode.flashcanvas
         // queue used in drawImage()
         private var taskQueue:Array = [];
 
+        // timer for delayed execution of resize event
+        private var resizeTimer:Timer;
+        private var width:int;
+        private var height:int;
+
         public function CanvasRenderingContext2D(canvas:Canvas)
         {
             _canvas = canvas;
@@ -94,13 +101,13 @@ package com.googlecode.flashcanvas
             currentPoint  = new Point();
 
             state = new State();
+
+            resizeTimer = new Timer(0, 1);
+            resizeTimer.addEventListener(TimerEvent.TIMER, _timerHandler);
         }
 
         public function resize(width:int, height:int):void
         {
-            // initialize bitmapdata
-            _canvas.resize(width, height);
-
             // initialize drawing states
             stateStack = [];
             state = new State();
@@ -110,6 +117,18 @@ package com.googlecode.flashcanvas
 
             // clear the current path
             beginPath();
+
+            // Execute _canvas.resize() after a while
+            this.width  = width;
+            this.height = height;
+            resizeTimer.reset();
+            resizeTimer.start();
+        }
+
+        private function _timerHandler(event:TimerEvent = null):void
+        {
+            // Initialize BitmapData of the Canvas
+            _canvas.resize(width, height);
         }
 
         /*
@@ -1105,6 +1124,13 @@ package com.googlecode.flashcanvas
 
         private function _renderShape():void
         {
+            if (resizeTimer.running)
+            {
+                // Execute the timer event right now
+                resizeTimer.stop();
+                _timerHandler();
+            }
+
             _canvas.bitmapData.draw(shape);
             shape.graphics.clear();
         }
@@ -1196,6 +1222,13 @@ package com.googlecode.flashcanvas
                 colorTransform = new ColorTransform(1, 1, 1, alpha);
             }
 
+            if (resizeTimer.running)
+            {
+                // Execute the timer event right now
+                resizeTimer.stop();
+                _timerHandler();
+            }
+
             // Render the BitmapData to the Canvas
             _canvas.bitmapData.draw(bitmapData, matrix, colorTransform, null, null, true);
 
@@ -1281,6 +1314,13 @@ package com.googlecode.flashcanvas
             {
                 // Make the image translucent
                 colorTransform = new ColorTransform(1, 1, 1, state.globalAlpha);
+            }
+
+            if (resizeTimer.running)
+            {
+                // Execute the timer event right now
+                resizeTimer.stop();
+                _timerHandler();
             }
 
             // Render the image to the Canvas
