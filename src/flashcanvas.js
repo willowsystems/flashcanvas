@@ -124,6 +124,9 @@ var images = {};
 // Monitor the number of loading files
 var lock = {};
 
+// Callback functions passed to loadImage()
+var callbacks = {};
+
 // Canvas elements
 var canvases = {};
 
@@ -671,9 +674,42 @@ CanvasRenderingContext2D.prototype = {
      * extended functions
      */
 
-    loadImage: function(image) {
-        this.drawImage(image, -1e5, -1e5);
-    },
+    loadImage: function(image, onload, onerror) {
+        var tagName = image.tagName, src;
+        var canvasId = this._canvasId;
+
+        // Get the URL of the image.
+        if (tagName) {
+            if (tagName.toLowerCase() === "img") {
+                src = image.getAttribute("src", 2);
+            }
+        } else if (image.src) {
+            src = image.src;
+        }
+
+        // Do nothing in the following cases:
+        //  - The first argument is neither an img element nor an object
+        //    with a src property,
+        //  - The image has been already cached.
+        if (!src || images[canvasId][src]) {
+            return;
+        }
+
+        // Store the objects.
+        if (onload || onerror) {
+            callbacks[canvasId][src] = [image, onload, onerror];
+        }
+
+        // Load the image without drawing.
+        this._queue.push(properties.drawImage, 1, encodeXML(src));
+
+        // Execute the command immediately if possible.
+        if (isReady[canvasId]) {
+            this._executeCommand();
+            ++lock[canvasId];
+            images[canvasId][src] = true;
+        }
+     },
 
     /*
      * private methods
@@ -892,11 +928,12 @@ var FlashCanvas = {
         }
 
         // initialize lock
-        var canvasId      = getUniqueId();
-        var objectId      = OBJECT_ID_PREFIX + canvasId;
-        isReady[canvasId] = false;
-        images[canvasId]  = {};
-        lock[canvasId]    = 1;
+        var canvasId        = getUniqueId();
+        var objectId        = OBJECT_ID_PREFIX + canvasId;
+        isReady[canvasId]   = false;
+        images[canvasId]    = {};
+        lock[canvasId]      = 1;
+        callbacks[canvasId] = {};
 
         // Set the width and height attributes.
         setCanvasSize(canvas);
@@ -975,15 +1012,18 @@ var FlashCanvas = {
         canvas.fireEvent("on" + type);
     },
 
-    unlock: function(canvasId, ready) {
+    unlock: function(canvasId, url, error) {
+        var canvas, swf, width, height;
+        var _callback, image, callback;
+
         if (lock[canvasId]) {
             --lock[canvasId];
         }
-        if (ready) {
-            var canvas = canvases[canvasId];
-            var swf    = canvas.firstChild;
-            var width;
-            var height;
+
+        // If Flash becomes ready
+        if (url === undefined) {
+            canvas = canvases[canvasId];
+            swf    = canvas.firstChild;
 
             // Set the width and height attributes of the canvas element.
             setCanvasSize(canvas);
@@ -1013,6 +1053,18 @@ var FlashCanvas = {
                 setTimeout(function() {
                     canvas.onload();
                 }, 0);
+            }
+        }
+
+        // If callback functions were defined
+        else if (_callback = callbacks[canvasId][url]) {
+            image    = _callback[0];
+            callback = _callback[1 + error];
+            delete callbacks[canvasId][url];
+
+            // Call the onload or onerror callback function.
+            if (typeof callback === "function") {
+                callback.call(image);
             }
         }
     }

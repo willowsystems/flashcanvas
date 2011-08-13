@@ -120,7 +120,7 @@ package
 
             try
             {
-                ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
+                ExternalInterface.call("FlashCanvas.unlock", canvasId);
             }
             catch (error:Error)
             {
@@ -135,7 +135,7 @@ package
             timer.removeEventListener(TimerEvent.TIMER, timerHandler);
 
             // Send JavaScript a message that the swf is ready
-            ExternalInterface.call("FlashCanvas.unlock", canvasId, true);
+            ExternalInterface.call("FlashCanvas.unlock", canvasId);
         }
 
         public function executeCommand(data:String):*

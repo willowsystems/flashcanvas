@@ -582,8 +582,11 @@ package
             image.removeEventListener(ErrorEvent.ERROR, errorHandler);
             image.removeEventListener("load", loadHandler);
 
-            // Send JavaScript a message that the image has been loaded
-            ExternalInterface.call("FlashCanvas.unlock", canvasId);
+            var url:String = image.src;
+            var error:int  = event is ErrorEvent ? 1 : 0;
+
+            // Send JavaScript a message that the image has been loaded.
+            ExternalInterface.call("FlashCanvas.unlock", canvasId, url, error);
         }
     }
 }
