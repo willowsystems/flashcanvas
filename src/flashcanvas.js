@@ -277,14 +277,30 @@ CanvasRenderingContext2D.prototype = {
     _setStrokeStyle: function() {
         if (this._strokeStyle !== this.strokeStyle) {
             var style = this._strokeStyle = this.strokeStyle;
-            this._queue.push(properties.strokeStyle, (typeof style === "object") ? style.id : style);
+            if (typeof style === "string") {
+                // OK
+            } else if (style instanceof CanvasGradient ||
+                       style instanceof CanvasPattern) {
+                style = style.id;
+            } else {
+                return;
+            }
+            this._queue.push(properties.strokeStyle, style);
         }
     },
 
     _setFillStyle: function() {
         if (this._fillStyle !== this.fillStyle) {
             var style = this._fillStyle = this.fillStyle;
-            this._queue.push(properties.fillStyle, (typeof style === "object") ? style.id : style);
+            if (typeof style === "string") {
+                // OK
+            } else if (style instanceof CanvasGradient ||
+                       style instanceof CanvasPattern) {
+                style = style.id;
+            } else {
+                return;
+            }
+            this._queue.push(properties.fillStyle, style);
         }
     },
 
