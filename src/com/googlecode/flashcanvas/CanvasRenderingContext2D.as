@@ -1031,6 +1031,12 @@ package com.googlecode.flashcanvas
                     alpha *= thickness;
             }
 
+            // Complicated thick lines are sometimes rendered incorrectly
+            // if pixelHinting is set to true.
+            // @see http://code.google.com/p/flashcanvas/issues/detail?id=15
+            if (thickness > 10)
+                pixelHinting = false;
+
             graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.NORMAL, state.lineCap, state.lineJoin, state.miterLimit);
 
             if (style is CanvasGradient)
