@@ -1014,6 +1014,82 @@ var FlashCanvas = {
         return canvas;
     },
 
+
+    replaceGetContext: function(contextId) {
+      canvas = this;
+
+        // initialize lock
+        var canvasId        = getUniqueId();
+        var objectId        = OBJECT_ID_PREFIX + canvasId;
+        isReady[canvasId]   = false;
+        images[canvasId]    = {};
+        lock[canvasId]      = 1;
+        callbacks[canvasId] = {};
+
+        // Set the width and height attributes.
+        setCanvasSize(canvas);
+
+        // embed swf and SPAN element
+        canvas.innerHTML =
+            '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
+            ' codebase="' + location.protocol + '//fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
+            ' width="100%" height="100%" id="' + objectId + '">' +
+            '<param name="allowScriptAccess" value="always">' +
+            '<param name="flashvars" value="id=' + objectId + '">' +
+            '<param name="wmode" value="transparent">' +
+            '</object>' +
+            '<span style="margin:0;padding:0;border:0;display:inline-block;position:static;height:1em;overflow:visible;white-space:nowrap">' +
+            '</span>';
+
+        canvases[canvasId] = canvas;
+        var swf            = canvas.firstChild;
+        spans[canvasId]    = canvas.lastChild;
+
+        // Check whether the canvas element is in the DOM tree
+        var documentContains = document.body.contains;
+        if (documentContains(canvas)) {
+            // Load swf file immediately
+            swf["movie"] = SWF_URL;
+        } else {
+            // Wait until the element is added to the DOM tree
+            var intervalId = setInterval(function() {
+                if (documentContains(canvas)) {
+                    clearInterval(intervalId);
+                    swf["movie"] = SWF_URL;
+                }
+            }, 0);
+        }
+
+        // If the browser is IE6 or in quirks mode
+        if (document.compatMode === "BackCompat" || !window.XMLHttpRequest) {
+            spans[canvasId].style.overflow = "hidden";
+        }
+
+        // initialize context
+        var ctx = new CanvasRenderingContext2D(canvas, swf);
+
+        // canvas API
+        canvas.getContext = function(contextId) {
+            return contextId === "2d" ? ctx : NULL;
+        };
+
+        canvas.toDataURL = function(type, quality) {
+            if (("" + type).replace(/[A-Z]+/g, toLowerCase) === "image/jpeg") {
+                ctx._queue.push(properties.toDataURL, type,
+                                typeof quality === "number" ? quality : "");
+            } else {
+                ctx._queue.push(properties.toDataURL, type);
+            }
+            return ctx._executeCommand();
+        };
+
+        // add event listener
+        swf.attachEvent(ON_FOCUS, onFocus);
+
+        return ctx;
+    },
+
+
     saveImage: function(canvas) {
         var swf = canvas.firstChild;
         swf.saveImage();
