@@ -45,6 +45,8 @@ package
     import flash.ui.ContextMenuItem;
     import flash.utils.Timer;
 
+    import com.demonsters.debugger.MonsterDebugger;
+     
     import com.adobe.images.PNGEncoder;
     import com.googlecode.flashcanvas.Canvas;
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
@@ -61,6 +63,9 @@ package
 
         public function FlashCanvas()
         {
+            MonsterDebugger.initialize(this);
+            MonsterDebugger.trace(this, "Hello World!");
+          
             // stage settings
             stage.scaleMode = StageScaleMode.NO_SCALE;
             stage.align     = StageAlign.TOP_LEFT;
