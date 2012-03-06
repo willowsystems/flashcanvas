@@ -984,14 +984,36 @@ package com.googlecode.flashcanvas
         public function createImageData():ImageData
         {
             // TODO: Implement
-            return new ImageData;
+            return new ImageData(0,0);
         }
 
         public function getImageData(sx:Number, sy:Number, sw:Number, sh:Number):ImageData
         {
-            // TODO: Implement
-            return new ImageData;
+          if (resizeTimer.running)
+          {
+              // Execute the timer event right now
+              resizeTimer.stop();
+              _timerHandler();
+          }
+
+          // normalise sizes
+          if (sw < 0) {
+              sx = sx + sw;
+              sw = -sw;
+          }
+          if (sy < 0) {
+              sy = sy + sh;
+              sh = -sh;
+          }
+
+          // TODO clamp to canvas size
+
+          var bounds:Rectangle = new Rectangle(sx, sy, sw, sh)
+          var byteArray:ByteArray = _canvas.bitmapData.getPixels(bounds);
+
+          return new ImageData(sw, sh, byteArray);
         }
+
 
         public function putImageData(data:ImageData, dx:Number, dy:Number, dirtyX:Number, dirtyY:Number, dirtyWidth:Number, dirtyHeight:Number):void
         {

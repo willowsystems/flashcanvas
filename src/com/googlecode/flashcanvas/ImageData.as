@@ -27,11 +27,25 @@
 
 package com.googlecode.flashcanvas
 {
+    import flash.utils.ByteArray;
     public class ImageData
     {
         private var _width:uint;
         private var _height:uint;
-        private var _data:CanvasPixelArray;
+        private var _data:Array;
+
+        public function ImageData(width:uint, height:uint, byteArray:ByteArray=null)
+        {
+          _width = width;
+          _height = height;
+
+          _data = [];
+
+          for (var i:int = 0, n:int = byteArray.length; i < n; i++) {
+            _data[i] = byteArray[i];
+          }
+        }
+        
 
         public function get width():uint
         {
@@ -43,7 +57,7 @@ package com.googlecode.flashcanvas
             return _height;
         }
 
-        public function get data():CanvasPixelArray
+        public function get data():Array
         {
             return _data;
         }
