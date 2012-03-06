@@ -55,6 +55,9 @@ package com.googlecode.flashcanvas
     import flash.utils.ByteArray;
     import flash.utils.Timer;
 
+    import com.demonsters.debugger.MonsterDebugger;
+    
+
     public class CanvasRenderingContext2D
     {
         // back-reference to the canvas
@@ -989,6 +992,8 @@ package com.googlecode.flashcanvas
 
         public function getImageData(sx:Number, sy:Number, sw:Number, sh:Number):ImageData
         {
+          MonsterDebugger.trace(this, "Getting image data requested!");
+          
           if (resizeTimer.running)
           {
               // Execute the timer event right now
