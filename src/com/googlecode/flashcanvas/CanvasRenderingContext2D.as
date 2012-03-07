@@ -990,6 +990,7 @@ package com.googlecode.flashcanvas
             return new ImageData(0,0);
         }
 
+        // TODO finish & test this implementation
         public function getImageData(sx:Number, sy:Number, sw:Number, sh:Number):ImageData
         {
           MonsterDebugger.trace(this, "Getting image data requested!");
