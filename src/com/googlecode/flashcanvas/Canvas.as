@@ -38,12 +38,16 @@ package com.googlecode.flashcanvas
     import com.adobe.images.JPGEncoder;
     import com.adobe.images.PNGEncoder;
 
+    import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+
+
     public class Canvas extends Bitmap
     {
         // Directionality of the canvas
         public var dir:String = "ltr";
 
         private var _context:*;
+        private var _command:Command;
         private var _width:int  = 300;
         private var _height:int = 150;
 
@@ -89,6 +93,15 @@ package com.googlecode.flashcanvas
                 return null;
             }
         }
+
+        public function getCommand(canvasId:String):Command
+        {
+          if(!_command) {
+            _command = new Command(this.getContext('2d'), canvasId);
+          }
+          return _command;
+        }
+
 
         public function toDataURL(type:String = "image/png", ...args:Array):String
         {

@@ -29,158 +29,192 @@
 
 package
 {
-    import flash.display.Sprite;
-    import flash.display.StageAlign;
-    import flash.display.StageScaleMode;
-    import flash.events.ContextMenuEvent;
-    import flash.events.Event;
-    import flash.events.MouseEvent;
-    import flash.events.TimerEvent;
-    import flash.external.ExternalInterface;
-    import flash.net.navigateToURL;
-    import flash.net.URLRequest;
-    import flash.net.URLRequestMethod;
-    import flash.system.Security;
-    import flash.ui.ContextMenu;
-    import flash.ui.ContextMenuItem;
-    import flash.utils.Timer;
+  import flash.display.Sprite;
+  import flash.display.StageAlign;
+  import flash.display.StageScaleMode;
+  import flash.events.ContextMenuEvent;
+  import flash.events.Event;
+  import flash.events.MouseEvent;
+  import flash.events.TimerEvent;
+  import flash.external.ExternalInterface;
+  import flash.net.navigateToURL;
+  import flash.net.URLRequest;
+  import flash.net.URLRequestMethod;
+  import flash.system.Security;
+  import flash.ui.ContextMenu;
+  import flash.ui.ContextMenuItem;
+  import flash.utils.Timer;
 
-    import com.demonsters.debugger.MonsterDebugger;
-     
-    import com.adobe.images.PNGEncoder;
-    import com.googlecode.flashcanvas.Canvas;
-    import com.googlecode.flashcanvas.CanvasRenderingContext2D;
-    import com.googlecode.flashcanvas.Config;
+  import com.demonsters.debugger.MonsterDebugger;
 
-    [SWF(backgroundColor="#FFFFFF")]
+  import com.adobe.images.PNGEncoder;
+  import com.googlecode.flashcanvas.Canvas;
+  import com.googlecode.flashcanvas.Config;
+
+  [SWF(backgroundColor="#FFFFFF")]
     public class FlashCanvas extends Sprite
     {
-        private var canvas:Canvas;
-        private var context:CanvasRenderingContext2D;
-        private var command:Command;
-        private var canvasId:String;
-        private var timer:Timer;
 
-        public function FlashCanvas()
+      private var canvases:Array
+
+      private var flashCanvasId:String;
+      private var timer:Timer;
+
+      public function FlashCanvas()
+      {
+        MonsterDebugger.initialize(this);
+        MonsterDebugger.trace(this, "Hello World!");
+
+        // stage settings
+        stage.scaleMode = StageScaleMode.NO_SCALE;
+        stage.align     = StageAlign.TOP_LEFT;
+        stage.frameRate = 60;
+
+        Security.allowDomain("*");
+
+        ExternalInterface.marshallExceptions = true;
+        ExternalInterface.addCallback("executeCommand", executeCommand);
+        ExternalInterface.addCallback("resize", resize);
+        ExternalInterface.addCallback("saveImage", saveImage);
+
+        // Flash Player earlier than version 10.1 has a bug that
+        // ExternalInterface.objectID returns null under some conditions.
+        // In such cases, get objectID via FlashVars instead.
+        //
+        // @see http://bugs.adobe.com/jira/browse/FP-383
+
+        var objectId:String = ExternalInterface.objectID;
+        if (objectId == null)
         {
-            MonsterDebugger.initialize(this);
-            MonsterDebugger.trace(this, "Hello World!");
-          
-            // stage settings
-            stage.scaleMode = StageScaleMode.NO_SCALE;
-            stage.align     = StageAlign.TOP_LEFT;
-            stage.frameRate = 60;
-
-            Security.allowDomain("*");
-
-            ExternalInterface.marshallExceptions = true;
-            ExternalInterface.addCallback("executeCommand", executeCommand);
-            ExternalInterface.addCallback("resize", resize);
-            ExternalInterface.addCallback("saveImage", saveImage);
-
-            // create canvas
-            canvas  = new Canvas();
-            context = canvas.getContext("2d");
-            addChild(canvas);
-
-            // Flash Player earlier than version 10.1 has a bug that
-            // ExternalInterface.objectID returns null under some conditions.
-            // In such cases, get objectID via FlashVars instead.
-            //
-            // @see http://bugs.adobe.com/jira/browse/FP-383
-
-            var objectId:String = ExternalInterface.objectID;
-            if (objectId == null)
-            {
-                objectId = loaderInfo.parameters.id;
-                resize(stage.stageWidth, stage.stageHeight);
-            }
-
-            // Remove the prefix "external" from objectID
-            canvasId = objectId.slice(8);
-
-            // Create a command parser object
-            command = new Command(context, canvasId);
-
-            // Set the URL of the proxy script
-            Config.domain = loaderInfo.url.match(/^[^\/]+\/\/[^\/]+\//)[0];
-            Config.proxy  = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");
-
-            // mouse event listeners
-            stage.doubleClickEnabled = true;
-            stage.addEventListener(MouseEvent.CLICK,        mouseEventHandler);
-            stage.addEventListener(MouseEvent.DOUBLE_CLICK, mouseEventHandler);
-
-            // custom context menu
-            var contextMenu:ContextMenu   = new ContextMenu();
-            var saveItem:ContextMenuItem  = new ContextMenuItem("Save Image As...");
-            var aboutItem:ContextMenuItem = new ContextMenuItem("About FlashCanvas");
-
-            saveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveImage);
-            aboutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, aboutItemSelectHandler);
-
-            contextMenu.hideBuiltInItems();
-            contextMenu.customItems.push(saveItem, aboutItem);
-            this.contextMenu = contextMenu;
-
-            try
-            {
-                ExternalInterface.call("FlashCanvas.unlock", canvasId);
-            }
-            catch (error:Error)
-            {
-                timer = new Timer(0, 1);
-                timer.addEventListener(TimerEvent.TIMER, timerHandler);
-                timer.start();
-            }
+          objectId = loaderInfo.parameters.id;
+          resize(stage.stageWidth, stage.stageHeight);
         }
 
-        private function timerHandler(event:TimerEvent):void
-        {
-            timer.removeEventListener(TimerEvent.TIMER, timerHandler);
+        // Remove the prefix "external" from objectID
+        flashCanvasId = objectId.slice(8);
 
-            // Send JavaScript a message that the swf is ready
-            ExternalInterface.call("FlashCanvas.unlock", canvasId);
+
+        // create canvas
+        var canvas:Canvas = new Canvas();
+        canvases = [canvas];
+        addChild(canvas);
+
+
+
+        // Create a command parser object
+
+        // Set the URL of the proxy script
+        Config.domain = loaderInfo.url.match(/^[^\/]+\/\/[^\/]+\//)[0];
+        Config.proxy  = loaderInfo.url.replace(/[^\/]+$/, "proxy.php");
+
+        // mouse event listeners
+        stage.doubleClickEnabled = true;
+        stage.addEventListener(MouseEvent.CLICK,        mouseEventHandler);
+        stage.addEventListener(MouseEvent.DOUBLE_CLICK, mouseEventHandler);
+
+
+        // custom context menu
+        try {
+          var contextMenu:ContextMenu   = new ContextMenu();
+          var saveItem:ContextMenuItem  = new ContextMenuItem("Save Image As...");
+          var aboutItem:ContextMenuItem = new ContextMenuItem("About FlashCanvas");
+
+          saveItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveImage);
+          aboutItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, aboutItemSelectHandler);
+
+          contextMenu.hideBuiltInItems();
+          contextMenu.customItems.push(saveItem, aboutItem);
+
+          this.contextMenu = contextMenu;
+        } catch (e:*) {
+          MonsterDebugger.trace(this, "error making menus");
+          MonsterDebugger.trace(this, e);
         }
 
-        public function executeCommand(data:String):*
+        try
         {
-            if (data.length > 0)
-                return command.parse(data);
-            return null;
+          ExternalInterface.call("FlashCanvas.unlock", flashCanvasId);
         }
-
-        public function resize(width:int, height:int):void
+        catch (error:Error)
         {
-            context.resize(width, height);
+          MonsterDebugger.trace(this, "unlocking error");
+          MonsterDebugger.trace(this, error);
+          timer = new Timer(0, 1);
+          timer.addEventListener(TimerEvent.TIMER, timerHandler);
+          timer.start();
         }
+        MonsterDebugger.trace(this, "yay2");
+      }
 
-        public function saveImage(event:Event = null):void
-        {
-            var url:String = loaderInfo.url.replace(/[^\/]+$/, "save.php");
-            var request:URLRequest = new URLRequest(url);
+      private function timerHandler(event:TimerEvent):void
+      {
+        MonsterDebugger.trace(this, "timer");
+        MonsterDebugger.trace(this, event);
 
-            request.contentType = "application/octet-stream";
-            request.method      = URLRequestMethod.POST;
-            request.data        = PNGEncoder.encode(canvas.bitmapData);
+        timer.removeEventListener(TimerEvent.TIMER, timerHandler);
 
-            navigateToURL(request, "_self");
+        // Send JavaScript a message that the swf is ready
+        ExternalInterface.call("FlashCanvas.unlock", flashCanvasId);
+      }
+
+
+      public function newAuxiliaryCanvas():Number
+      {
+        var canvas:Canvas = new Canvas();
+        canvases.push(canvas);
+        return canvases.length-1
+      }
+
+
+      public function executeCommand(internalCanvasId:Number, data:String):*
+      {
+        if(!internalCanvasId) {internalCanvasId = 0}
+        var canvas:Canvas = canvases[internalCanvasId];
+
+        try {
+          if (data.length > 0)
+            return canvas.getCommand(flashCanvasId).parse(data);
+          return null;
+        } catch(e:*) {
+          MonsterDebugger.trace(this, "error executing command");
+          MonsterDebugger.trace(this, e);
         }
+      }
 
-        private function mouseEventHandler(event:MouseEvent):void
-        {
-            var type:String = event.type;
-            if (type == MouseEvent.DOUBLE_CLICK)
-                type = "dblclick";
+      public function resize(width:int, height:int):void
+      {
+        MonsterDebugger.trace(this, "resizing")
+          MonsterDebugger.trace(this, width)
+          MonsterDebugger.trace(this, height)
+          canvases[0].resize(width, height);
+      }
 
-            ExternalInterface.call("FlashCanvas.trigger", canvasId, type);
-        }
+      public function saveImage(event:Event = null):void
+      {
+        var url:String = loaderInfo.url.replace(/[^\/]+$/, "save.php");
+        var request:URLRequest = new URLRequest(url);
 
-        private function aboutItemSelectHandler(event:Event):void
-        {
-            var url:String         = "http://code.google.com/p/flashcanvas/";
-            var request:URLRequest = new URLRequest(url);
-            navigateToURL(request, "_blank");
-        }
+        request.contentType = "application/octet-stream";
+        request.method      = URLRequestMethod.POST;
+        request.data        = PNGEncoder.encode(canvases[0].bitmapData);
+
+        navigateToURL(request, "_self");
+      }
+
+      private function mouseEventHandler(event:MouseEvent):void
+      {
+        var type:String = event.type;
+        if (type == MouseEvent.DOUBLE_CLICK)
+          type = "dblclick";
+
+        ExternalInterface.call("FlashCanvas.trigger", flashCanvasId, type);
+      }
+
+      private function aboutItemSelectHandler(event:Event):void
+      {
+        var url:String         = "http://code.google.com/p/flashcanvas/";
+        var request:URLRequest = new URLRequest(url);
+        navigateToURL(request, "_blank");
+      }
     }
 }
