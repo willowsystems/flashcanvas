@@ -74,6 +74,7 @@ package
 
         ExternalInterface.marshallExceptions = true;
         ExternalInterface.addCallback("executeCommand", executeCommand);
+        ExternalInterface.addCallback("newAuxiliaryCanvas", newAuxiliaryCanvas);
         ExternalInterface.addCallback("resize", resize);
         ExternalInterface.addCallback("saveImage", saveImage);
 
