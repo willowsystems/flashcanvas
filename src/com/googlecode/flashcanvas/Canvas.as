@@ -39,6 +39,7 @@ package com.googlecode.flashcanvas
     import com.adobe.images.PNGEncoder;
 
     import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+    import com.demonsters.debugger.MonsterDebugger;
 
 
     public class Canvas extends Bitmap
@@ -46,13 +47,16 @@ package com.googlecode.flashcanvas
         // Directionality of the canvas
         public var dir:String = "ltr";
 
+        public var internalCanvasId:uint;
+
         private var _context:*;
         private var _command:Command;
         private var _width:int  = 300;
         private var _height:int = 150;
 
-        public function Canvas(width:int = 300, height:int = 150)
+        public function Canvas(internalCanvasId:uint, width:int = 300, height:int = 150)
         {
+          this.internalCanvasId = internalCanvasId;
             super(null, PixelSnapping.ALWAYS);
             resize(width, height);
         }
@@ -97,7 +101,8 @@ package com.googlecode.flashcanvas
         public function getCommand(canvasId:String):Command
         {
           if(!_command) {
-            _command = new Command(this.getContext('2d'), canvasId);
+            var ctx:* = this.getContext('2d')
+            _command = new Command(ctx, canvasId);
           }
           return _command;
         }
@@ -160,6 +165,10 @@ package com.googlecode.flashcanvas
                 width = 1;
             if (height <= 0)
                 height = 1;
+
+            MonsterDebugger.trace(this, "resize canvas "+internalCanvasId)
+            MonsterDebugger.trace(this, width)
+            MonsterDebugger.trace(this, height)
 
             // create new bitmapdata
             bitmapData = new BitmapData(width, height, true, 0x00000000);

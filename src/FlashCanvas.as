@@ -96,7 +96,7 @@ package
 
 
         // create canvas
-        var canvas:Canvas = new Canvas();
+        var canvas:Canvas = new Canvas(0);
         canvases = [canvas];
         addChild(canvas);
 
@@ -161,9 +161,12 @@ package
 
       public function newAuxiliaryCanvas():Number
       {
-        var canvas:Canvas = new Canvas();
+        var internalCanvasId:uint = canvases.length;
+        var canvas:Canvas = new Canvas(internalCanvasId);
         canvases.push(canvas);
-        return canvases.length-1
+
+        MonsterDebugger.trace(this, "creating newAuxiliaryCanvas "+internalCanvasId);
+        return internalCanvasId;
       }
 
 
@@ -172,13 +175,30 @@ package
         if(!internalCanvasId) {internalCanvasId = 0}
         var canvas:Canvas = canvases[internalCanvasId];
 
+        if(!canvas) {
+          throw new ArgumentError("auxiliary canvas id "+internalCanvasId+" not found");
+        }
+
+        //MonsterDebugger.trace(this, "icid");
+        //MonsterDebugger.trace(this, internalCanvasId);
+
+        var command:Command = canvas.getCommand(flashCanvasId);
+
+        if(!command) {
+          throw new ArgumentError("unable to get command parser for auxiliary canvas id "+internalCanvasId);
+        }
+
         try {
           if (data.length > 0)
-            return canvas.getCommand(flashCanvasId).parse(data);
+            return command.parse(data);
           return null;
+
         } catch(e:*) {
-          MonsterDebugger.trace(this, "error executing command");
+          MonsterDebugger.trace(this, "error executing command "+command.getCurrentCommand());
+          MonsterDebugger.trace(this, data);
           MonsterDebugger.trace(this, e);
+          throw(e);
+          return null;
         }
       }
 

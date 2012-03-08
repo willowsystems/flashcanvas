@@ -41,8 +41,13 @@ package com.googlecode.flashcanvas
 
           _data = [];
 
-          for (var i:int = 0, n:int = byteArray.length; i < n; i++) {
-            _data[i] = byteArray[i];
+          if(byteArray) {
+            byteArray.position = 0;
+            var i:uint = 0;
+            while( byteArray.bytesAvailable ) {
+              _data[i] = byteArray.readUnsignedByte();
+              i += 1;
+            }
           }
         }
         

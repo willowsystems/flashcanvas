@@ -695,10 +695,14 @@ package com.googlecode.flashcanvas
             if (!isFinite(x) || !isFinite(y) || !isFinite(w) || !isFinite(h))
                 return;
 
+
             var p1:Point = _getTransformedPoint(x, y);
             var p2:Point = _getTransformedPoint(x + w, y);
             var p3:Point = _getTransformedPoint(x + w, y + h);
             var p4:Point = _getTransformedPoint(x, y + h);
+
+            MonsterDebugger.trace(this, "rect")
+            MonsterDebugger.log(p1, p2, p3, p4);
 
             path.moveTo(p1.x, p1.y);
             path.lineTo(p2.x, p2.y);
@@ -993,8 +997,6 @@ package com.googlecode.flashcanvas
         // TODO finish & test this implementation
         public function getImageData(sx:Number, sy:Number, sw:Number, sh:Number):ImageData
         {
-          MonsterDebugger.trace(this, "Getting image data requested!");
-          
           if (resizeTimer.running)
           {
               // Execute the timer event right now
