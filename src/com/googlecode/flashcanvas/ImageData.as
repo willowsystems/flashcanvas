@@ -41,12 +41,16 @@ package com.googlecode.flashcanvas
 
           _data = [];
 
+          var alpha:uint;
+
           if(byteArray) {
             byteArray.position = 0;
-            var i:uint = 0;
             while( byteArray.bytesAvailable ) {
-              _data[i] = byteArray.readUnsignedByte();
-              i += 1;
+              alpha = byteArray.readUnsignedByte();
+              _data.push(byteArray.readUnsignedByte());
+              _data.push(byteArray.readUnsignedByte());
+              _data.push(byteArray.readUnsignedByte());
+              _data.push(alpha);
             }
           }
         }
