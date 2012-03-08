@@ -54,7 +54,7 @@ package com.googlecode.flashcanvas
         private var _width:int  = 300;
         private var _height:int = 150;
 
-        public function Canvas(internalCanvasId:uint, width:int = 1000, height:int = 1000)
+        public function Canvas(internalCanvasId:uint, width:int = 300, height:int = 150)
         {
           this.internalCanvasId = internalCanvasId;
             super(null, PixelSnapping.ALWAYS);
