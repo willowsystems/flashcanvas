@@ -1014,7 +1014,8 @@ package com.googlecode.flashcanvas
               sh = -sh;
           }
 
-          // TODO clamp to canvas size
+          // TODO clamp to canvas size, or expand canvas?
+          // TODO test canvas transform
 
           var bounds:Rectangle = new Rectangle(sx, sy, sw, sh)
           var byteArray:ByteArray = _canvas.bitmapData.getPixels(bounds);
