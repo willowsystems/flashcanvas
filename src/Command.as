@@ -34,6 +34,7 @@ package
   import flash.external.ExternalInterface;
 
   import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+  import com.googlecode.flashcanvas.Canvas;
   import com.googlecode.flashcanvas.CSSColor;
   import com.googlecode.flashcanvas.ImageData;
   import com.googlecode.flashcanvas.Image;
@@ -43,6 +44,7 @@ package
   public class Command
   {
     private var ctx:CanvasRenderingContext2D;
+    private var canvas:Canvas;
     private var canvasId:String;
 
     private var commands:Array;
@@ -56,6 +58,7 @@ package
     public function Command(ctx:CanvasRenderingContext2D, canvasId:String)
     {
       this.ctx      = ctx;
+      this.canvas   = ctx.canvas;
       this.canvasId = canvasId;
       initializeDispatchTable();
     }
@@ -464,7 +467,6 @@ package
     private function rect():void
     {
 
-      MonsterDebugger.trace(this, "rect");
       var x:Number = input.readFloat();
       var y:Number = input.readFloat();
       var w:Number = input.readFloat();
@@ -542,6 +544,7 @@ package
       // JavaScript.
     }
 
+
     private function drawImage():void
     {
       var argc:int   = input.readInt();
@@ -588,16 +591,59 @@ package
       }
     }
 
+
     private function drawImageCanvas():void
     {
-      throw "drawImageCanvas not implemented";
-      // TODO: Implement
+      var argc:int   = input.readInt();
+      var srcCanvasId:uint = input.readInt();
+      var srcCanvas:Canvas = getCanvasObject(srcCanvasId);
+
+      if(srcCanvas) {
+
+        var sx:Number;
+        var sy:Number;
+        var sw:Number;
+        var sh:Number;
+        var dx:Number;
+        var dy:Number;
+        var dw:Number;
+        var dh:Number;
+
+        if (argc == 3)
+        {
+          dx = input.readFloat();
+          dy = input.readFloat();
+          ctx.drawImageCanvas(srcCanvas, dx, dy);
+        }
+        else if (argc == 5)
+        {
+          dx = input.readFloat();
+          dy = input.readFloat();
+          dw = input.readFloat();
+          dh = input.readFloat();
+          ctx.drawImageCanvas(srcCanvas, dx, dy, dw, dh);
+        }
+        else if (argc == 9)
+        {
+          sx = input.readFloat();
+          sy = input.readFloat();
+          sw = input.readFloat();
+          sh = input.readFloat();
+          dx = input.readFloat();
+          dy = input.readFloat();
+          dw = input.readFloat();
+          dh = input.readFloat();
+          ctx.drawImageCanvas(srcCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
+        }
+      }
     }
+
 
     private function createImageData():*
     {
       // TODO: Implement
     }
+
 
     private function getImageData():ImageData
     {
@@ -658,6 +704,13 @@ package
       return image;
     }
 
+
+    private function getCanvasObject(canvasId:uint):Canvas
+    {
+      return this.canvas.flashCanvas.getAuxiliaryCanvas(canvasId);
+    }
+
+
     private function errorHandler(event:ErrorEvent):void
     {
       // Remove the image object from the cache.
@@ -681,5 +734,13 @@ package
       // Send JavaScript a message that the image has been loaded.
       ExternalInterface.call("FlashCanvas.unlock", canvasId, url, error);
     }
+
+    private function mlog(...args:Array):void
+    {
+      for(var i:uint=0, l:uint=args.length; i<l; i++) {
+        MonsterDebugger.trace(this, args[i]);
+      }
+    }
   }
+
 }

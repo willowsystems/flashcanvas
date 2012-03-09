@@ -29,149 +29,160 @@
 
 package com.googlecode.flashcanvas
 {
-    import flash.display.Bitmap;
-    import flash.display.BitmapData;
-    import flash.display.PixelSnapping;
-    import flash.geom.Point;
-    import flash.geom.Rectangle;
-    import flash.utils.ByteArray;
-    import com.adobe.images.JPGEncoder;
-    import com.adobe.images.PNGEncoder;
+  import flash.display.Bitmap;
+  import flash.display.BitmapData;
+  import flash.display.PixelSnapping;
+  import flash.geom.Point;
+  import flash.geom.Rectangle;
+  import flash.utils.ByteArray;
+  import com.adobe.images.JPGEncoder;
+  import com.adobe.images.PNGEncoder;
 
-    import com.googlecode.flashcanvas.CanvasRenderingContext2D;
-    import com.demonsters.debugger.MonsterDebugger;
+  import com.googlecode.flashcanvas.CanvasRenderingContext2D;
+  import com.demonsters.debugger.MonsterDebugger;
 
 
-    public class Canvas extends Bitmap
+  public class Canvas extends Bitmap
+  {
+    // Directionality of the canvas
+    public var dir:String = "ltr";
+
+    public var internalCanvasId:uint;
+
+    private var _flashCanvas:FlashCanvas;
+    private var _context:*;
+    private var _command:Command;
+    private var _width:int  = 300;
+    private var _height:int = 150;
+
+
+    public function Canvas(flashCanvas:FlashCanvas, internalCanvasId:uint, width:int = 300, height:int = 150)
     {
-        // Directionality of the canvas
-        public var dir:String = "ltr";
-
-        public var internalCanvasId:uint;
-
-        private var _context:*;
-        private var _command:Command;
-        private var _width:int  = 300;
-        private var _height:int = 150;
-
-        public function Canvas(internalCanvasId:uint, width:int = 300, height:int = 150)
-        {
-          this.internalCanvasId = internalCanvasId;
-            super(null, PixelSnapping.ALWAYS);
-            resize(width, height);
-        }
-
-        override public function get width():Number
-        {
-            return _width;
-        }
-
-        override public function set width(value:Number):void
-        {
-            resize(value, height);
-        }
-
-        override public function get height():Number
-        {
-            return _height;
-        }
-
-        override public function set height(value:Number):void
-        {
-            resize(width, value);
-        }
-
-        public function getContext(contextId:String):*
-        {
-            if (contextId == "2d")
-            {
-                if (!_context)
-                {
-                    _context = new CanvasRenderingContext2D(this);
-                    _context.resize(width, height);
-                }
-                return _context;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public function getCommand(canvasId:String):Command
-        {
-          if(!_command) {
-            var ctx:* = this.getContext('2d')
-            _command = new Command(ctx, canvasId);
-          }
-          return _command;
-        }
-
-
-        public function toDataURL(type:String = "image/png", ...args:Array):String
-        {
-            if (_width == 0 || _height == 0)
-            {
-                return "data:,";
-            }
-
-            var byteArray:ByteArray;
-
-            if (/^image\/jpeg$/i.test(type))
-            {
-                var quality:* = args[0];
-                if (typeof quality != "number" || isNaN(quality) ||
-                    quality < 0 || quality > 1)
-                    quality = 0.5;
-
-                // For image types that do not support an alpha channel, the
-                // image must be composited onto a solid black background
-                // using the source-over operator.
-                var image:BitmapData     =
-                    new BitmapData(width, height, true, 0xFF000000);
-                var sourceRect:Rectangle = bitmapData.rect;
-                var destPoint:Point      = new Point(0, 0);
-                image.copyPixels(
-                    bitmapData, sourceRect, destPoint, null, null, true);
-
-                var jpgEncoder:JPGEncoder = new JPGEncoder(quality * 100);
-
-                type      = "image/jpeg";
-                byteArray = jpgEncoder.encode(image);
-
-                // Release the memory
-                image.dispose();
-            }
-            else
-            {
-                type      = "image/png";
-                byteArray = PNGEncoder.encode(bitmapData);
-            }
-
-            return "data:" + type + ";base64," + Base64.encode(byteArray);
-        }
-
-        public function resize(width:int, height:int):void
-        {
-            this._width  = width;
-            this._height = height;
-
-            // purge existing
-            if (bitmapData)
-                bitmapData.dispose();
-
-            // The dimension of bitmapdata needs to be a positive value.
-            if (width <= 0)
-                width = 1;
-            if (height <= 0)
-                height = 1;
-
-            MonsterDebugger.trace(this, "resize canvas "+internalCanvasId)
-            MonsterDebugger.trace(this, width)
-            MonsterDebugger.trace(this, height)
-
-            // create new bitmapdata
-            bitmapData = new BitmapData(width, height, true, 0x00000000);
-        }
+      this._flashCanvas = flashCanvas;
+      this.internalCanvasId = internalCanvasId;
+      super(null, PixelSnapping.ALWAYS);
+      resize(width, height);
     }
+
+
+    override public function get width():Number
+    {
+      return _width;
+    }
+
+
+    override public function set width(value:Number):void
+    {
+      resize(value, height);
+    }
+
+
+    override public function get height():Number
+    {
+      return _height;
+    }
+
+
+    override public function set height(value:Number):void
+    {
+      resize(width, value);
+    }
+
+
+    public function get flashCanvas():FlashCanvas
+    {
+      return _flashCanvas;
+    }
+
+
+    public function getContext(contextId:String):*
+    {
+      if (contextId == "2d")
+      {
+        if (!_context)
+        {
+          _context = new CanvasRenderingContext2D(this);
+          _context.resize(width, height);
+        }
+        return _context;
+      }
+      else
+      {
+        return null;
+      }
+    }
+
+
+    public function getCommand(canvasId:String):Command
+    {
+      if(!_command) {
+        var ctx:* = this.getContext('2d')
+          _command = new Command(ctx, canvasId);
+      }
+      return _command;
+    }
+
+
+    public function toDataURL(type:String = "image/png", ...args:Array):String
+    {
+      if (_width == 0 || _height == 0)
+      {
+        return "data:,";
+      }
+
+      var byteArray:ByteArray;
+
+      if (/^image\/jpeg$/i.test(type))
+      {
+        var quality:* = args[0];
+        if (typeof quality != "number" || isNaN(quality) ||
+            quality < 0 || quality > 1)
+          quality = 0.5;
+
+        // For image types that do not support an alpha channel, the
+        // image must be composited onto a solid black background
+        // using the source-over operator.
+        var image:BitmapData     =
+          new BitmapData(width, height, true, 0xFF000000);
+        var sourceRect:Rectangle = bitmapData.rect;
+        var destPoint:Point      = new Point(0, 0);
+        image.copyPixels(
+            bitmapData, sourceRect, destPoint, null, null, true);
+
+        var jpgEncoder:JPGEncoder = new JPGEncoder(quality * 100);
+
+        type      = "image/jpeg";
+        byteArray = jpgEncoder.encode(image);
+
+        // Release the memory
+        image.dispose();
+      }
+      else
+      {
+        type      = "image/png";
+        byteArray = PNGEncoder.encode(bitmapData);
+      }
+
+      return "data:" + type + ";base64," + Base64.encode(byteArray);
+    }
+
+    public function resize(width:int, height:int):void
+    {
+      this._width  = width;
+      this._height = height;
+
+      // purge existing
+      if (bitmapData)
+        bitmapData.dispose();
+
+      // The dimension of bitmapdata needs to be a positive value.
+      if (width <= 0)
+        width = 1;
+      if (height <= 0)
+        height = 1;
+
+      // create new bitmapdata
+      bitmapData = new BitmapData(width, height, true, 0x00000000);
+    }
+  }
 }
