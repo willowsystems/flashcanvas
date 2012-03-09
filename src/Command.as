@@ -732,7 +732,7 @@ package
       var error:int  = event is ErrorEvent ? 1 : 0;
 
       // Send JavaScript a message that the image has been loaded.
-      ExternalInterface.call("FlashCanvas.unlock", canvasId, url, error);
+      ExternalInterface.call("FlashCanvas.unlockImage", canvasId, url, error);
     }
 
     private function mlog(...args:Array):void
