@@ -32,9 +32,7 @@ var ON_PROPERTY_CHANGE          = "onpropertychange";
 var ON_READY_STATE_CHANGE       = "onreadystatechange";
 var ON_UNLOAD                   = "onunload";
 
-var config   = window[FLASH_CANVAS + "Options"] || {};
-var BASE_URL = config["swfPath"] || getScriptUrl().replace(/[^\/]+$/, "");
-var SWF_URL  = BASE_URL + "flashcanvas.swf";
+var BASE_URL = getScriptUrl().replace(/[^\/]+$/, "");
 
 // DOMException code
 var INDEX_SIZE_ERR              =  1;
@@ -933,14 +931,71 @@ function onUnload() {
 }
 
 /*
- * FlashCanvas API
+ * FlashCanvas global object API (not the Canvas API, just initializer etc.)
  */
 
-var FlashCanvas = {
-    initElement: function(canvas) {
+var FlashCanvas = {}
+
+    FlashCanvas.initWindow = function(window, document){
+
+        // IE HTML5 shiv
+        document.createElement(CANVAS);
+
+        // setup default CSS
+        document.createStyleSheet().cssText =
+            CANVAS + "{display:inline-block;overflow:hidden;width:300px;height:150px}";
+
+        // initialize canvas elements
+        if (document.readyState === "complete") {
+            onReadyStateChange();
+        } else {
+            document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
+        }
+
+        // prevent IE6 memory leaks
+        window.attachEvent(ON_UNLOAD, onUnload);
+
+        // preload SWF file if it's in the same domain
+        var swfUrl  = ( (window[FLASH_CANVAS + "Options"] || {})["swfPath"] || BASE_URL ) + "flashcanvas.swf"
+        if (swfUrl.indexOf(location.protocol + "//" + location.host + "/") === 0) {
+            var req = new ActiveXObject("Microsoft.XMLHTTP");
+            req.open("GET", swfUrl, false);
+            req.send(NULL);
+        }
+
+        /*
+         * public API
+         */
+
+        window[CANVAS_RENDERING_CONTEXT_2D] = CanvasRenderingContext2D;
+        window[CANVAS_GRADIENT]             = CanvasGradient;
+        window[CANVAS_PATTERN]              = CanvasPattern;
+        window[FLASH_CANVAS]                = FlashCanvas;
+
+        // ExplorerCanvas-compatible APIs for convenience
+        window[G_VML_CANVAS_MANAGER] = {
+            init:  function(){},
+            init_: function(){},
+            initElement: FlashCanvas.initElement
+        };
+    }
+
+    FlashCanvas.initElement = function(canvas) {
         // Check whether the initialization is required or not.
         if (canvas.getContext) {
             return canvas;
+        }
+
+        // when init is called from parent frame over canvas sitting in child frame,
+        // FlashCanvas does not pick up the right "window" or "document" - the one from child frame.
+        // to avoid making the users specify window, document, we sniff them out from canvas element.
+        var document = canvas.ownerDocument
+        , window = document.defaultView ? document.defaultView : document.parentWindow
+
+        if (!window[CANVAS_RENDERING_CONTEXT_2D]) {
+            // this may happen when FlashCanvas.initElement is called from parent fram on a canvas in child frame
+            // child frame's `window` will not have the canvas methods
+            this.initWindow(window, document)
         }
 
         // initialize lock
@@ -954,10 +1009,14 @@ var FlashCanvas = {
         // Set the width and height attributes.
         setCanvasSize(canvas);
 
+        // on iframes with src = 'about:blank' location.protocol is "about:"
+        // so, let's not go crafty nuts about this:
+        var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
+
         // embed swf and SPAN element
         canvas.innerHTML =
             '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
-            ' codebase="' + location.protocol + '//fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
+            ' codebase="' + protocol + '//fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0"' +
             ' width="100%" height="100%" id="' + objectId + '">' +
             '<param name="allowScriptAccess" value="always">' +
             '<param name="flashvars" value="id=' + objectId + '">' +
@@ -967,20 +1026,21 @@ var FlashCanvas = {
             '</span>';
 
         canvases[canvasId] = canvas;
-        var swf            = canvas.firstChild;
-        spans[canvasId]    = canvas.lastChild;
+        var swf = canvas.firstChild;
+        spans[canvasId] = canvas.lastChild;
 
         // Check whether the canvas element is in the DOM tree
         var documentContains = document.body.contains;
+        var swfUrl = ( (window[FLASH_CANVAS + "Options"] || {})["swfPath"] || BASE_URL ) + "flashcanvas.swf"
         if (documentContains(canvas)) {
             // Load swf file immediately
-            swf["movie"] = SWF_URL;
+            swf["movie"] = swfUrl;
         } else {
             // Wait until the element is added to the DOM tree
             var intervalId = setInterval(function() {
                 if (documentContains(canvas)) {
                     clearInterval(intervalId);
-                    swf["movie"] = SWF_URL;
+                    swf["movie"] = swfUrl;
                 }
             }, 0);
         }
@@ -1012,23 +1072,23 @@ var FlashCanvas = {
         swf.attachEvent(ON_FOCUS, onFocus);
 
         return canvas;
-    },
+    }
 
-    saveImage: function(canvas) {
+    FlashCanvas.saveImage = function(canvas) {
         var swf = canvas.firstChild;
         swf.saveImage();
-    },
+    }
 
-    setOptions: function(options) {
+    FlashCanvas.setOptions = function(options) {
         // TODO: Implement
-    },
+    }
 
-    trigger: function(canvasId, type) {
+    FlashCanvas.trigger = function(canvasId, type) {
         var canvas = canvases[canvasId];
         canvas.fireEvent("on" + type);
-    },
+    }
 
-    unlock: function(canvasId, url, error) {
+    FlashCanvas.unlock = function(canvasId, url, error) {
         var canvas, swf, width, height;
         var _callback, image, callback;
 
@@ -1084,7 +1144,7 @@ var FlashCanvas = {
             }
         }
     }
-};
+
 
 /*
  * Utility methods
@@ -1141,46 +1201,7 @@ function setCanvasSize(canvas) {
 /*
  * initialization
  */
-
-// IE HTML5 shiv
-document.createElement(CANVAS);
-
-// setup default CSS
-document.createStyleSheet().cssText =
-    CANVAS + "{display:inline-block;overflow:hidden;width:300px;height:150px}";
-
-// initialize canvas elements
-if (document.readyState === "complete") {
-    onReadyStateChange();
-} else {
-    document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
-}
-
-// prevent IE6 memory leaks
-window.attachEvent(ON_UNLOAD, onUnload);
-
-// preload SWF file if it's in the same domain
-if (SWF_URL.indexOf(location.protocol + "//" + location.host + "/") === 0) {
-    var req = new ActiveXObject("Microsoft.XMLHTTP");
-    req.open("GET", SWF_URL, false);
-    req.send(NULL);
-}
-
-/*
- * public API
- */
-
-window[CANVAS_RENDERING_CONTEXT_2D] = CanvasRenderingContext2D;
-window[CANVAS_GRADIENT]             = CanvasGradient;
-window[CANVAS_PATTERN]              = CanvasPattern;
-window[FLASH_CANVAS]                = FlashCanvas;
-
-// ExplorerCanvas-compatible APIs for convenience
-window[G_VML_CANVAS_MANAGER] = {
-    init:  function(){},
-    init_: function(){},
-    initElement: FlashCanvas.initElement
-};
+FlashCanvas.initWindow(window, document)
 
 // Prevent Closure Compiler from removing the function.
 keep = [
