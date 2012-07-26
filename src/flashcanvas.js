@@ -1,6 +1,5 @@
-/*
- * FlashCanvas
- *
+/* @preserve FlashCanvas
+ * Copyright 2012 Willow Systems Corp
  * Copyright (c) 2009      Tim Cameron Ryan
  * Copyright (c) 2009-2011 FlashCanvas Project
  * Released under the MIT/X License
@@ -13,7 +12,12 @@
 // If the browser is IE and does not support HTML5 Canvas
 if (window["ActiveXObject"] && !window["CanvasRenderingContext2D"]) {
 
-(function(window, document, undefined) {
+(function() {
+'use strict'
+
+var window = this
+, document = window.document
+, undefined
 
 /*
  * Constant
@@ -31,7 +35,41 @@ var ON_PROPERTY_CHANGE          = "onpropertychange";
 var ON_READY_STATE_CHANGE       = "onreadystatechange";
 var ON_UNLOAD                   = "onunload";
 
-var BASE_URL = getScriptUrl().replace(/[^\/]+$/, "");
+var BASE_URL = (function(){
+    var scripts = this.document.getElementsByTagName("script")
+
+    // async script tag injections lead to our script NOT being the last. so
+    // var script  = scripts[scripts.length - 1];
+    // will not work
+
+    // so we just loop over scripts and look for "flashcanvas"
+    // and go for "last script tag's src" only if path is not matched 
+    // (may happen when flashcanvas script is loaded with name not containing 'flashcanvas')
+
+    // backwardCompatibilityUrl: original script was looking at last script tag's src.
+    // we simulate that for cases when proper URL is not found elsewhere.
+
+    var backwardCompatibilityUrl = ''
+    var i = scripts.length
+    if (i) {
+        backwardCompatibilityUrl = scripts[i - 1].src || ''
+        while (i){
+            script = scripts[i - 1] // yes, we look from the back of the queue
+            if (script.src && script.src.match('flashcanvas')) {
+                // we are trying to return absolute path:
+                // @see http://msdn.microsoft.com/en-us/library/ms536429(VS.85).aspx
+                // @see http://stackoverflow.com/questions/984510/what-is-my-script-src-url
+                if (document.documentMode >= 8) {
+                    return script.src;
+                } else {
+                    return script.getAttribute("src", 4);
+                }
+            }
+            ;i--;
+        }
+    }
+    return backwardCompatibilityUrl
+}).call(window).replace(/[^\/]+$/, "") // last part trims all chars following last '/'
 
 // DOMException code
 var INDEX_SIZE_ERR              =  1;
@@ -124,9 +162,6 @@ var lock = {};
 // Callback functions passed to loadImage()
 var callbacks = {};
 
-// Canvas elements
-var canvases = {};
-
 // SPAN element embedded in the canvas
 var spans = {};
 
@@ -135,6 +170,7 @@ var spans = {};
  * @constructor
  */
 var CanvasRenderingContext2D = function(canvas, swf) {
+
     // back-reference to the canvas
     this.canvas = canvas;
 
@@ -729,6 +765,7 @@ CanvasRenderingContext2D.prototype = {
      */
 
     _initialize: function() {
+
         // compositing
         this.globalAlpha = this._globalAlpha = 1.0;
         this.globalCompositeOperation = this._globalCompositeOperation = "source-over";
@@ -839,102 +876,50 @@ var TextMetrics = function(width) {
  * @constructor
  */
 var DOMException = function(code) {
+    var DOMExceptionNames = {
+        1:  "INDEX_SIZE_ERR",
+        9:  "NOT_SUPPORTED_ERR",
+        11: "INVALID_STATE_ERR",
+        12: "SYNTAX_ERR",
+        17: "TYPE_MISMATCH_ERR",
+        18: "SECURITY_ERR"
+    }
+
     this.code    = code;
     this.message = DOMExceptionNames[code];
 };
 
 DOMException.prototype = new Error;
 
-var DOMExceptionNames = {
-    1:  "INDEX_SIZE_ERR",
-    9:  "NOT_SUPPORTED_ERR",
-    11: "INVALID_STATE_ERR",
-    12: "SYNTAX_ERR",
-    17: "TYPE_MISMATCH_ERR",
-    18: "SECURITY_ERR"
-};
-
 /*
  * Event handlers
  */
 
-function onReadyStateChange() {
-    if (document.readyState === "complete") {
-        document.detachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
-
-        var canvases = document.getElementsByTagName(CANVAS);
-        for (var i = 0, n = canvases.length; i < n; ++i) {
-            FlashCanvas.initElement(canvases[i]);
-        }
-    }
-}
-
-function onFocus() {
-    // forward the event to the parent
-    var swf = event.srcElement, canvas = swf.parentNode;
-    swf.blur();
-    canvas.focus();
-}
-
-function onPropertyChange() {
-    var prop = event.propertyName;
-    if (prop === "width" || prop === "height") {
-        var canvas = event.srcElement;
-        var value  = canvas[prop];
-        var number = parseInt(value, 10);
-
-        if (isNaN(number) || number < 0) {
-            number = (prop === "width") ? 300 : 150;
-        }
-
-        if (value === number) {
-            canvas.style[prop] = number + "px";
-            canvas.getContext("2d")._resize(canvas.width, canvas.height);
-        } else {
-            canvas[prop] = number;
-        }
-    }
-}
-
-function onUnload() {
-    window.detachEvent(ON_UNLOAD, onUnload);
-
-    for (var canvasId in canvases) {
-        var canvas = canvases[canvasId], swf = canvas.firstChild, prop;
-
-        // clean up the references of swf.executeCommand and swf.resize
-        for (prop in swf) {
-            if (typeof swf[prop] === "function") {
-                swf[prop] = NULL;
-            }
-        }
-
-        // clean up the references of canvas.getContext and canvas.toDataURL
-        for (prop in canvas) {
-            if (typeof canvas[prop] === "function") {
-                canvas[prop] = NULL;
-            }
-        }
-
-        // remove event listeners
-        swf.detachEvent(ON_FOCUS, onFocus);
-        canvas.detachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
-    }
-
-    // delete exported symbols
-    window[CANVAS_RENDERING_CONTEXT_2D] = NULL;
-    window[CANVAS_GRADIENT]             = NULL;
-    window[CANVAS_PATTERN]              = NULL;
-    window[FLASH_CANVAS]                = NULL;
-}
 
 /*
  * FlashCanvas global object API (not the Canvas API, just initializer etc.)
  */
 
+/**
+Generates a URL pointing to fashcanvas.swf file by inspecing constants and Window-specific
+settings and deriving the path appropirate for that Window.
+@public
+@function
+@param window {Object} Pointer to Window (top, child frames) object instance into which we will dig.
+@returns {String} relative or absolute path to the swf file.
+*/
+function getSwfUrl(window) {
+    return ( (window[FLASH_CANVAS + "Options"] || {})["swfPath"] || BASE_URL ) + "flashcanvas.swf"
+}
+
 var FlashCanvas = {}
 
-FlashCanvas.initWindow = function(window, document){
+FlashCanvas.registeredEvents = {} // 'canvasID':[[eventName, handler],...]
+FlashCanvas.canvases = {}
+
+FlashCanvas.initWindow = function(window){
+
+    var document = window.document
 
     // IE HTML5 shiv
     document.createElement(CANVAS);
@@ -943,32 +928,91 @@ FlashCanvas.initWindow = function(window, document){
     document.createStyleSheet().cssText =
         CANVAS + "{display:inline-block;overflow:hidden;width:300px;height:150px}";
 
-    // initialize canvas elements
-    if (document.readyState === "complete") {
-        onReadyStateChange();
-    } else {
-        document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
+    var canvases = this.canvases
+
+    var registeredEvents = this.registeredEvents
+
+    var onUnload = function() {
+        window.detachEvent(ON_UNLOAD, onUnload);
+
+        var canvas
+        , swf
+        , prop
+        , NULL
+        , parentWindow
+        , i, l, e
+
+        for (var canvasId in canvases) {
+            canvas = canvases[canvasId]
+            swf = canvas.firstChild
+            parentWindow = canvas.ownerDocument.defaultView ? canvas.ownerDocument.defaultView : canvas.ownerDocument.parentWindow
+
+            // parent frame may be handling canvas elemns in self and in children frames. We only kill
+            // the canvases in "windows" that "unloaded"
+            if (window === parentWindow) {
+                // clean up the references of swf.executeCommand and swf.resize
+                for (prop in swf) {
+                    if (typeof swf[prop] === "function") {
+                        swf[prop] = NULL;
+                    }
+                }
+
+                // clean up the references of canvas.getContext and canvas.toDataURL
+                for (prop in canvas) {
+                    if (typeof canvas[prop] === "function") {
+                        canvas[prop] = NULL;
+                    }
+                }
+
+                for (i = 0, l = registeredEvents[canvasId].length; i !== l; i++) {
+                    e = registeredEvents[canvasId][i] // it's an array: [eventName, eventHandler]
+                    swf.detachEvent(e[0], e[1]);
+                    canvas.detachEvent(e[0], e[1]);
+                }
+            }
+        }
+
+        // delete exported symbols
+        window[CANVAS_RENDERING_CONTEXT_2D] = NULL;
+        window[CANVAS_GRADIENT]             = NULL;
+        window[CANVAS_PATTERN]              = NULL;
+        window[FLASH_CANVAS]                = NULL;
     }
 
     // prevent IE6 memory leaks
     window.attachEvent(ON_UNLOAD, onUnload);
 
-    // preload SWF file if it's in the same domain
-    var swfUrl  = ( (window[FLASH_CANVAS + "Options"] || {})["swfPath"] || BASE_URL ) + "flashcanvas.swf"
-    if (swfUrl.indexOf(location.protocol + "//" + location.host + "/") === 0) {
-        var req = new ActiveXObject("Microsoft.XMLHTTP");
-        req.open("GET", swfUrl, false);
-        req.send(NULL);
-    }
-
-    /*
-     * public API
-     */
-
     window[CANVAS_RENDERING_CONTEXT_2D] = CanvasRenderingContext2D;
     window[CANVAS_GRADIENT]             = CanvasGradient;
     window[CANVAS_PATTERN]              = CanvasPattern;
     window[FLASH_CANVAS]                = FlashCanvas;
+
+    // preload SWF file if it's in the same domain
+    var swfUrl = getSwfUrl(window)
+    if (swfUrl.indexOf(window.location.protocol + "//" + window.location.host + "/") === 0) {
+        window.setTimeout(function(){
+            var req = new ActiveXObject("Microsoft.XMLHTTP");
+            req.open("GET", swfUrl, false);
+            req.send(NULL);
+        }, 0)
+    }
+
+    function onReadyStateChange() {
+        if (window.document.readyState === "complete") {
+            window.document.detachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
+            var canvases = window.document.getElementsByTagName(CANVAS);
+            for (var i = 0, n = canvases.length; i < n; ++i) {
+                FlashCanvas.initElement(canvases[i]);
+            }
+        }
+    }
+
+    // initialize canvas elements
+    if (window.document.readyState === "complete") {
+        onReadyStateChange();
+    } else {
+        window.document.attachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
+    }
 
 }
 
@@ -987,7 +1031,7 @@ FlashCanvas.initElement = function(canvas) {
     if (!window[CANVAS_RENDERING_CONTEXT_2D]) {
         // this may happen when FlashCanvas.initElement is called from parent fram on a canvas in child frame
         // child frame's `window` will not have the canvas methods
-        this.initWindow(window, document)
+        this.initWindow(window)
     }
 
     // initialize lock
@@ -998,13 +1042,16 @@ FlashCanvas.initElement = function(canvas) {
     lock[canvasId]      = 1;
     callbacks[canvasId] = {};
 
+    this.registeredEvents[canvasId] = []
+
     // Set the width and height attributes.
     setCanvasSize(canvas);
+
+    var swfUrl = getSwfUrl(window)
 
     // on iframes with src = 'about:blank' location.protocol is "about:"
     // so, let's not go crafty nuts about this:
     var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
-
     // embed swf and SPAN element
     canvas.innerHTML =
         '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"' +
@@ -1013,17 +1060,17 @@ FlashCanvas.initElement = function(canvas) {
         '<param name="allowScriptAccess" value="always">' +
         '<param name="flashvars" value="id=' + objectId + '">' +
         '<param name="wmode" value="transparent">' +
+        // '<param name="movie" value="'+swfUrl+'">'
         '</object>' +
         '<span style="margin:0;padding:0;border:0;display:inline-block;position:static;height:1em;overflow:visible;white-space:nowrap">' +
         '</span>';
 
-    canvases[canvasId] = canvas;
+    this.canvases[canvasId] = canvas;
     var swf = canvas.firstChild;
     spans[canvasId] = canvas.lastChild;
 
     // Check whether the canvas element is in the DOM tree
     var documentContains = document.body.contains;
-    var swfUrl = ( (window[FLASH_CANVAS + "Options"] || {})["swfPath"] || BASE_URL ) + "flashcanvas.swf"
     if (documentContains(canvas)) {
         // Load swf file immediately
         swf["movie"] = swfUrl;
@@ -1034,7 +1081,7 @@ FlashCanvas.initElement = function(canvas) {
                 clearInterval(intervalId);
                 swf["movie"] = swfUrl;
             }
-        }, 0);
+        }, 2);
     }
 
     // If the browser is IE6 or in quirks mode
@@ -1051,14 +1098,34 @@ FlashCanvas.initElement = function(canvas) {
     };
 
     canvas.toDataURL = function(type, quality) {
-        if (("" + type).replace(/[A-Z]+/g, toLowerCase) === "image/jpeg") {
-            ctx._queue.push(properties.toDataURL, type,
-                            typeof quality === "number" ? quality : "");
+        if (("" + type).toLowerCase() === "image/jpeg") {
+            ctx._queue.push(
+                properties.toDataURL
+                , type
+                , typeof quality === "number" ? quality : ""
+            )
         } else {
             ctx._queue.push(properties.toDataURL, type);
         }
         return ctx._executeCommand();
     };
+
+    // the events handler functions are declared within initElement because
+    // when it is inited against an iframe, the "window" object points
+    // elswhere. Thus, we create new set of event handlers for each "window" 
+    // In other words, "window" below is preset.
+
+    // forward the event to the parent
+    var onFocus = function(e) {
+        var swf = e ? e.srcElement : window.event.srcElement
+        , canvas = swf.parentNode
+        swf.blur();
+        canvas.focus();
+    }
+
+    this.registeredEvents[canvasId].push(
+        [ON_FOCUS, onFocus]
+    )
 
     // add event listener
     swf.attachEvent(ON_FOCUS, onFocus);
@@ -1076,22 +1143,28 @@ FlashCanvas.setOptions = function(options) {
 }
 
 FlashCanvas.trigger = function(canvasId, type) {
-    var canvas = canvases[canvasId];
+    var canvas = this.canvases[canvasId];
     canvas.fireEvent("on" + type);
 }
 
 FlashCanvas.unlock = function(canvasId, url, error) {
+
+    try {
+        
     var canvas, swf, width, height;
     var _callback, image, callback;
-
-    if (lock[canvasId]) {
-        --lock[canvasId];
-    }
+    var document, window
 
     // If Flash becomes ready
     if (url === undefined) {
-        canvas = canvases[canvasId];
+        canvas = this.canvases[canvasId];
         swf    = canvas.firstChild;
+
+        // when init is called from parent frame over canvas sitting in child frame,
+        // FlashCanvas does not pick up the right "window" or "document" - the one from child frame.
+        // to avoid making the users specify window, document, we sniff them out from canvas element.
+        document = canvas.ownerDocument
+        window = document.defaultView ? document.defaultView : document.parentWindow
 
         // Set the width and height attributes of the canvas element.
         setCanvasSize(canvas);
@@ -1109,6 +1182,37 @@ FlashCanvas.unlock = function(canvasId, url, error) {
             swf.height = height;
         }
         swf.resize(width, height);
+
+        // the events handler functions are declared within initElement because
+        // when it is inited against an iframe, the "window" object points
+        // elswhere. Thus, we create new set of event handlers for each "window" 
+        // In other words, "window" below is NOT resolved runtime. It's preset.
+
+        var onPropertyChange = function(e) {
+            var e = e ? e : window.event
+            , prop = e.propertyName
+
+            if (prop === "width" || prop === "height") {
+                var canvas = e.srcElement;
+                var value  = canvas[prop];
+                var number = parseInt(value, 10);
+
+                if (isNaN(number) || number < 0) {
+                    number = (prop === "width") ? 300 : 150;
+                }
+
+                if (value === number) {
+                    canvas.style[prop] = number + "px";
+                    canvas.getContext("2d")._resize(canvas.width, canvas.height);
+                } else {
+                    canvas[prop] = number;
+                }
+            }
+        }
+
+        this.registeredEvents[canvasId].push(
+            [ON_PROPERTY_CHANGE, onPropertyChange]
+        )
 
         // Add event listener
         canvas.attachEvent(ON_PROPERTY_CHANGE, onPropertyChange);
@@ -1135,25 +1239,24 @@ FlashCanvas.unlock = function(canvasId, url, error) {
             callback.call(image);
         }
     }
+
+    if (lock[canvasId]) {
+        --lock[canvasId];
+    }
+
+    } catch (ex) {
+        // .unlock is called from within try catch inside flash. We never see errors if we don't
+        // capture and display them.
+        console.log("Call to FlashCanvas.unlock had thrown an error: ", ex.message)
+        throw ex
+    }
+
 }
 
 
 /*
  * Utility methods
  */
-
-// Get the absolute URL of flashcanvas.js
-function getScriptUrl() {
-    var scripts = document.getElementsByTagName("script");
-    var script  = scripts[scripts.length - 1];
-
-    // @see http://msdn.microsoft.com/en-us/library/ms536429(VS.85).aspx
-    if (document.documentMode >= 8) {
-        return script.src;
-    } else {
-        return script.getAttribute("src", 4);
-    }
-}
 
 // Get a unique ID composed of alphanumeric characters.
 function getUniqueId() {
@@ -1163,10 +1266,6 @@ function getUniqueId() {
 // Escape characters not permitted in XML.
 function encodeXML(str) {
     return ("" + str).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-}
-
-function toLowerCase(str) {
-    return str.toLowerCase();
 }
 
 function throwException(code) {
@@ -1193,6 +1292,7 @@ function setCanvasSize(canvas) {
 /*
  * initialization
  */
+
 FlashCanvas.initWindow(window, document)
 
 // Prevent Closure Compiler from removing the function.
@@ -1201,6 +1301,6 @@ keep = [
     CanvasRenderingContext2D.loadImage
 ];
 
-})(window, document);
+}).call(window);
 
 }
