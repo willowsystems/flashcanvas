@@ -25,7 +25,6 @@ var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
 var CANVAS_GRADIENT             = "CanvasGradient";
 var CANVAS_PATTERN              = "CanvasPattern";
 var FLASH_CANVAS                = "FlashCanvas";
-var G_VML_CANVAS_MANAGER        = "G_vmlCanvasManager";
 var OBJECT_ID_PREFIX            = "external";
 var ON_FOCUS                    = "onfocus";
 var ON_PROPERTY_CHANGE          = "onpropertychange";
@@ -927,7 +926,6 @@ function onUnload() {
     window[CANVAS_GRADIENT]             = NULL;
     window[CANVAS_PATTERN]              = NULL;
     window[FLASH_CANVAS]                = NULL;
-    window[G_VML_CANVAS_MANAGER]        = NULL;
 }
 
 /*
@@ -972,12 +970,6 @@ FlashCanvas.initWindow = function(window, document){
     window[CANVAS_PATTERN]              = CanvasPattern;
     window[FLASH_CANVAS]                = FlashCanvas;
 
-    // ExplorerCanvas-compatible APIs for convenience
-    window[G_VML_CANVAS_MANAGER] = {
-        init:  function(){},
-        init_: function(){},
-        initElement: FlashCanvas.initElement
-    };
 }
 
 FlashCanvas.initElement = function(canvas) {
