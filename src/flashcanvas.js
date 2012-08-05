@@ -1,4 +1,4 @@
-/* @preserve FlashCanvas
+/** @preserve FlashCanvas
  * Copyright 2012 Willow Systems Corp
  * Copyright (c) 2009      Tim Cameron Ryan
  * Copyright (c) 2009-2011 FlashCanvas Project
@@ -912,12 +912,20 @@ function getSwfUrl(window) {
     return ( (window[FLASH_CANVAS + "Options"] || {})["swfPath"] || BASE_URL ) + "flashcanvas.swf"
 }
 
+var registeredEvents = 'registeredEvents'
+, canvasesProp = 'canvases'
+, initWindow = 'initWindow'
+, initElement = 'initElement'
+, saveImage = 'saveImage'
+, unlock = 'unlock'
+, trigger = 'trigger'
+
 var FlashCanvas = {}
 
-FlashCanvas.registeredEvents = {} // 'canvasID':[[eventName, handler],...]
-FlashCanvas.canvases = {}
+FlashCanvas[registeredEvents] = {} // 'canvasID':[[eventName, handler],...]
+FlashCanvas[canvasesProp] = {}
 
-FlashCanvas.initWindow = function(window){
+FlashCanvas[initWindow] = function(window){
 
     var document = window.document
 
@@ -928,7 +936,7 @@ FlashCanvas.initWindow = function(window){
     document.createStyleSheet().cssText =
         CANVAS + "{display:inline-block;overflow:hidden;width:300px;height:150px}";
 
-    var canvases = this.canvases
+    var canvases = this[canvasesProp]
 
     var registeredEvents = this.registeredEvents
 
@@ -1002,7 +1010,7 @@ FlashCanvas.initWindow = function(window){
             window.document.detachEvent(ON_READY_STATE_CHANGE, onReadyStateChange);
             var canvases = window.document.getElementsByTagName(CANVAS);
             for (var i = 0, n = canvases.length; i < n; ++i) {
-                FlashCanvas.initElement(canvases[i]);
+                FlashCanvas[initElement](canvases[i]);
             }
         }
     }
@@ -1016,7 +1024,7 @@ FlashCanvas.initWindow = function(window){
 
 }
 
-FlashCanvas.initElement = function(canvas) {
+FlashCanvas[initElement] = function(canvas) {
     // Check whether the initialization is required or not.
     if (canvas.getContext) {
         return canvas;
@@ -1031,7 +1039,7 @@ FlashCanvas.initElement = function(canvas) {
     if (!window[CANVAS_RENDERING_CONTEXT_2D]) {
         // this may happen when FlashCanvas.initElement is called from parent fram on a canvas in child frame
         // child frame's `window` will not have the canvas methods
-        this.initWindow(window)
+        this[initWindow](window)
     }
 
     // initialize lock
@@ -1065,7 +1073,7 @@ FlashCanvas.initElement = function(canvas) {
         '<span style="margin:0;padding:0;border:0;display:inline-block;position:static;height:1em;overflow:visible;white-space:nowrap">' +
         '</span>';
 
-    this.canvases[canvasId] = canvas;
+    this[canvasesProp][canvasId] = canvas;
     var swf = canvas.firstChild;
     spans[canvasId] = canvas.lastChild;
 
@@ -1133,21 +1141,21 @@ FlashCanvas.initElement = function(canvas) {
     return canvas;
 }
 
-FlashCanvas.saveImage = function(canvas) {
+FlashCanvas[saveImage] = function(canvas) {
     var swf = canvas.firstChild;
-    swf.saveImage();
+    swf[saveImage]();
 }
 
 FlashCanvas.setOptions = function(options) {
     // TODO: Implement
 }
 
-FlashCanvas.trigger = function(canvasId, type) {
-    var canvas = this.canvases[canvasId];
+FlashCanvas[trigger] = function(canvasId, type) {
+    var canvas = this[canvasesProp][canvasId];
     canvas.fireEvent("on" + type);
 }
 
-FlashCanvas.unlock = function(canvasId, url, error) {
+FlashCanvas[unlock] = function(canvasId, url, error) {
 
     try {
         
@@ -1157,7 +1165,7 @@ FlashCanvas.unlock = function(canvasId, url, error) {
 
     // If Flash becomes ready
     if (url === undefined) {
-        canvas = this.canvases[canvasId];
+        canvas = this[canvasesProp][canvasId];
         swf    = canvas.firstChild;
 
         // when init is called from parent frame over canvas sitting in child frame,
@@ -1222,7 +1230,7 @@ FlashCanvas.unlock = function(canvasId, url, error) {
 
         // Call the onload event handler
         if (typeof canvas.onload === "function") {
-            setTimeout(function() {
+            window.setTimeout(function() {
                 canvas.onload();
             }, 0);
         }
