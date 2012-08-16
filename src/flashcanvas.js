@@ -165,6 +165,16 @@ var callbacks = {};
 // SPAN element embedded in the canvas
 var spans = {};
 
+var elementIsOrphan = function(e){
+    var topOfDOM = false
+    e = e.parentNode
+    while (e && !topOfDOM){
+        topOfDOM = e.body
+        e = e.parentNode
+    }
+    return !topOfDOM
+}
+
 /**
  * 2D context
  * @constructor
@@ -194,12 +204,16 @@ var CanvasRenderingContext2D = function(canvas, swf) {
     this._font = "";
 
     // frame update interval
-    var self = this;
-    setInterval(function() {
-        if (lock[self._canvasId] === 0) {
-            self._executeCommand();
+    var self = this
+    this._executeCommandIntervalID = setInterval(function() {
+        if (elementIsOrphan(self.canvas)) {
+            clearInterval(self._executeCommandIntervalID)
+        } else {
+            if (lock[self._canvasId] === 0) {
+                self._executeCommand();
+            }
         }
-    }, 30);
+    }, 30)
 };
 
 CanvasRenderingContext2D.prototype = {
