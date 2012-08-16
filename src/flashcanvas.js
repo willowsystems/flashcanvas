@@ -1,4 +1,4 @@
-/** @preserve FlashCanvas
+/** @preserve FlashCanvas, ${buildDate} ${commitID}
  * Copyright 2012 Willow Systems Corp
  * Copyright (c) 2009      Tim Cameron Ryan
  * Copyright (c) 2009-2011 FlashCanvas Project
