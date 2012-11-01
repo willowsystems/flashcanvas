@@ -822,10 +822,13 @@ CanvasRenderingContext2D.prototype = {
         // execute commands
         var commands = this._flush();
         if (commands.length > 0) {
-            return eval(this._swf.CallFunction(
-                '<invoke name="executeCommand" returntype="javascript"><arguments><string>'
-                + commands.join("&#0;") + "</string></arguments></invoke>"
-            ));
+            try {
+                return eval( this._swf.CallFunction(
+                    '<invoke name="executeCommand" returntype="javascript"><arguments><string>'
+                    + commands.join("&#0;") + "</string></arguments></invoke>"
+                ))
+            } catch (ex) {
+            }
         }
     },
 
@@ -960,7 +963,7 @@ FlashCanvas[initWindow] = function(window){
         var canvas
         , swf
         , prop
-        , NULL
+        , NULL = null
         , parentWindow
         , i, l, e
 
@@ -986,7 +989,9 @@ FlashCanvas[initWindow] = function(window){
                     }
                 }
 
-                for (i = 0, l = registeredEvents[canvasId].length; i !== l; i++) {
+                i = 0
+                l = registeredEvents[canvasId].length
+                for (; i !== l; i++) {
                     e = registeredEvents[canvasId][i] // it's an array: [eventName, eventHandler]
                     swf.detachEvent(e[0], e[1]);
                     canvas.detachEvent(e[0], e[1]);
@@ -1098,9 +1103,9 @@ FlashCanvas[initElement] = function(canvas) {
         swf["movie"] = swfUrl;
     } else {
         // Wait until the element is added to the DOM tree
-        var intervalId = setInterval(function() {
+        var intervalId = window.setInterval(function() {
             if (documentContains(canvas)) {
-                clearInterval(intervalId);
+                window.clearInterval(intervalId);
                 swf["movie"] = swfUrl;
             }
         }, 2);
